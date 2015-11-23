@@ -13,10 +13,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Diagnostics;
-using System.IO;
-using System.Reflection;
-using TagLib;
 using MusicPlayerAPI;
 
 namespace MusicPlayer
@@ -28,15 +24,17 @@ namespace MusicPlayer
     {        
         private double currentSliderValue = -1;
         private DispatcherTimer timer = new DispatcherTimer();
+        public bool IsPlaying { get; set; } = false;
+        public int repeatValue = 0;
 
         public MainWindow()
         {
             InitializeComponent();
             InitializeTimer();
             InitializeMediaElement();
-            Player.mainWindow = this;
+            SongsManager.mainWindow = this;
             volumeSlider.ValueChanged += SetVolume;
-            Player.GetList(@"D:\MUSIC\"); //temporary
+            SongsManager.GetList(@"D:\MUSIC\"); //temporary
         }
 
         private void InitializeMediaElement()
@@ -67,7 +65,7 @@ namespace MusicPlayer
             }
             labelCurrTimelinePos.Content = FormatTime((int)mediaElement.Position.TotalMinutes) + ":" + FormatTime(mediaElement.Position.Seconds);
             if (mediaElement.NaturalDuration.HasTimeSpan && mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds == mediaElement.Position.TotalMilliseconds)
-                Player.Next();
+                Next();
             songsDataGrid.Columns[0].Width = songsDataGrid.Columns[1].Width = (songsDataGrid.ActualWidth - songsDataGrid.Columns[2].Width.Value) / 2;
         }
 
@@ -84,25 +82,59 @@ namespace MusicPlayer
         }
 
         private void btPlayPause_Click(object sender, RoutedEventArgs e)
-        {            
-            if (Player.IsPlaying)
-                Player.Pause();
+        {
+            if (IsPlaying)
+                Pause();
             else
-                Player.Play();            
+                Play();
+            IsPlaying = !IsPlaying;          
+        }
+
+        public void Play()
+        {
+            mediaElement.Play();
+            btPlayPause.Content = "Pause";
+        }
+
+        public void Pause()
+        {
+            mediaElement.Pause();
+            btPlayPause.Content = "Play";
         }
 
         private void btPrev_Click(object sender, RoutedEventArgs e)
         {           
-            Player.Prev();
+            Prev();
         }
 
         private void btNext_Click(object sender, RoutedEventArgs e)
         {
-            int temp = Player.repeatValue;
-            Player.repeatValue = 0;
-            Player.Next();
-            Player.repeatValue = temp;
-        }        
+            int temp = repeatValue;
+            repeatValue = 0;
+            Next();
+            repeatValue = temp;
+        }
+
+        public void Prev()
+        {
+            if (songsDataGrid.SelectedIndex > 0)
+                songsDataGrid.SelectedIndex--;
+        }
+
+        public void Next()
+        {
+            if (repeatValue == 1)
+                mediaElement.Position = new TimeSpan(0, 0, 0, 0);
+            else
+            {
+                if (songsDataGrid.SelectedIndex != songsDataGrid.Items.Count - 1)
+                    songsDataGrid.SelectedIndex++;
+                else if (repeatValue == 2)
+                    songsDataGrid.SelectedIndex = 0;
+            }
+            Play();
+            songsDataGrid.ScrollIntoView(songsDataGrid.SelectedItem);
+        }
 
         private void SetVolume(object sender, RoutedPropertyChangedEventArgs<double> e)
         {       
@@ -119,20 +151,20 @@ namespace MusicPlayer
 
         public void CreateMediaList()
         {
-            if (Player.GetSongs().Length == 0)
+            if (SongsManager.GetSongs().Length == 0)
                 labelTitle.Content = labelArtist.Content = "[Музыки не найдено]";
             else
             {
                 songsDataGrid.SelectedIndex = 0;
                 SetSong();
-                Player.Play();
-                Player.Pause();
+                Play();
+                Pause();
             }
         }
 
         public void SetSong()
         {
-            Song currentSong = Player.GetSongs()[songsDataGrid.SelectedIndex];
+            Song currentSong = SongsManager.GetSongs()[songsDataGrid.SelectedIndex];
             mediaElement.Source = new Uri(currentSong.Path);
             labelTitle.Content = "-  " + currentSong.Title;
             labelArtist.Content = currentSong.Artist;
@@ -141,28 +173,28 @@ namespace MusicPlayer
         private void songsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetSong();
-            Player.Play();
+            Play();
         }
 
         private void btRand_Click(object sender, RoutedEventArgs e)
         {
-            Player.MixSongs();
+            SongsManager.MixSongs();
         }
 
         private void btRepeat_Click(object sender, RoutedEventArgs e)
         {
-            switch (Player.repeatValue)
+            switch (repeatValue)
             {
                 case 0:
-                    Player.repeatValue = 1;
+                    repeatValue = 1;
                     btRepeat.Content = "+1Rep";
                     break;
                 case 1:
-                    Player.repeatValue = 2;
+                    repeatValue = 2;
                     btRepeat.Content = "+Rep";
                     break;
                 case 2:
-                    Player.repeatValue = 0;
+                    repeatValue = 0;
                     btRepeat.Content = "-Rep";
                     break;
             }

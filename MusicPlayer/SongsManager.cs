@@ -1,34 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using TagLib;
 using MusicPlayerAPI;
 
 namespace MusicPlayer
 {
-    public static class Player
+    public static class SongsManager
     {
         public static MainWindow mainWindow { get; set; }
         private static Song[] songs { get; set; }
         private static Song[] randSongs { get; set; }
-        public static bool IsPlaying { get; set; } = false;
-        private static bool IsRandomPlaying { get; set; } = false;
-        public static int repeatValue = 0;
+        private static bool IsRandomPlaying { get; set; } = false;        
 
         public static Song[] GetSongs()
         {
@@ -63,44 +46,7 @@ namespace MusicPlayer
             var dataToShow = from s in songArray
                              select new { s.Title, s.Artist, s.Duration };
             mainWindow.songsDataGrid.ItemsSource = dataToShow;
-        }
-
-        public static void Play()
-        {
-            mainWindow.mediaElement.Play();
-            mainWindow.btPlayPause.Content = "Pause";
-            IsPlaying = true;
-        }
-
-        public static void Pause()
-        {
-            mainWindow.mediaElement.Pause();
-            mainWindow.btPlayPause.Content = "Play";
-            IsPlaying = false;
-        }
-
-        public static void Prev()
-        {
-            if (mainWindow.songsDataGrid.SelectedIndex > 0)
-                mainWindow.songsDataGrid.SelectedIndex--;
-        }
-
-        public static void Next()
-        {
-            if (repeatValue == 1)
-            {
-                mainWindow.mediaElement.Position = new TimeSpan(0, 0, 0, 0);
-            }
-            else
-            {
-                if (mainWindow.songsDataGrid.SelectedIndex != mainWindow.songsDataGrid.Items.Count - 1)
-                    mainWindow.songsDataGrid.SelectedIndex++;
-                else if (repeatValue == 2)
-                    mainWindow.songsDataGrid.SelectedIndex = 0;
-            }
-            Play();     
-            mainWindow.songsDataGrid.ScrollIntoView(mainWindow.songsDataGrid.SelectedItem);
-        }
+        }                
 
         public static void MixSongs()
         {
@@ -113,10 +59,7 @@ namespace MusicPlayer
             else
                 mainWindow.btRand.Content = "-Rand";
             ExtractDataToShow(GetSongs());
-            mainWindow.CreateMediaList();            
-            mainWindow.songsDataGrid.SelectedIndex++;
-            mainWindow.songsDataGrid.SelectedIndex--;
-            Pause();
+            mainWindow.CreateMediaList();
         }
 
         private static void CreateRandomList()

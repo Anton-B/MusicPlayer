@@ -34,7 +34,7 @@
         </DockPanel>
         <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48" 
     		        VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill" Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Pause"/>
-        <TabControl x:Name="tabControl" Height="{Binding ActualHeight, ElementName=songsDataGrid, Mode=OneWay}" DockPanel.Dock="Left" VerticalAlignment="Top" Width="250" BorderBrush="{x:Null}" Background="#FFB4DEFB">
+        <TabControl x:Name="tabControl" Height="{Binding ActualHeight, ElementName=songsDataGrid, Mode=OneWay}" DockPanel.Dock="Left" VerticalAlignment="Top" Width="549" BorderBrush="{x:Null}" Background="#FFB4DEFB">
             <TabItem x:Name="compTabItem" Header="TabItem">
                 <Grid Background="White"/>
             </TabItem>
