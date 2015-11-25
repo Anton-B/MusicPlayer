@@ -8,11 +8,10 @@ namespace MusicPlayer
 {
     public class SongsManager
     {
-        public MainWindow MainWindow { get; set; }
         private Song[] songs { get; set; }
         private Song[] randSongs { get; set; }
-        public Song[] Songs { get { return isMixed ? randSongs : songs; } }
-        private bool isMixed { get; set; }
+        public Song[] Songs { get { return IsMixed ? randSongs : songs; } }
+        public bool IsMixed { get; set; }
 
         public void GetList(string path) //temporary
         {
@@ -31,32 +30,9 @@ namespace MusicPlayer
                     songs[i].Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes) + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
                 }
             }
-            ExtractDataToShow(songs);
-            MainWindow.CreateMediaList();
         }
 
-        public void ExtractDataToShow(Song[] songArray)
-        {
-            var dataToShow = from s in songArray
-                             select new { s.Title, s.Artist, s.Duration };
-            MainWindow.songsDataGrid.ItemsSource = dataToShow;
-        }
-
-        public void MixSongs()
-        {
-            isMixed = !isMixed;
-            if (isMixed)
-            {
-                CreateRandomList();
-                MainWindow.btRand.Content = "+Rand";
-            }
-            else
-                MainWindow.btRand.Content = "-Rand";
-            ExtractDataToShow(Songs);
-            MainWindow.CreateMediaList();
-        }
-
-        private void CreateRandomList()
+        public void CreateRandomList()
         {
             var rand = new Random();
             randSongs = songs.OrderBy(f => rand.Next(0, songs.Length)).ToArray();
