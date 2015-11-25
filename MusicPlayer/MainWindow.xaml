@@ -24,7 +24,7 @@
                         VerticalAlignment="Top" Width="30" Height="30" Click="btRand_Click"/>
                 <Button x:Name="btRepeat" DockPanel.Dock="Left" Content="-Rep" HorizontalAlignment="Left" Margin="10,10,0,10" 
                         VerticalAlignment="Top" Width="30" Height="30" Click="btRepeat_Click"/>
-                <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="10,17,10,10"
+                <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="10,17,10,10" ValueChanged="VolumeSlider_ValueChanged"
     		            VerticalAlignment="Top" Width="80" Value="1" Maximum="1" LargeChange="0.1" IsMoveToPointEnabled="True"/>
                 <Label x:Name="labelMaxTimelinePos" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" VerticalAlignment="Top" Width="39" Margin="0,13,0,10" Foreground="White"/>
                 <Label x:Name="labelSlash" Content="/" DockPanel.Dock="Right" HorizontalAlignment="Left" VerticalAlignment="Top" Width="19" Margin="0,13,0,10" Foreground="White"/>
@@ -32,8 +32,8 @@
                 <Slider  x:Name="musicTimelineSlider" ValueChanged="SetMediaPosition" SmallChange="1" IsMoveToPointEnabled="True" Margin="10,17,0,10"/>
             </DockPanel>
         </DockPanel>
-        <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48" 
-    		        VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill" Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Pause"/>
+        <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48" MediaEnded="MediaElement_MediaEnded"
+    		        VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill" Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Manual"/>
         <TabControl x:Name="tabControl" Height="{Binding ActualHeight, ElementName=songsDataGrid, Mode=OneWay}" DockPanel.Dock="Left" VerticalAlignment="Top" Width="549" BorderBrush="{x:Null}" Background="#FFB4DEFB">
             <TabItem x:Name="compTabItem" Header="TabItem">
                 <Grid Background="White"/>
