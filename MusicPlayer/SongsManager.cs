@@ -8,15 +8,10 @@ namespace MusicPlayer
 {
     public class SongsManager
     {
-        private Song[] songs { get; set; }
-        private Song[] randSongs { get; set; }
-        public Song[] Songs { get { return IsMixed ? randSongs : songs; } }
-        public bool IsMixed { get; set; }
-
-        public void GetList(string path) //temporary
+        public Song[] GetList(string path) //temporary
         {
             string[] mp3FilesPath = Directory.GetFiles(path, "*.mp3", SearchOption.AllDirectories);
-            songs = new Song[mp3FilesPath.Length];
+            Song[] songs = new Song[mp3FilesPath.Length];
             for (int i = 0; i < mp3FilesPath.Length; i++)
             {
                 using (FileStream fs = new FileStream(mp3FilesPath[i], FileMode.Open))
@@ -30,12 +25,13 @@ namespace MusicPlayer
                     songs[i].Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes) + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
                 }
             }
+            return songs;
         }
 
-        public void CreateRandomList()
+        public Song[] CreateRandomList(Song[] songs)
         {
             var rand = new Random();
-            randSongs = songs.OrderBy(f => rand.Next(0, songs.Length)).ToArray();
+            return songs.OrderBy(f => rand.Next(0, songs.Length)).ToArray();
         }
     }
 }

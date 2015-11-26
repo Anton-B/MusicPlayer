@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MusicPlayerAPI
+﻿namespace MusicPlayerAPI
 {
     public class Song
     {
@@ -13,10 +7,5 @@ namespace MusicPlayerAPI
         public string Artist { get; set; }
         public string Album { get; set; }
         public string Duration { get; set; }
-
-        public override string ToString()
-        {
-            return string.Format("{0} - {1}", Artist, Title);
-        }
     }
 }

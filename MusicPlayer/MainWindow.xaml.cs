@@ -2,8 +2,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using System.Collections;
 using MusicPlayerAPI;
-using System.Linq;
 using System.Windows.Input;
 
 namespace MusicPlayer
@@ -14,18 +14,19 @@ namespace MusicPlayer
     public partial class MainWindow : Window
     {
         private SongsManager songsManager = new SongsManager();
-        private double currentSliderValue = -1;
         private DispatcherTimer timer = new DispatcherTimer();
-        private bool isPlaying { get; set; }
+        private double currentSliderValue = -1;
+        private bool isPlaying;
+        private bool isMixed;
         private RepeatValue repeatValue;
+        private IEnumerable tempItemSource;
 
         #region CONSTRUCTORS
         public MainWindow()
         {
             InitializeComponent();
             InitializeTimer();
-            musicTimelineSlider.LostMouseCapture += MusicTimelineSlider_LostMouseCapture;
-            songsManager.GetList(@"D:\MUSIC\"); //temporary
+            songsDataGrid.ItemsSource = songsManager.GetList(@"D:\MUSIC\"); //temporary
             DisplaySongs();
         }
         #endregion
@@ -58,7 +59,7 @@ namespace MusicPlayer
             Next();
         }
 
-        private void btPlayPause_Click(object sender, RoutedEventArgs e)
+        private void BtPlayPause_Click(object sender, RoutedEventArgs e)
         {
             if (isPlaying)
                 Pause();
@@ -66,12 +67,12 @@ namespace MusicPlayer
                 Play();
         }
 
-        private void btPrev_Click(object sender, RoutedEventArgs e)
+        private void BtPrev_Click(object sender, RoutedEventArgs e)
         {
             Prev();
         }
 
-        private void btNext_Click(object sender, RoutedEventArgs e)
+        private void BtNext_Click(object sender, RoutedEventArgs e)
         {
             RepeatValue temp = repeatValue;
             repeatValue = RepeatValue.NoRepeat;
@@ -85,7 +86,7 @@ namespace MusicPlayer
                 mediaElement.Volume = volumeSlider.Value;
         }
 
-        private void SetMediaPosition(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void MusicTimelineSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (musicTimelineSlider.IsMouseCaptureWithin)
                 currentSliderValue = musicTimelineSlider.Value;
@@ -93,26 +94,31 @@ namespace MusicPlayer
                 mediaElement.Position = TimeSpan.FromMilliseconds(musicTimelineSlider.Value);
         }
 
-        private void songsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void SongsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SetSong();
             Play();
         }
 
-        private void btRand_Click(object sender, RoutedEventArgs e)
+        private void BtRand_Click(object sender, RoutedEventArgs e)
         {
-            songsManager.IsMixed = !songsManager.IsMixed;
-            if (songsManager.IsMixed)
+            isMixed = !isMixed;
+            if (isMixed)
             {
-                songsManager.CreateRandomList();
+                tempItemSource = (Song[])songsDataGrid.ItemsSource;
+                songsDataGrid.ItemsSource = songsManager.CreateRandomList((Song[])songsDataGrid.ItemsSource);
                 btRand.Content = "+Rand";
             }
             else
+            {
+                songsDataGrid.ItemsSource = tempItemSource;
+                tempItemSource = null;
                 btRand.Content = "-Rand";
+            }
             DisplaySongs();
         }
 
-        private void btRepeat_Click(object sender, RoutedEventArgs e)
+        private void BtRepeat_Click(object sender, RoutedEventArgs e)
         {
             switch (repeatValue)
             {
@@ -177,23 +183,13 @@ namespace MusicPlayer
 
         private void DisplaySongs()
         {
-            if (songsManager.Songs.Length == 0)
+            if (songsDataGrid.Items.Count == 0)
             {
                 labelTitle.Content = labelArtist.Content = "[Музыки не найдено]";
                 songsDataGrid.IsEnabled = false;
             }
             else
-            {
-                ExtractDataToShow();
                 MoveToFirstSong();
-            }
-        }
-
-        private void ExtractDataToShow()
-        {
-            var dataToShow = from s in songsManager.Songs
-                             select new { s.Title, s.Artist, s.Duration };
-            songsDataGrid.ItemsSource = dataToShow;
         }
 
         private void MoveToFirstSong()
@@ -205,7 +201,7 @@ namespace MusicPlayer
 
         private void SetSong()
         {
-            Song currentSong = songsManager.Songs[songsDataGrid.SelectedIndex];
+            Song currentSong = (Song)songsDataGrid.SelectedItem;
             mediaElement.Source = new Uri(currentSong.Path);
             labelTitle.Content = "-  " + currentSong.Title;
             labelArtist.Content = currentSong.Artist;
