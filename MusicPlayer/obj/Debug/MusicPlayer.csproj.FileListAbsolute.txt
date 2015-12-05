@@ -14,4 +14,3 @@ D:\C#\MusicPlayer\MusicPlayer\obj\Debug\MusicPlayer.exe
 D:\C#\MusicPlayer\MusicPlayer\obj\Debug\MusicPlayer.pdb
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\MusicPlayerAPI.dll
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\MusicPlayerAPI.pdb
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\TagLib.Portable.dll
