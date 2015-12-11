@@ -6,7 +6,7 @@
         public string Path { get; set; }
         public double Height { get; set; }
         public bool CanBeOpened { get; set; }
-        public bool CanBeFavourite { get; set; }
+        public bool CanBeFavorite { get; set; }
         public string ImageSource { get; set; }
 
         public NavigationItem() { }
@@ -17,8 +17,20 @@
             Path = path;
             Height = height;
             CanBeOpened = canBeOpened;
-            CanBeFavourite = canBeFavorite;
+            CanBeFavorite = canBeFavorite;
             ImageSource = imageSource;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return ((NavigationItem)obj).Path == this.Path;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashNavigationItemName = Name == null ? 0 : Name.GetHashCode();
+            int hashNavigationItemPath = Path == null ? 0 : Path.GetHashCode();
+            return hashNavigationItemName ^ hashNavigationItemPath;
         }
     }
 }

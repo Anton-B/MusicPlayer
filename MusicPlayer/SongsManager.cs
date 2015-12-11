@@ -6,7 +6,7 @@ namespace MusicPlayer
 {
     public class SongsManager
     {
-        public Song[] CreateRandomList(Song[] songs)
+        public Song[] MixSongs(Song[] songs)
         {
             var rand = new Random();
             return songs.OrderBy(f => rand.Next(0, songs.Length)).ToArray();

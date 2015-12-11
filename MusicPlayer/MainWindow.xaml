@@ -42,19 +42,21 @@
         <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48"
 			MediaEnded="MediaElement_MediaEnded" VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill"
 			Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Manual"/>
-        <DockPanel x:Name="mainAreaDockPanel" LastChildFill="True">
+        <DockPanel x:Name="mainAreaDockPanel" LastChildFill="False">
             <DockPanel x:Name="navigDockPanel" Background="#FFF3F3F3" Margin="0,1,0,0" Width="400" LastChildFill="True"
                        Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
-                <ComboBox x:Name="modeComboBox" Margin="40,60,40,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged"/>
-                <DockPanel x:Name="navigControlsDockPanel" Margin="40,0,40,0" LastChildFill="True" DockPanel.Dock="Top">
+                <ComboBox x:Name="modeComboBox" Margin="20,60,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged"/>
+                <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
                     <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3" Background="White" Click="UpdateButton_Click"/>
-                    <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True"/>
+                    <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True" ToolTip="{Binding Text, ElementName=addressTextBox}"/>
                 </DockPanel>
-                <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="40,0,40,40" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White">
-                    <TabItem Header="" Width="158">
-                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick"></ListView>
+                <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
+                    <TabItem Width="178">
+                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
                     </TabItem>
-                    <TabItem Header="" Width="158"></TabItem>
+                    <TabItem Width="178">
+                        <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
+                    </TabItem>
                 </TabControl>
             </DockPanel>
             <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="White">
@@ -70,15 +72,31 @@
                 <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click"/>
                 <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="0,1"/>
             </DockPanel>
-            <DataGrid x:Name="songsDataGrid" SelectionChanged="SongsDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
+            <DataGrid x:Name="firstPlaylistDataGrid" SelectionChanged="PlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
 				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
 				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" 
 				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
-				ColumnWidth="60" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3" BorderThickness="1,0,0,0">
+				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
+                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Title}"/>
-                    <DataGridTextColumn Binding="{Binding Artist}"/>
-                    <DataGridTextColumn Binding="{Binding Duration}"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
+                    <DataGridTextColumn Width="50" Binding="{Binding Duration}"/>
+                </DataGrid.Columns>
+                <DataGrid.AlternatingRowBackground>
+                    <SolidColorBrush Color="#FFCDE8FB"/>
+                </DataGrid.AlternatingRowBackground>
+            </DataGrid>
+            <DataGrid x:Name="secondPlaylistDataGrid" SelectionChanged="PlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
+				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
+				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" Visibility="Collapsed"
+				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
+				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
+                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
+                    <DataGridTextColumn Width="50" Binding="{Binding Duration}"/>
                 </DataGrid.Columns>
                 <DataGrid.AlternatingRowBackground>
                     <SolidColorBrush Color="#FFCDE8FB"/>
