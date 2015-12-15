@@ -2,13 +2,11 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using System.Collections;
 using System.Collections.Generic;
 using MusicPlayerAPI;
 using System.Windows.Input;
 using System.IO;
 using System.Windows.Media.Imaging;
-using System.Windows.Media;
 using System.Linq;
 
 namespace MusicPlayer
@@ -26,8 +24,7 @@ namespace MusicPlayer
         private double currentSliderValue = -1;
         private bool isPlaying;
         private bool isMixed;
-        private bool useFirstPlaylist = true;
-        private DataGrid playlistDataGrid { get { return (useFirstPlaylist) ? firstPlaylistDataGrid : secondPlaylistDataGrid; } }
+        private bool isMainPlaylist = true;
         private RepeatValue repeatValue;
         private ListView currentListView { get { return (navigTabControl.SelectedIndex == 0) ? navigListView : favoritesListView; } }
         private int currentTabIndex = 0;
@@ -60,10 +57,13 @@ namespace MusicPlayer
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             musicTimelineSlider.Maximum = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;
-            Song currentSong = (Song)playlistDataGrid.SelectedItem;
-            artistLabel.Content = currentSong.Artist;
-            titleLabel.Content = "-  " + currentSong.Title;
-            maxTimelinePosLabel.Content = currentSong.Duration;
+            Song currentSong = mainPlaylistDataGrid.SelectedItem as Song;
+            if (currentSong != null)
+            {
+                artistLabel.Content = currentSong.Artist;
+                titleLabel.Content = "-  " + currentSong.Title;
+                maxTimelinePosLabel.Content = currentSong.Duration;
+            }
         }
 
         private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)
@@ -110,7 +110,7 @@ namespace MusicPlayer
         {
             isMixed = !isMixed;
             randButton.Content = (isMixed) ? "+Rand" : "-Rand";
-            SetSongsList((Song[])playlistDataGrid.ItemsSource, true);
+            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, true);
         }
 
         private void RepeatButton_Click(object sender, RoutedEventArgs e)
@@ -155,8 +155,8 @@ namespace MusicPlayer
 
         private void Prev()
         {
-            if (playlistDataGrid.SelectedIndex > 0)
-                playlistDataGrid.SelectedIndex--;
+            if (mainPlaylistDataGrid.SelectedIndex > 0)
+                mainPlaylistDataGrid.SelectedIndex--;
         }
 
         private void Next()
@@ -165,13 +165,13 @@ namespace MusicPlayer
                 mediaElement.Position = new TimeSpan(0, 0, 0, 0);
             else
             {
-                if (playlistDataGrid.SelectedIndex != playlistDataGrid.Items.Count - 1)
-                    playlistDataGrid.SelectedIndex++;
+                if (mainPlaylistDataGrid.SelectedIndex != mainPlaylistDataGrid.Items.Count - 1)
+                    mainPlaylistDataGrid.SelectedIndex++;
                 else if (repeatValue == RepeatValue.RepeatList)
-                    playlistDataGrid.SelectedIndex = 0;
+                    mainPlaylistDataGrid.SelectedIndex = 0;
             }
             Play();
-            playlistDataGrid.ScrollIntoView(playlistDataGrid.SelectedItem);
+            mainPlaylistDataGrid.ScrollIntoView(mainPlaylistDataGrid.SelectedItem);
         }
         #endregion
 
@@ -226,6 +226,8 @@ namespace MusicPlayer
             mediaElement.Close();
             mainPlaylist = pluginsManager.GetSongs();
             SetSongsList(mainPlaylist, true);
+            if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
+                dependentPlaylistDataGrid.SelectedIndex = 0;
             if (mainPlaylist == null || mainPlaylist.Length == 0)
                 ClearControls();
         }
@@ -309,21 +311,32 @@ namespace MusicPlayer
         {
             randButton.Content = "-Rand";
             isMixed = false;
-            SetSongsList((Song[])playlistDataGrid.ItemsSource, true);
+            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, false);
+            dependentPlaylistDataGrid.SelectedIndex = -1;
         }
 
-        private void PlaylistDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void MainPlaylistDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (((DataGrid)sender).SelectedIndex == -1)
+            if (mainPlaylistDataGrid?.ItemsSource == null)
                 return;
-            if (!((DataGrid)sender).Equals(playlistDataGrid) && playlistDataGrid.SelectedIndex != -1
-                && ((DataGrid)sender).SelectedIndex != -1)
+            if ((isMainPlaylist && dependentPlaylistDataGrid.ItemsSource == null)
+                || ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource)
+                && mainPlaylistDataGrid.SelectedIndex != -1)
             {
-                playlistDataGrid.SelectedIndex = -1;
-                useFirstPlaylist = !useFirstPlaylist;
+                dependentPlaylistDataGrid.ItemsSource = mainPlaylistDataGrid.ItemsSource;
+                dependentPlaylistDataGrid.SelectedIndex = mainPlaylistDataGrid.SelectedIndex;
             }
             PlaySong();
             Play();
+        }
+
+        private void DependentPlaylistDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (dependentPlaylistDataGrid.SelectedIndex != -1)
+            {
+                mainPlaylistDataGrid.ItemsSource = dependentPlaylistDataGrid.ItemsSource;
+                mainPlaylistDataGrid.SelectedIndex = dependentPlaylistDataGrid.SelectedIndex;
+            }
         }
 
         private void SearchButton_Click(object sender, RoutedEventArgs e)
@@ -335,83 +348,72 @@ namespace MusicPlayer
                     if (currentSong.Title.ToLower().Contains(searchTextBox.Text.ToLower())
                         || currentSong.Artist.ToLower().Contains(searchTextBox.Text.ToLower()))
                         songs.Add(currentSong);
-                ChangePlaylist(songsManager.SortSongs(songs.ToArray(), sortComboBox.SelectedIndex),
-                    (Song[])playlistDataGrid.ItemsSource);
+                isMainPlaylist = false;
+                SetSongsList(songs.ToArray(), false);
+                SelectItem();
             }
         }
 
         private void MyMusicButton_Click(object sender, RoutedEventArgs e)
         {
-            ChangePlaylist(songsManager.SortSongs(mainPlaylist, sortComboBox.SelectedIndex),
-                (Song[])playlistDataGrid.ItemsSource);
+            isMainPlaylist = true;
+            dependentPlaylistDataGrid.ItemsSource = isMixed ? mainPlaylist : songsManager.SortSongs(mainPlaylist, sortComboBox.SelectedIndex);
+            numOfAudioTextBlock.Content = string.Format("Песен: {0}", dependentPlaylistDataGrid.Items.Count);
+            SelectItem();
         }
 
-        private void ChangePlaylist(Song[] newPlaylist, Song[] currentPlaylist)
+        private void SelectItem()
         {
-            if (newPlaylist.SequenceEqual(currentPlaylist))
-                return;
-            firstPlaylistDataGrid.Visibility = (useFirstPlaylist) ? Visibility.Collapsed : Visibility.Visible;
-            secondPlaylistDataGrid.Visibility = (!useFirstPlaylist) ? Visibility.Collapsed : Visibility.Visible;
-            useFirstPlaylist = !useFirstPlaylist;
-            SetSongsList(newPlaylist, false);
-            useFirstPlaylist = !useFirstPlaylist;
+            if (((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
+                dependentPlaylistDataGrid.SelectedIndex = mainPlaylistDataGrid.SelectedIndex;
+            else
+                dependentPlaylistDataGrid.SelectedIndex = -1;
         }
 
-        private void SetSongsList(Song[] list, bool moveToFirstSongs)
+        private void SetSongsList(Song[] list, bool moveToFirstSong)
         {
-            if (list == null || list.Length == 0)
-                playlistDataGrid.ItemsSource = null;
+            if (list == null)
+                dependentPlaylistDataGrid.ItemsSource = null;
             else
             {
-                playlistDataGrid.ItemsSource = (isMixed) ? songsManager.MixSongs(list)
+                dependentPlaylistDataGrid.ItemsSource = isMixed ? songsManager.MixSongs(list)
                     : songsManager.SortSongs(list, sortComboBox.SelectedIndex);
-                DisplaySongs();
-                if (moveToFirstSongs)
+                if (isMainPlaylist)
+                    mainPlaylist = isMixed ? (Song[])dependentPlaylistDataGrid.ItemsSource : mainPlaylist;
+                numOfAudioTextBlock.Content = string.Format("Песен: {0}", dependentPlaylistDataGrid.Items.Count);
+                if (moveToFirstSong)
                     MoveToFirstSong();
             }
         }
 
         private void ClearControls()
         {
-            firstPlaylistDataGrid.ItemsSource = secondPlaylistDataGrid.ItemsSource = null;
-            firstPlaylistDataGrid.Visibility = Visibility.Visible;
-            secondPlaylistDataGrid.Visibility = Visibility.Collapsed;
-            useFirstPlaylist = true;
+            mainPlaylistDataGrid.ItemsSource = dependentPlaylistDataGrid.ItemsSource = null;
+            mainPlaylistDataGrid.SelectedIndex = dependentPlaylistDataGrid.SelectedIndex = 0;
+            isMainPlaylist = true;
             numOfAudioTextBlock.Content = "Песен: 0";
             sortComboBox.SelectedIndex = 0;
             searchTextBox.Clear();
             musicTimelineSlider.Value = 0;
-            currTimelinePosLabel.Content = maxTimelinePosLabel.Content =  "00:00";
+            currTimelinePosLabel.Content = maxTimelinePosLabel.Content = "00:00";
             artistLabel.Content = "Исполнитель";
             titleLabel.Content = "Название";
             playPauseButton.Content = "Play";
             isPlaying = false;
         }
 
-        private void DisplaySongs()
-        {
-            numOfAudioTextBlock.Content = string.Format("Песен: {0}", playlistDataGrid.Items.Count);
-            if (playlistDataGrid.Items.Count == 0)
-            {
-                titleLabel.Content = artistLabel.Content = "[Музыки не найдено]";
-                playlistDataGrid.IsEnabled = false;
-            }
-            else
-                playlistDataGrid.IsEnabled = true;
-        }
-
         private void MoveToFirstSong()
         {
-            playlistDataGrid.SelectedIndex = 0;
+            dependentPlaylistDataGrid.SelectedIndex = 0;
             PlaySong();
             Pause();
         }
 
         private void PlaySong()
         {
-            if (playlistDataGrid.SelectedIndex == -1)
+            if (mainPlaylistDataGrid.SelectedIndex == -1)
                 return;
-            mediaElement.Source = new Uri(((Song)playlistDataGrid.SelectedItem).Path);
+            mediaElement.Source = new Uri(((Song)mainPlaylistDataGrid.SelectedItem).Path);
         }
         #endregion
     }

@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+
 namespace MusicPlayerAPI
 {
     public class Song : IEqualityComparer<Song>

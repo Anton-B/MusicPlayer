@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using System.Collections.Generic;
-using MusicPlayerAPI;
-using System.Windows.Input;
 using System.IO;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
 using System.Linq;
 using System.Reflection;
 
@@ -82,15 +77,7 @@ namespace MusicPlayerAPI
 
         public Song[] GetSongs()
         {
-            try
-            {
-                return PluginInstasnces[Key].GetSongsList();
-            }
-            catch (Exception e)
-            {
-                MessageBox.Show(e.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
+            return PluginInstasnces[Key].GetSongsList();
         }
     }
 }

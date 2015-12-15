@@ -72,12 +72,12 @@
                 <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click"/>
                 <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="0,1"/>
             </DockPanel>
-            <DataGrid x:Name="firstPlaylistDataGrid" SelectionChanged="PlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
+            <DataGrid x:Name="mainPlaylistDataGrid" SelectionChanged="MainPlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
 				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
 				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" 
 				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
 				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
-                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}">
+                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Collapsed">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
                     <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
@@ -87,9 +87,9 @@
                     <SolidColorBrush Color="#FFCDE8FB"/>
                 </DataGrid.AlternatingRowBackground>
             </DataGrid>
-            <DataGrid x:Name="secondPlaylistDataGrid" SelectionChanged="PlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
+            <DataGrid x:Name="dependentPlaylistDataGrid" SelectionChanged="DependentPlaylistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
 				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
-				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" Visibility="Collapsed"
+				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3"
 				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
 				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
                 BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}">
