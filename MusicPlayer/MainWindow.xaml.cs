@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Linq;
+using System.Windows.Media;
 
 namespace MusicPlayer
 {
@@ -180,6 +181,8 @@ namespace MusicPlayer
         {
             mediaElement.Close();
             ClearControls();
+            addressTextBox.Tag = null;
+            addressTextBox.Text = string.Empty;
             pluginsManager.Key = ((TextBlock)modeComboBox.SelectedItem).Tag.ToString();
             for (int i = 0; i < navigTabControl.Items.Count; i++)
                 ((TabItem)navigTabControl.Items[i]).Header = pluginsManager.GetHeader(i);
@@ -200,10 +203,23 @@ namespace MusicPlayer
 
         private void NavigFavListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            currentListView.SelectedIndex = -1;
+            if (pluginsManager.DoubleClickToOpenItem)
+                currentListView.SelectedIndex = -1;
         }
 
         private void NavigListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (pluginsManager.DoubleClickToOpenItem)
+                OpenItem();
+        }
+
+        private void NavigListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!pluginsManager.DoubleClickToOpenItem)
+                OpenItem();
+        }
+
+        private void OpenItem()
         {
             NavigationItem item = (navigListView.SelectedIndex == -1) ? null : ((DockPanel)navigListView.SelectedItem).Tag as NavigationItem;
             if (item != null && item.CanBeOpened)
@@ -215,7 +231,7 @@ namespace MusicPlayer
             ShowItems(addressTextBox.Tag?.ToString(), false);
         }
 
-        private void ImgAddDel_MouseDown(object sender, MouseButtonEventArgs e)
+        private void ChangeFavorites_MouseDown(object sender, MouseButtonEventArgs e)
         {
             NavigationItem ni = (NavigationItem)((DockPanel)((Image)sender).Parent).Tag;
             if (pluginsManager.IsFavorite(ni))
@@ -226,7 +242,8 @@ namespace MusicPlayer
             mediaElement.Close();
             mainPlaylist = pluginsManager.GetSongs();
             SetSongsList(mainPlaylist, true);
-            if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
+            if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null
+                && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
                 dependentPlaylistDataGrid.SelectedIndex = 0;
             if (mainPlaylist == null || mainPlaylist.Length == 0)
                 ClearControls();
@@ -243,7 +260,7 @@ namespace MusicPlayer
             navigListView.Items.Clear();
             List<NavigationItem> navItems = pluginsManager.GetNavigationItems(path);
             addressTextBox.Tag = (navItems == null) ? addressTextBox.Tag?.ToString() : path;
-            addressTextBox.Text = (addressTextBox.Tag == null) ? "Компьютер" : addressTextBox.Tag.ToString();
+            addressTextBox.Text = (addressTextBox.Tag == null) ? string.Empty : addressTextBox.Tag.ToString();
             if (navItems == null)
                 navItems = pluginsManager.GetNavigationItems(addressTextBox.Tag?.ToString());
             foreach (NavigationItem ni in navItems)
@@ -271,26 +288,33 @@ namespace MusicPlayer
             dp.LastChildFill = true;
             dp.Height = ni.Height;
             dp.Width = listView.MinWidth;
-            Image img = new Image();
-            img.Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + ni.ImageSource, UriKind.RelativeOrAbsolute));
-            img.Height = ni.Height;
-            DockPanel.SetDock(img, Dock.Left);
-            dp.Children.Add(img);
+            dp.Cursor = ni.CursorType;
+            try
+            {
+                Image img = new Image();
+                img.Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + ni.ImageSource, UriKind.RelativeOrAbsolute));
+                img.Height = ni.Height;
+                DockPanel.SetDock(img, Dock.Left);
+                dp.Children.Add(img);
+            }
+            catch { }
             if (ni.CanBeFavorite)
             {
                 Image imgAddDel = new Image();
                 imgAddDel.Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + pluginsManager.GetItemButtonImage(ni), UriKind.RelativeOrAbsolute));
                 imgAddDel.ToolTip = "Добавить в избранное / удалить из избранного";
-                imgAddDel.Height = ni.Height;
                 imgAddDel.Cursor = Cursors.Hand;
-                imgAddDel.MouseDown += ImgAddDel_MouseDown;
+                imgAddDel.MouseDown += ChangeFavorites_MouseDown;
                 DockPanel.SetDock(imgAddDel, Dock.Right);
                 dp.Children.Add(imgAddDel);
             }
-            TextBlock tb = new TextBlock();
-            tb.Text = ni.Name;
-            tb.Padding = new Thickness(5, 4, 0, 0);
-            dp.Children.Add(tb);
+            Label l = new Label();
+            l.VerticalContentAlignment = VerticalAlignment.Center;
+            l.Content = ni.Name;
+            l.FontSize = ni.FontSize;
+            l.Height = ni.Height;
+            l.Padding = new Thickness(5, 0, 0, 0);
+            dp.Children.Add(l);
             listView.Items.Add(dp);
         }
 
@@ -415,6 +439,6 @@ namespace MusicPlayer
                 return;
             mediaElement.Source = new Uri(((Song)mainPlaylistDataGrid.SelectedItem).Path);
         }
-        #endregion
+        #endregion        
     }
 }

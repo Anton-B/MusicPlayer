@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Windows.Input;
 
 namespace MusicPlayerAPI
 {
@@ -8,6 +9,7 @@ namespace MusicPlayerAPI
         string[] TabItemHeaders { get; }
         string AddButtonImageSource { get; }
         string DeleteButtonImageSource { get; }
+        bool DoubleClickToOpenItem { get; }
         List<NavigationItem> FavoriteItems { get; set; }
 
         List<NavigationItem> GetNavigationItems(string path);

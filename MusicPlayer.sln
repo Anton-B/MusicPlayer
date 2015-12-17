@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayer", "MusicPlayer\MusicPlayer.csproj", "{9E4EA78C-2290-4AED-BD11-1F418CCF9281}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MusicPlayerAPI", "MusicPlayerAPI\MusicPlayerAPI.csproj", "{2E037FDB-5EC8-4ECA-9FAF-8E227E90D8A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileSystemPlugin", "FileSystemPlugin\FileSystemPlugin.csproj", "{C504ACDD-C5BE-4234-9BC8-9C2F510D1D09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VKPlugin", "VKPlugin\VKPlugin.csproj", "{4A280552-D4ED-415D-83F3-4828722D997A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{2E037FDB-5EC8-4ECA-9FAF-8E227E90D8A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E037FDB-5EC8-4ECA-9FAF-8E227E90D8A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E037FDB-5EC8-4ECA-9FAF-8E227E90D8A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C504ACDD-C5BE-4234-9BC8-9C2F510D1D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C504ACDD-C5BE-4234-9BC8-9C2F510D1D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C504ACDD-C5BE-4234-9BC8-9C2F510D1D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C504ACDD-C5BE-4234-9BC8-9C2F510D1D09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A280552-D4ED-415D-83F3-4828722D997A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A280552-D4ED-415D-83F3-4828722D997A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A280552-D4ED-415D-83F3-4828722D997A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A280552-D4ED-415D-83F3-4828722D997A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

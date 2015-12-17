@@ -52,7 +52,7 @@
                 </DockPanel>
                 <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
                     <TabItem Width="178">
-                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
+                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" SelectionChanged="NavigListView_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
                     </TabItem>
                     <TabItem Width="178">
                         <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>

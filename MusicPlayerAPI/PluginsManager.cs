@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Windows.Input;
 
 namespace MusicPlayerAPI
 {
@@ -11,6 +12,7 @@ namespace MusicPlayerAPI
     {
         public Dictionary<string, IPlugin> PluginInstasnces { get; set; } = new Dictionary<string, IPlugin>();
         public string Key { get; set; }
+        public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }
 
         public void LoadPlugin(DirectoryInfo directory)
         {
