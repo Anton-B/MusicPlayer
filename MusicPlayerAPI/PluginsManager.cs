@@ -16,18 +16,26 @@ namespace MusicPlayerAPI
 
         public void LoadPlugin(DirectoryInfo directory)
         {
-            FileInfo dllFile = directory.GetFiles("*.dll").FirstOrDefault();
-            FileInfo manifestFile = directory.GetFiles("*.manifest").FirstOrDefault();
-            if (dllFile != null && manifestFile != null)
+            try
             {
-                Assembly assembly = Assembly.LoadFrom(dllFile.FullName);
-                string pluginClassName = File.ReadAllText(manifestFile.FullName);
-                Type type = assembly.GetType(pluginClassName);
-                PluginInstasnces.Add(dllFile.Name.Replace(".dll", string.Empty), Activator.CreateInstance(type) as IPlugin);
+                FileInfo manifestFile = directory.GetFiles("*.manifest").FirstOrDefault();
+                if (manifestFile != null)
+                {
+                    string[] manifestContent = File.ReadAllText(manifestFile.FullName).Split(',');
+                    string assemblyName = manifestContent[0].Trim();
+                    string pluginClassName = manifestContent[1].Trim();
+                    Assembly assembly = Assembly.LoadFrom(Directory.GetFiles(manifestFile.DirectoryName, assemblyName + ".dll").FirstOrDefault());
+                    Type type = assembly.GetType(pluginClassName);
+                    PluginInstasnces.Add(assemblyName, Activator.CreateInstance(type) as IPlugin);
+                }
+                DirectoryInfo[] dirs = directory.GetDirectories();
+                foreach (DirectoryInfo dir in dirs)
+                    LoadPlugin(dir);
             }
-            DirectoryInfo[] dirs = directory.GetDirectories();
-            foreach (DirectoryInfo dir in dirs)
-                LoadPlugin(dir);
+            catch (IOException ex)
+            {
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         public void AddToFavorites(NavigationItem item)

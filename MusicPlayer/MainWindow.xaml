@@ -47,12 +47,12 @@
                        Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
                 <ComboBox x:Name="modeComboBox" Margin="20,60,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged"/>
                 <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
-                    <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3" Background="White" Click="UpdateButton_Click"/>
+                    <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3" Background="White" Click="UpdateButton_Click" ToolTip="Обновить"/>
                     <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True" ToolTip="{Binding Text, ElementName=addressTextBox}"/>
                 </DockPanel>
                 <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
                     <TabItem Width="178">
-                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" SelectionChanged="NavigListView_SelectionChanged" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
+                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
                     </TabItem>
                     <TabItem Width="178">
                         <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
