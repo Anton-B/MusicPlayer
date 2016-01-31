@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 using System.Net;
 using MusicPlayerAPI;
+using System.IO;
 
 namespace VKPlugin
 {
@@ -15,12 +16,14 @@ namespace VKPlugin
         private const string display = "popup";
         private const string scope = "friends,audio,groups,offline";
         private const string responseType = "token";
-        private const string APIVersion = "5.44";
+        private const string APIVersion = "5.44";        
+        private const string lang = "ru";
         private const string friendsOrder = "hints";
         private const string friendsFields = "photo_50";
-        private const string lang = "ru";
+        private const string groupsInfoType = "1";
         private string userID;
         private string accessToken;
+        private const string cacheFolder = @"vkcache\";
         internal string UserID { get { return userID; } }
         internal string AccessToken { get { return accessToken; } }
         internal bool HasAccessData { get { return !string.IsNullOrEmpty(UserID) && !string.IsNullOrEmpty(AccessToken); } }
@@ -30,16 +33,21 @@ namespace VKPlugin
         internal string FriendsUrl { get { return string.Format(
             "https://api.vk.com/method/friends.get?order={0}&fields={1}&lang={2}&v={3}&access_token={4}",
             friendsOrder, friendsFields, lang, APIVersion, AccessToken); } }
+        internal string GroupsUrl { get { return string.Format(
+            "https://api.vk.com/method/groups.get?extended={0}&lang={1}&v={2}&access_token={3}",
+            groupsInfoType, lang, APIVersion, accessToken); } }
         [DllImport("wininet.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
+
+        private enum RequestedListType {Friends, Groups }
 
         private class Response
         {
             public string id;
+            public string name;
             public string first_name;
             public string last_name;
             public string photo_50;
-            public int online;
         }
 
         internal void GetAccessData(string url)
@@ -56,17 +64,58 @@ namespace VKPlugin
 
         internal List<NavigationItem> GetFriendsList()
         {
+            return GetList(FriendsUrl, cacheFolder + @"\friends\", RequestedListType.Friends);
+        }
+
+        internal List<NavigationItem> GetGroupsList()
+        {
+            return GetList(GroupsUrl, cacheFolder + @"\groups\", RequestedListType.Groups);
+        }
+
+        private List<NavigationItem> GetList(string requestUrl, string cacheFolderPath, RequestedListType listType)
+        {
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
-                string friendsStr = client.DownloadString(FriendsUrl);                
-                var vkResponseList = new { response = new { count = 0, items = new List<Response>() } };
-                var friends = JsonConvert.DeserializeAnonymousType(friendsStr, vkResponseList);
+                Dictionary<string, string> idsDict = new Dictionary<string, string>();
+                Directory.CreateDirectory(cacheFolderPath);
+                using (StreamReader streamR = new StreamReader(new FileStream(cacheFolderPath + @"\ids.links", FileMode.OpenOrCreate)))
+                {
+                    string[] lines = streamR.ReadToEnd().Split('\n');
+                    foreach (string line in lines)
+                    {
+                        if (string.IsNullOrEmpty(line))
+                            continue;
+                        string[] data = line.Split(' ', '\r');
+                        idsDict.Add(data[0], data[1]);
+                    }
+                }
+
+                string jsonResponseStr = client.DownloadString(requestUrl);
+                var vkResponse = new { response = new { count = 0, items = new List<Response>() } };
+                var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
                 List<NavigationItem> list = new List<NavigationItem>();
-                list.Add(new NavigationItem("Назад", "Вход", 50, true, false, null, 16, System.Windows.Input.Cursors.Hand));
-                foreach (Response res in friends.response.items)
-                    list.Add(new NavigationItem(res.first_name + " " + res.last_name, res.id, 50, false, 
-                        true, res.photo_50, 16, System.Windows.Input.Cursors.Hand));
+                list.Add(new NavigationItem("Назад", "Вход", 50, true, false, null, 16, System.Windows.Input.Cursors.Arrow));
+                foreach (Response res in resp.response.items)
+                {
+                    if (idsDict.ContainsKey(res.id))
+                    {
+                        if (!res.photo_50.Equals(idsDict[res.id]))
+                        {
+                            File.Delete(cacheFolderPath + res.id + ".jpg");
+                            client.DownloadFile(new Uri(res.photo_50), cacheFolderPath + res.id + ".jpg");
+                        }
+                    }
+                    else
+                        client.DownloadFile(new Uri(res.photo_50), cacheFolderPath + res.id + ".jpg");
+                    idsDict[res.id] = res.photo_50;
+                    list.Add(new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), res.id, 50, false,
+                        true, idsDict[res.id], 16, System.Windows.Input.Cursors.Arrow));
+                }
+
+                using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + @"\ids.links", FileMode.OpenOrCreate)))
+                    foreach (KeyValuePair<string, string> kvp in idsDict)
+                        streamW.WriteLine(kvp.Key + " " + kvp.Value);
                 return list;
             }
         }

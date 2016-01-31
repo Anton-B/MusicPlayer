@@ -5,6 +5,7 @@ using MusicPlayerAPI;
 using TagLib;
 using System.Windows.Input;
 using System.Windows;
+using System;
 
 namespace FileSystemPlugin
 {
@@ -27,31 +28,24 @@ namespace FileSystemPlugin
         public List<NavigationItem> GetNavigationItems(string path)
         {
             List<NavigationItem> navigItems = new List<NavigationItem>();
-            try
+            if (path == null)
             {
-                if (path == null)
-                {
-                    DriveInfo[] drives = DriveInfo.GetDrives();
-                    foreach (DriveInfo drive in drives)
-                        navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
-                            itemHeight, true, true, diskImageSource, fontHeight, Cursors.Arrow));
-                }
-                else
-                {
-                    DirectoryInfo parent = Directory.GetParent(path);
-                    navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, parentFolderImageSource, fontHeight, Cursors.Arrow));
-                    DirectoryInfo di = new DirectoryInfo(path);
-                    DirectoryInfo[] dirs = di.GetDirectories();
-                    foreach (DirectoryInfo dir in dirs)
-                        navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, folderImageSource, fontHeight, Cursors.Arrow));
-                    FileInfo[] files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
-                    foreach (FileInfo file in files)
-                        navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
-                }
+                DriveInfo[] drives = DriveInfo.GetDrives();
+                foreach (DriveInfo drive in drives)
+                    navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
+                        itemHeight, true, false, diskImageSource, fontHeight, Cursors.Arrow));
             }
-            catch (IOException ex)
+            else
             {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                DirectoryInfo parent = Directory.GetParent(path);
+                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, parentFolderImageSource, fontHeight, Cursors.Arrow));
+                DirectoryInfo di = new DirectoryInfo(path);
+                DirectoryInfo[] dirs = di.GetDirectories();
+                foreach (DirectoryInfo dir in dirs)
+                    navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, folderImageSource, fontHeight, Cursors.Arrow));
+                FileInfo[] files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
+                foreach (FileInfo file in files)
+                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
             }
             return navigItems;
         }
@@ -75,30 +69,33 @@ namespace FileSystemPlugin
                 foreach (NavigationItem ni in FavoriteItems)
                 {
                     string[] mp3FilePaths = GetFiles(ni.Path, "*.mp3").ToArray();
-                    Song[] songs = new Song[mp3FilePaths.Length];
+                    List<Song> songs = new List<Song>();
                     for (int i = 0; i < mp3FilePaths.Length; i++)
                     {
-                        using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
+                        try
                         {
-                            var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
-                            songs[i] = new Song();
-                            songs[i].Path = mp3FilePaths[i];
-                            songs[i].Title = (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title;
-                            songs[i].Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;
-                            songs[i].Album = (tagFile.Tag.Album == null) ? "[Без имени]" : tagFile.Tag.Album;
-                            songs[i].Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
-                                + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
-                            FileInfo file = new FileInfo(mp3FilePaths[i]);
-                            songs[i].CreationTime = file.CreationTime.Ticks;
+                            using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
+                            {
+                                var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
+                                Song song = new Song();
+                                song = new Song();
+                                song.Path = mp3FilePaths[i];
+                                song.Title = (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title;
+                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;
+                                song.Album = (tagFile.Tag.Album == null) ? "[Без имени]" : tagFile.Tag.Album;
+                                song.Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
+                                    + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
+                                FileInfo file = new FileInfo(mp3FilePaths[i]);
+                                song.CreationTime = file.CreationTime.Ticks;
+                                songs.Add(song);
+                            }
                         }
+                        catch { }
                     }
                     allSongsList.AddRange(songs);
                 }
             }
-            catch (IOException ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch { }
             IEqualityComparer<Song> comparer = new Song() as IEqualityComparer<Song>;
             var songsList = allSongsList.Distinct(comparer);
             return songsList.ToArray();
@@ -113,10 +110,7 @@ namespace FileSystemPlugin
                 foreach (var directory in Directory.GetDirectories(path))
                     files.AddRange(GetFiles(directory, pattern));
             }
-            catch (IOException ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            catch { }
             return files;
         }
     }

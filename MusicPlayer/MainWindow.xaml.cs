@@ -57,14 +57,18 @@ namespace MusicPlayer
 
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
-            musicTimelineSlider.Maximum = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;
-            Song currentSong = mainPlaylistDataGrid.SelectedItem as Song;
-            if (currentSong != null)
+            try
             {
-                artistLabel.Content = currentSong.Artist;
-                titleLabel.Content = "-  " + currentSong.Title;
-                maxTimelinePosLabel.Content = currentSong.Duration;
+                musicTimelineSlider.Maximum = mediaElement.NaturalDuration.TimeSpan.TotalMilliseconds;
+                Song currentSong = mainPlaylistDataGrid.SelectedItem as Song;
+                if (currentSong != null)
+                {
+                    artistLabel.Content = currentSong.Artist;
+                    titleLabel.Content = "-  " + currentSong.Title;
+                    maxTimelinePosLabel.Content = currentSong.Duration;
+                }
             }
+            catch { }
         }
 
         private void MediaElement_MediaEnded(object sender, RoutedEventArgs e)
@@ -254,13 +258,14 @@ namespace MusicPlayer
 
         private void ShowItems(string path, bool isScrollToUp)
         {
+            Cursor = Cursors.Wait;
             ShowNavigationItems(path, isScrollToUp);
             ShowFavoriteItems();
+            Cursor = Cursors.Arrow;
         }
 
         private void ShowNavigationItems(string path, bool isScrollToUp)
-        {
-            Cursor = Cursors.Wait;
+        {            
             navigListView.Items.Clear();
             List<NavigationItem> navItems = pluginsManager.GetNavigationItems(path);
             addressTextBox.Tag = (navItems == null) ? addressTextBox.Tag?.ToString() : path;
@@ -270,8 +275,7 @@ namespace MusicPlayer
             foreach (NavigationItem ni in navItems)
                 ShowNavigationItem(navigListView, ni);
             if (navigListView.Items.Count > 0 && isScrollToUp)
-                navigListView.ScrollIntoView(navigListView.Items[0]);
-            Cursor = Cursors.Arrow;
+                navigListView.ScrollIntoView(navigListView.Items[0]);            
         }
 
         void ShowFavoriteItems()

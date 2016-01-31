@@ -59,9 +59,9 @@ namespace MusicPlayerAPI
             {
                 return PluginInstasnces[Key].GetNavigationItems(path);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                MessageBox.Show(e.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return null;
             }
         }

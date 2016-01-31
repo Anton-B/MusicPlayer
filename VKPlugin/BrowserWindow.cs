@@ -14,7 +14,7 @@ namespace VKPlugin
         private double windowHeight = 380;
         private VKAudio vkAudio = new VKAudio();        
 
-        internal BrowserWindow()
+        private BrowserWindow()
         {
             window.Width = windowWidth;
             window.Height = windowHeight;
