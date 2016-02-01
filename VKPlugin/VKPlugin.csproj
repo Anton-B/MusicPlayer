@@ -81,6 +81,9 @@
     <Content Include="Images\groups.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\playlist.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\playlists.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

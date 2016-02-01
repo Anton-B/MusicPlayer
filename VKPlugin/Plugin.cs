@@ -22,7 +22,7 @@ namespace VKPlugin
         private const string audioImageSource = @"Plugins\VKPlugin\Images\audio.png";
         private const string friendsImageSource = @"Plugins\VKPlugin\Images\friends.png";
         private const string groupsImageSource = @"Plugins\VKPlugin\Images\groups.png";
-        private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";
+        private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";        
         private BrowserWindow browserWin;
         private bool isCacheDownloaded;
         private string loginPath = "Вход";
@@ -44,8 +44,7 @@ namespace VKPlugin
                 if (!isCacheDownloaded)
                 {
                     vkAudio.GetFriendsList();
-                    vkAudio.GetGroupsList();
-                    //TODO: vkAudio.GetPlaylistsList();
+                    vkAudio.GetGroupsList();                    
                     isCacheDownloaded = true;
                 }
                 navigItems.Add(new NavigationItem("Мои аудиозаписи", userAudio, itemHeight, false, true, audioImageSource, fontHeight, Cursors.Arrow));
@@ -73,14 +72,16 @@ namespace VKPlugin
                 userLogged = false;
                 navigItems = GetNavigationItems(null);
             }
-            else if (path == friendsPath)
-                navigItems = vkAudio.GetFriendsList();
-            else if (path == groupsPath)
-                navigItems = vkAudio.GetGroupsList();
-            else if (path == playlistsPath)
+            else
             {
-
-            }
+                navigItems.Add(new NavigationItem("Назад", "Вход", 50, true, false, null, 16, Cursors.Arrow));
+                if (path == friendsPath)
+                    navigItems.AddRange(vkAudio.GetFriendsList());
+                else if (path == groupsPath)
+                    navigItems.AddRange(vkAudio.GetGroupsList());
+                else if (path == playlistsPath)
+                    navigItems.AddRange(vkAudio.GetPlaylistsList());
+            }            
             return navigItems;
         }
 

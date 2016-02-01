@@ -24,6 +24,7 @@ namespace VKPlugin
         private string userID;
         private string accessToken;
         private const string cacheFolder = @"vkcache\";
+        private const string playlistImageSource = @"Plugins\VKPlugin\Images\playlist.png";
         internal string UserID { get { return userID; } }
         internal string AccessToken { get { return accessToken; } }
         internal bool HasAccessData { get { return !string.IsNullOrEmpty(UserID) && !string.IsNullOrEmpty(AccessToken); } }
@@ -36,6 +37,9 @@ namespace VKPlugin
         internal string GroupsUrl { get { return string.Format(
             "https://api.vk.com/method/groups.get?extended={0}&lang={1}&v={2}&access_token={3}",
             groupsInfoType, lang, APIVersion, accessToken); } }
+        internal string PlaylistsUrl { get { return string.Format(
+            "https://api.vk.com/method/audio.getAlbums?lang={0}&v={1}&access_token={2}",
+            lang, APIVersion, accessToken); } }
         [DllImport("wininet.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
 
@@ -47,6 +51,7 @@ namespace VKPlugin
             public string name;
             public string first_name;
             public string last_name;
+            public string title;
             public string photo_50;
         }
 
@@ -72,6 +77,18 @@ namespace VKPlugin
             return GetList(GroupsUrl, cacheFolder + @"\groups\", RequestedListType.Groups);
         }
 
+        internal List<NavigationItem> GetPlaylistsList()
+        {
+            using (WebClient client = new WebClient())
+            {
+                List<NavigationItem> list = new List<NavigationItem>();
+                foreach (Response res in GetResponseItems(client, PlaylistsUrl))
+                    list.Add(new NavigationItem(res.title, res.id, 50, false, true, 
+                        playlistImageSource, 16, System.Windows.Input.Cursors.Arrow));
+                return list;
+            }                
+         }
+
         private List<NavigationItem> GetList(string requestUrl, string cacheFolderPath, RequestedListType listType)
         {
             using (WebClient client = new WebClient())
@@ -90,13 +107,9 @@ namespace VKPlugin
                         idsDict.Add(data[0], data[1]);
                     }
                 }
-
-                string jsonResponseStr = client.DownloadString(requestUrl);
-                var vkResponse = new { response = new { count = 0, items = new List<Response>() } };
-                var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
-                List<NavigationItem> list = new List<NavigationItem>();
-                list.Add(new NavigationItem("Назад", "Вход", 50, true, false, null, 16, System.Windows.Input.Cursors.Arrow));
-                foreach (Response res in resp.response.items)
+                
+                List<NavigationItem> list = new List<NavigationItem>();                
+                foreach (Response res in GetResponseItems(client, requestUrl))
                 {
                     if (idsDict.ContainsKey(res.id))
                     {
@@ -118,6 +131,14 @@ namespace VKPlugin
                         streamW.WriteLine(kvp.Key + " " + kvp.Value);
                 return list;
             }
+        }
+
+        private List<Response> GetResponseItems(WebClient client, string requestUrl)
+        {
+            string jsonResponseStr = client.DownloadString(requestUrl);
+            var vkResponse = new { response = new { count = 0, items = new List<Response>() } };
+            var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
+            return resp.response.items;
         }
 
         internal void LogOut()
