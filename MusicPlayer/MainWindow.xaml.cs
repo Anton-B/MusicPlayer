@@ -115,7 +115,7 @@ namespace MusicPlayer
         {
             isMixed = !isMixed;
             randButton.Content = (isMixed) ? "+Rand" : "-Rand";
-            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, true);
+            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, true, false);
         }
 
         private void RepeatButton_Click(object sender, RoutedEventArgs e)
@@ -193,7 +193,7 @@ namespace MusicPlayer
             ShowItems(addressTextBox.Tag?.ToString(), true);
             sortComboBox.SelectedIndex = 0;
             mainPlaylist = pluginsManager.GetSongs();
-            SetSongsList(mainPlaylist, true);
+            SetSongsList(mainPlaylist, true, true);
         }
 
         private void NavigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -248,7 +248,7 @@ namespace MusicPlayer
             mediaElement.Close();
             mediaElement.Source = null;
             mainPlaylist = pluginsManager.GetSongs();
-            SetSongsList(mainPlaylist, true);
+            SetSongsList(mainPlaylist, false, true);
             if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null
                 && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
                 dependentPlaylistDataGrid.SelectedIndex = 0;
@@ -265,7 +265,7 @@ namespace MusicPlayer
         }
 
         private void ShowNavigationItems(string path, bool isScrollToUp)
-        {            
+        {
             navigListView.Items.Clear();
             List<NavigationItem> navItems = pluginsManager.GetNavigationItems(path);
             addressTextBox.Tag = (navItems == null) ? addressTextBox.Tag?.ToString() : path;
@@ -275,7 +275,7 @@ namespace MusicPlayer
             foreach (NavigationItem ni in navItems)
                 ShowNavigationItem(navigListView, ni);
             if (navigListView.Items.Count > 0 && isScrollToUp)
-                navigListView.ScrollIntoView(navigListView.Items[0]);            
+                navigListView.ScrollIntoView(navigListView.Items[0]);
         }
 
         void ShowFavoriteItems()
@@ -348,7 +348,7 @@ namespace MusicPlayer
         {
             randButton.Content = "-Rand";
             isMixed = false;
-            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, false);
+            SetSongsList((Song[])dependentPlaylistDataGrid.ItemsSource, true, false);
             dependentPlaylistDataGrid.SelectedIndex = -1;
         }
 
@@ -388,7 +388,7 @@ namespace MusicPlayer
                     || currentSong.Artist.ToLower().Contains(searchTextBox.Text.ToLower()))
                     songs.Add(currentSong);
             isMainPlaylist = false;
-            SetSongsList(songs.ToArray(), false);
+            SetSongsList(songs.ToArray(), false, false);
             SelectItem();
         }
 
@@ -411,7 +411,7 @@ namespace MusicPlayer
                 dependentPlaylistDataGrid.SelectedIndex = -1;
         }
 
-        private void SetSongsList(Song[] list, bool moveToFirstSong)
+        private void SetSongsList(Song[] list, bool changeCurrentPlaylist, bool moveToFirstSong)
         {
             if (list == null || list.Length == 0)
                 dependentPlaylistDataGrid.ItemsSource = new Song[0];
@@ -421,6 +421,7 @@ namespace MusicPlayer
                     : songsManager.SortSongs(list, sortComboBox.SelectedIndex);
                 if (isMainPlaylist)
                     mainPlaylist = isMixed ? (Song[])dependentPlaylistDataGrid.ItemsSource : mainPlaylist;
+                mainPlaylistDataGrid.ItemsSource = (changeCurrentPlaylist) ? dependentPlaylistDataGrid.ItemsSource : mainPlaylistDataGrid.ItemsSource;
                 numOfAudioTextBlock.Content = string.Format("Песен: {0}", dependentPlaylistDataGrid.Items.Count);
                 if (moveToFirstSong)
                     MoveToFirstSong();
