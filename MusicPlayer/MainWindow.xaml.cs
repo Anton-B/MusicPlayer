@@ -166,6 +166,8 @@ namespace MusicPlayer
 
         private void Next()
         {
+            if (mainPlaylistDataGrid.SelectedItem == null)
+                return;
             if (repeatValue == RepeatValue.RepeatSong)
                 mediaElement.Position = new TimeSpan(0, 0, 0, 0);
             else
@@ -184,6 +186,7 @@ namespace MusicPlayer
         private void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mediaElement.Close();
+            mediaElement.Source = null;
             ClearControls();
             addressTextBox.Tag = null;
             addressTextBox.Text = string.Empty;
@@ -192,7 +195,7 @@ namespace MusicPlayer
                 ((TabItem)navigTabControl.Items[i]).Header = pluginsManager.GetHeader(i);
             ShowItems(addressTextBox.Tag?.ToString(), true);
             sortComboBox.SelectedIndex = 0;
-            mainPlaylist = pluginsManager.GetSongs();
+            mainPlaylist = pluginsManager.GetDefaultSongsList();
             SetSongsList(mainPlaylist, true, true);
         }
 
@@ -219,17 +222,20 @@ namespace MusicPlayer
 
         private void NavigListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!pluginsManager.DoubleClickToOpenItem)
-                OpenItem(sender as DockPanel);
+            if (!pluginsManager.DoubleClickToOpenItem && !(sender is Image))
+                OpenItem((sender as DockPanel).Parent as DockPanel);
         }
 
-        private void OpenItem(DockPanel panel)
+        private void OpenItem(DockPanel outerPanel)
         {
-            if (panel == null)
+            DockPanel innerPanel = outerPanel.Children[outerPanel.Children.Count - 1] as DockPanel;
+            if (innerPanel == null)
                 return;
-            NavigationItem item = panel.Tag as NavigationItem;
+            NavigationItem item = innerPanel.Tag as NavigationItem;
             if (item != null && item.CanBeOpened)
                 ShowItems(item.Path, true);
+            else if (item != null && !pluginsManager.UpdatePlaylistWhenFavoritesChanges)
+                SetSongsList(pluginsManager.GetSongsList(item), false, false);
         }
 
         private void UpdateButton_Click(object sender, RoutedEventArgs e)
@@ -237,7 +243,7 @@ namespace MusicPlayer
             ShowItems(addressTextBox.Tag?.ToString(), false);
         }
 
-        private void ChangeFavorites_MouseDown(object sender, MouseButtonEventArgs e)
+        private void ChangeFavorites(object sender, MouseButtonEventArgs e)
         {
             NavigationItem ni = (NavigationItem)((DockPanel)((Image)sender).Parent).Tag;
             if (pluginsManager.IsFavorite(ni))
@@ -245,15 +251,19 @@ namespace MusicPlayer
             else
                 pluginsManager.AddToFavorites(ni);
             ShowItems(addressTextBox.Tag?.ToString(), false);
-            mediaElement.Close();
-            mediaElement.Source = null;
-            mainPlaylist = pluginsManager.GetSongs();
-            SetSongsList(mainPlaylist, false, true);
-            if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null
-                && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
-                dependentPlaylistDataGrid.SelectedIndex = 0;
-            if (mainPlaylist == null || mainPlaylist.Length == 0)
-                ClearControls();
+            
+            if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
+            {
+                mediaElement.Close();
+                mediaElement.Source = null;
+                mainPlaylist = pluginsManager.GetDefaultSongsList();
+                SetSongsList(mainPlaylist, false, true);
+                if (dependentPlaylistDataGrid.ItemsSource != null && mainPlaylistDataGrid.ItemsSource != null
+                    && ((Song[])dependentPlaylistDataGrid.ItemsSource).SequenceEqual((Song[])mainPlaylistDataGrid.ItemsSource))
+                    dependentPlaylistDataGrid.SelectedIndex = 0;
+                if (mainPlaylist == null || mainPlaylist.Length == 0)
+                    ClearControls();
+            }
         }
 
         private void ShowItems(string path, bool isScrollToUp)
@@ -272,7 +282,7 @@ namespace MusicPlayer
             addressTextBox.Text = (addressTextBox.Tag == null) ? string.Empty : addressTextBox.Tag.ToString();
             if (navItems == null)
                 navItems = pluginsManager.GetNavigationItems(addressTextBox.Tag?.ToString());
-            foreach (NavigationItem ni in navItems)
+            foreach (var ni in navItems)
                 ShowNavigationItem(navigListView, ni);
             if (navigListView.Items.Count > 0 && isScrollToUp)
                 navigListView.ScrollIntoView(navigListView.Items[0]);
@@ -284,7 +294,7 @@ namespace MusicPlayer
             List<NavigationItem> favItems = pluginsManager.GetFavoriteItems();
             if (navigTabControl.SelectedIndex == 1)
                 addressTextBox.Text = pluginsManager.GetHeader(1);
-            foreach (NavigationItem ni in favItems)
+            foreach (var ni in favItems)
                 ShowNavigationItem(favoritesListView, ni);
             if (favoritesListView.Items.Count > 0)
                 favoritesListView.ScrollIntoView(favoritesListView.Items[0]);
@@ -292,21 +302,31 @@ namespace MusicPlayer
 
         void ShowNavigationItem(ListView listView, NavigationItem ni)
         {
-            DockPanel dp = new DockPanel();
-            dp.Tag = ni;
-            dp.LastChildFill = true;
-            dp.Height = ni.Height;
-            dp.Width = listView.MinWidth;
-            dp.Cursor = ni.CursorType;
+            DockPanel outerDP = new DockPanel();
+            outerDP.LastChildFill = true;
+            DockPanel innerDP = new DockPanel();
+            DockPanel.SetDock(innerDP, Dock.Left);            
+            innerDP.LastChildFill = true;
+            outerDP.Tag = innerDP.Tag = ni;
+            innerDP.Height = ni.Height;
+            innerDP.Width = listView.MinWidth;
+            innerDP.Cursor = ni.CursorType;
             try
             {
                 Image img = new Image();
                 img.Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + ni.ImageSource, UriKind.RelativeOrAbsolute));
                 img.Height = ni.Height;
                 DockPanel.SetDock(img, Dock.Left);
-                dp.Children.Add(img);
+                innerDP.Children.Add(img);
             }
-            catch { }
+            catch { }            
+            Label label = new Label();
+            label.VerticalContentAlignment = VerticalAlignment.Center;
+            label.Content = ni.Name;
+            label.FontSize = ni.FontSize;
+            label.Height = ni.Height;
+            label.Padding = new Thickness(5, 0, 0, 0);
+            innerDP.Children.Add(label);
             if (ni.CanBeFavorite)
             {
                 Image imgAddDel = new Image();
@@ -316,24 +336,18 @@ namespace MusicPlayer
                 imgAddDel.Cursor = Cursors.Hand;
                 imgAddDel.Width = bmImage.Width;
                 imgAddDel.Height = bmImage.Height;
-                imgAddDel.MouseDown += ChangeFavorites_MouseDown;
+                imgAddDel.MouseDown += ChangeFavorites;
                 DockPanel.SetDock(imgAddDel, Dock.Right);
-                dp.Children.Add(imgAddDel);
+                outerDP.Children.Add(imgAddDel);
             }
-            Label label = new Label();
-            label.VerticalContentAlignment = VerticalAlignment.Center;
-            label.Content = ni.Name;
-            label.FontSize = ni.FontSize;
-            label.Height = ni.Height;
-            label.Padding = new Thickness(5, 0, 0, 0);
-            dp.Children.Add(label);
-            listView.Items.Add(dp);
-            dp.MouseDown += NavigListView_MouseDown;
+            outerDP.Children.Add(innerDP);
+            listView.Items.Add(outerDP);
+            innerDP.MouseDown += NavigListView_MouseDown;
         }
 
         private void SetModeComboBoxItems()
         {
-            foreach (KeyValuePair<string, IPlugin> kvp in pluginsManager.PluginInstasnces)
+            foreach (var kvp in pluginsManager.PluginInstasnces)
             {
                 TextBlock tb = new TextBlock();
                 tb.Text = kvp.Value.Name;
@@ -383,7 +397,7 @@ namespace MusicPlayer
                 || (dependentPlaylistDataGrid.Visibility == Visibility.Visible && ((Song[])dependentPlaylistDataGrid.ItemsSource).Length == 0)))
                 return;
             List<Song> songs = new List<Song>();
-            foreach (Song currentSong in mainPlaylist)
+            foreach (var currentSong in mainPlaylist)
                 if (currentSong.Title.ToLower().Contains(searchTextBox.Text.ToLower())
                     || currentSong.Artist.ToLower().Contains(searchTextBox.Text.ToLower()))
                     songs.Add(currentSong);
@@ -425,7 +439,8 @@ namespace MusicPlayer
                 numOfAudioTextBlock.Content = string.Format("Песен: {0}", dependentPlaylistDataGrid.Items.Count);
                 if (moveToFirstSong)
                     MoveToFirstSong();
-            }
+                Pause();
+            }            
         }
 
         private void ClearControls()

@@ -11,8 +11,9 @@ namespace VKPlugin
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Избранное" };
         public string AddButtonImageSource { get; } = @"Plugins\VKPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";
-        public List<NavigationItem> FavoriteItems { get; set; } = new List<NavigationItem>();
-        public bool DoubleClickToOpenItem { get; }
+        public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
+        public bool DoubleClickToOpenItem { get { return false; } }
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return false; } }
         private VKAudio vkAudio = new VKAudio();
         private bool userLogged = false;
         private const double itemHeight = 50;
@@ -27,7 +28,6 @@ namespace VKPlugin
         private bool isCacheDownloaded;
         private string loginPath = "Вход";
         private string logoutPath = "Выход";
-        private string userAudio = "Мои аудиозаписи";
         private string friendsPath = "Друзья";
         private string groupsPath = "Группы";
         private string playlistsPath = "Плейлисты";
@@ -47,7 +47,7 @@ namespace VKPlugin
                     vkAudio.GetGroupsList();                    
                     isCacheDownloaded = true;
                 }
-                navigItems.Add(new NavigationItem("Мои аудиозаписи", userAudio, itemHeight, false, true, audioImageSource, fontHeight, Cursors.Arrow));
+                navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, true, audioImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Друзья", friendsPath, itemHeight, true, false, friendsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Группы", groupsPath, itemHeight, true, false, groupsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Плейлисты", playlistsPath, itemHeight, true, false, playlistsImageSource, fontHeight, Cursors.Arrow));
@@ -87,19 +87,22 @@ namespace VKPlugin
 
         public void AddToFavorites(NavigationItem item)
         {
-
+            FavoriteItems.Add(item);
         }
 
         public void DeleteFromFavorites(NavigationItem item)
         {
-
+            FavoriteItems.Remove(item);
         }
 
-        public Song[] GetSongsList()
+        public Song[] GetDefaultSongsList()
         {
-            List<Song> songsList = new List<Song>();
+            return vkAudio.GetAudioList(null).ToArray();
+        }
 
-            return songsList.ToArray();
+        public Song[] GetSongsList(NavigationItem item)
+        {            
+            return vkAudio.GetAudioList(item).ToArray();
         }
     }
 }

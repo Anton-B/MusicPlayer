@@ -13,12 +13,13 @@ namespace MusicPlayerAPI
         public Dictionary<string, IPlugin> PluginInstasnces { get; set; } = new Dictionary<string, IPlugin>();
         public string Key { get; set; }
         public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return PluginInstasnces[Key].UpdatePlaylistWhenFavoritesChanges; } }
 
         public void LoadPlugin(DirectoryInfo directory)
         {
             try
             {
-                FileInfo manifestFile = directory.GetFiles("*.manifest").FirstOrDefault();
+                var manifestFile = directory.GetFiles("*.manifest").FirstOrDefault();
                 if (manifestFile != null)
                 {
                     string[] manifestContent = File.ReadAllText(manifestFile.FullName).Split(',');
@@ -28,8 +29,8 @@ namespace MusicPlayerAPI
                     Type type = assembly.GetType(pluginClassName);
                     PluginInstasnces.Add(assemblyName, Activator.CreateInstance(type) as IPlugin);
                 }
-                DirectoryInfo[] dirs = directory.GetDirectories();
-                foreach (DirectoryInfo dir in dirs)
+                var dirs = directory.GetDirectories();
+                foreach (var dir in dirs)
                     LoadPlugin(dir);
             }
             catch (IOException ex)
@@ -73,8 +74,8 @@ namespace MusicPlayerAPI
 
         public bool IsFavorite(NavigationItem item)
         {
-            foreach (NavigationItem ni in PluginInstasnces[Key].FavoriteItems)
-                if (ni.Path.Equals(item.Path))
+            foreach (var ni in PluginInstasnces[Key].FavoriteItems)
+                if (ni.Equals(item))
                     return true;
             return false;
         }
@@ -85,9 +86,14 @@ namespace MusicPlayerAPI
                 : PluginInstasnces[Key].AddButtonImageSource;
         }
 
-        public Song[] GetSongs()
+        public Song[] GetDefaultSongsList()
         {
-            return PluginInstasnces[Key].GetSongsList();
+            return PluginInstasnces[Key].GetDefaultSongsList();
+        }
+
+        public Song[] GetSongsList(NavigationItem item)
+        {
+            return PluginInstasnces[Key].GetSongsList(item);
         }
     }
 }

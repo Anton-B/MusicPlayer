@@ -40,12 +40,13 @@ namespace VKPlugin
         internal string PlaylistsUrl { get { return string.Format(
             "https://api.vk.com/method/audio.getAlbums?lang={0}&v={1}&access_token={2}",
             lang, APIVersion, accessToken); } }
+        internal string AudioListUrl { get { return "https://api.vk.com/method/audio.get?{0}{1}&lang={2}&v={3}&access_token={4}"; } }
         [DllImport("wininet.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
 
-        private enum RequestedListType {Friends, Groups }
+        private enum RequestedListType { Friends, Groups }
 
-        private class Response
+        private class ResponseList
         {
             public string id;
             public string name;
@@ -53,6 +54,15 @@ namespace VKPlugin
             public string last_name;
             public string title;
             public string photo_50;
+        }
+
+        private class ResponseAudio
+        {
+            public string title;
+            public string artist;
+            public int duration;
+            public string url;
+            public long date;
         }
 
         internal void GetAccessData(string url)
@@ -82,7 +92,7 @@ namespace VKPlugin
             using (WebClient client = new WebClient())
             {
                 List<NavigationItem> list = new List<NavigationItem>();
-                foreach (Response res in GetResponseItems(client, PlaylistsUrl))
+                foreach (var res in GetResponseItems(client, PlaylistsUrl))
                     list.Add(new NavigationItem(res.title, res.id, 50, false, true, 
                         playlistImageSource, 16, System.Windows.Input.Cursors.Arrow));
                 return list;
@@ -109,8 +119,9 @@ namespace VKPlugin
                 }
                 
                 List<NavigationItem> list = new List<NavigationItem>();                
-                foreach (Response res in GetResponseItems(client, requestUrl))
+                foreach (var res in GetResponseItems(client, requestUrl))
                 {
+                    res.id = (listType == RequestedListType.Friends) ? res.id : ("-" + res.id);
                     if (idsDict.ContainsKey(res.id))
                     {
                         if (!res.photo_50.Equals(idsDict[res.id]))
@@ -127,18 +138,44 @@ namespace VKPlugin
                 }
 
                 using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + @"\ids.links", FileMode.OpenOrCreate)))
-                    foreach (KeyValuePair<string, string> kvp in idsDict)
+                    foreach (var kvp in idsDict)
                         streamW.WriteLine(kvp.Key + " " + kvp.Value);
                 return list;
             }
         }
 
-        private List<Response> GetResponseItems(WebClient client, string requestUrl)
+        private List<ResponseList> GetResponseItems(WebClient client, string requestUrl)
         {
-            string jsonResponseStr = client.DownloadString(requestUrl);
-            var vkResponse = new { response = new { count = 0, items = new List<Response>() } };
+            var jsonResponseStr = client.DownloadString(requestUrl);
+            var vkResponse = new { response = new { count = 0, items = new List<ResponseList>() } };
             var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
             return resp.response.items;
+        }
+
+        internal List<Song> GetAudioList(NavigationItem item)
+        {
+            List<Song> songs = new List<Song>();
+            if (accessToken == null)
+                return songs;
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                string url;
+                if (item == null)
+                    url = string.Format(AudioListUrl, string.Empty, string.Empty, lang, APIVersion, accessToken);
+                else
+                    url = string.Format(AudioListUrl, (item.ImageSource == playlistImageSource) ? "album_id=" : "owner_id=",
+                        item.Path, lang, APIVersion, accessToken);
+                var jsonResponseStr = client.DownloadString(url);
+                var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
+                var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
+                if (resp == null || resp.response == null || resp.response.count == 0)
+                    return songs;
+                foreach (var res in resp.response.items)
+                    songs.Add(new Song(res.title, res.artist, TimeFormatter.Format(res.duration / 60) 
+                        + ":" + TimeFormatter.Format(res.duration % 60), res.url, res.date));
+                return songs;
+            }
         }
 
         internal void LogOut()

@@ -4,8 +4,6 @@ using System.IO;
 using MusicPlayerAPI;
 using TagLib;
 using System.Windows.Input;
-using System.Windows;
-using System;
 
 namespace FileSystemPlugin
 {
@@ -15,8 +13,9 @@ namespace FileSystemPlugin
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Выбранное" };
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
-        public bool DoubleClickToOpenItem { get; } = true;
-        public List<NavigationItem> FavoriteItems { get; set; } = new List<NavigationItem>();
+        public bool DoubleClickToOpenItem { get { return true; } }
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return true; } } 
+        public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
         private const double itemHeight = 24;
         private const double fontHeight = 12;
         private const string diskImageSource = @"Plugins\FileSystemPlugin\Images\disk.png";
@@ -31,20 +30,20 @@ namespace FileSystemPlugin
             if (path == null)
             {
                 DriveInfo[] drives = DriveInfo.GetDrives();
-                foreach (DriveInfo drive in drives)
+                foreach (var drive in drives)
                     navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
                         itemHeight, true, false, diskImageSource, fontHeight, Cursors.Arrow));
             }
             else
             {
-                DirectoryInfo parent = Directory.GetParent(path);
+                var parent = Directory.GetParent(path);
                 navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, parentFolderImageSource, fontHeight, Cursors.Arrow));
                 DirectoryInfo di = new DirectoryInfo(path);
-                DirectoryInfo[] dirs = di.GetDirectories();
-                foreach (DirectoryInfo dir in dirs)
+                var dirs = di.GetDirectories();
+                foreach (var dir in dirs)
                     navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, folderImageSource, fontHeight, Cursors.Arrow));
                 FileInfo[] files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
-                foreach (FileInfo file in files)
+                foreach (var file in files)
                     navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
             }
             return navigItems;
@@ -61,14 +60,14 @@ namespace FileSystemPlugin
             FavoriteItems.Remove(item);
         }
 
-        public Song[] GetSongsList()
+        public Song[] GetDefaultSongsList()
         {
             List<Song> allSongsList = new List<Song>();
             try
             {
-                foreach (NavigationItem ni in FavoriteItems)
+                foreach (var ni in FavoriteItems)
                 {
-                    string[] mp3FilePaths = GetFiles(ni.Path, "*.mp3").ToArray();
+                    var mp3FilePaths = GetFiles(ni.Path, "*.mp3").ToArray();
                     List<Song> songs = new List<Song>();
                     for (int i = 0; i < mp3FilePaths.Length; i++)
                     {
@@ -77,12 +76,10 @@ namespace FileSystemPlugin
                             using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
                             {
                                 var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
-                                Song song = new Song();
-                                song = new Song();
+                                Song song = new Song();                                
                                 song.Path = mp3FilePaths[i];
                                 song.Title = (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title;
-                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;
-                                song.Album = (tagFile.Tag.Album == null) ? "[Без имени]" : tagFile.Tag.Album;
+                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;                                
                                 song.Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
                                     + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
                                 FileInfo file = new FileInfo(mp3FilePaths[i]);
@@ -99,6 +96,11 @@ namespace FileSystemPlugin
             IEqualityComparer<Song> comparer = new Song() as IEqualityComparer<Song>;
             var songsList = allSongsList.Distinct(comparer);
             return songsList.ToArray();
+        }
+
+        public Song[] GetSongsList(NavigationItem item)
+        {
+            return new Song[] { new Song()};
         }
 
         private List<string> GetFiles(string path, string pattern)

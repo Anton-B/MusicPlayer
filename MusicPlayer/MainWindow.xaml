@@ -52,14 +52,14 @@
                 </DockPanel>
                 <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
                     <TabItem Width="178">
-                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
+                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
                     </TabItem>
                     <TabItem Width="178">
                         <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
                     </TabItem>
                 </TabControl>
             </DockPanel>
-            <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="White">
+            <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="#FF3498DB">
                 <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
                            ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="#FFF3F3F3" BorderThickness="1,1,0,1" BorderBrush="#FFABADB3"/>
                 <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="154" ToolTip="Сортировка песен" FontSize="13.333" 

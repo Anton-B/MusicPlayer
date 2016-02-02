@@ -10,11 +10,13 @@ namespace MusicPlayerAPI
         string AddButtonImageSource { get; }
         string DeleteButtonImageSource { get; }
         bool DoubleClickToOpenItem { get; }
-        List<NavigationItem> FavoriteItems { get; set; }
+        bool UpdatePlaylistWhenFavoritesChanges { get; }
+        List<NavigationItem> FavoriteItems { get; }
 
         List<NavigationItem> GetNavigationItems(string path);
         void AddToFavorites(NavigationItem item);
         void DeleteFromFavorites(NavigationItem item);
-        Song[] GetSongsList();
+        Song[] GetDefaultSongsList();
+        Song[] GetSongsList(NavigationItem item);
     }
 }
