@@ -1,6 +1,6 @@
 ﻿namespace MusicPlayer
 {
-    enum RepeatValue
+    enum RepeatType
     {
         NoRepeat = 0,
         RepeatSong = 1,

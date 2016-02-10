@@ -13,7 +13,10 @@ namespace FileSystemPlugin
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Выбранное" };
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
+        public bool UseDefaultHomeButton { get { return false; } }
+        public bool UseDefaultSearch { get { return true; } }
         public bool DoubleClickToOpenItem { get { return true; } }
+        public bool SortSearchResults { get { return true; } }
         public bool UpdatePlaylistWhenFavoritesChanges { get { return true; } } 
         public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
         private const double itemHeight = 24;
@@ -23,6 +26,7 @@ namespace FileSystemPlugin
         private const string favoriteImageSource = @"Plugins\FileSystemPlugin\Images\favorite_folder.png";
         private const string audioImageSource = @"Plugins\FileSystemPlugin\Images\audio.png";
         private const string parentFolderImageSource = @"Plugins\FileSystemPlugin\Images\parent_folder.png";
+        private Song[] lastLoadedSongs;
 
         public List<NavigationItem> GetNavigationItems(string path)
         {
@@ -95,12 +99,8 @@ namespace FileSystemPlugin
             catch { }
             IEqualityComparer<Song> comparer = new Song() as IEqualityComparer<Song>;
             var songsList = allSongsList.Distinct(comparer);
-            return songsList.ToArray();
-        }
-
-        public Song[] GetSongsList(NavigationItem item)
-        {
-            return new Song[] { new Song()};
+            lastLoadedSongs = songsList.ToArray();
+            return lastLoadedSongs;
         }
 
         private List<string> GetFiles(string path, string pattern)
@@ -115,5 +115,20 @@ namespace FileSystemPlugin
             catch { }
             return files;
         }
+
+        public Song[] GetSongsList(NavigationItem item)
+        {
+            return new Song[0];
+        }
+
+        public Song[] GetSearchResponse(string request)
+        {
+            return new Song[0];
+        }
+        
+        public Song[] GetHomeButtonSongs()
+        {
+            return lastLoadedSongs;
+        }        
     }
 }

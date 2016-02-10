@@ -17,11 +17,11 @@ namespace MusicPlayer
             switch (index)
             {
                 case 0:
-                    return songs.OrderByDescending(s => s.CreationTime).ToArray();
+                    return songs.OrderBy(s => s.Path).OrderByDescending(s => s.CreationTime).ToArray();
                 case 1:
-                    return songs.OrderBy(s => s.Title).ToArray();
+                    return songs.OrderBy(s => s.Path).OrderBy(s => s.Title).ToArray();
                 case 2:
-                    return songs.OrderBy(s => s.Artist).ToArray();
+                    return songs.OrderBy(s => s.Path).OrderBy(s => s.Artist).ToArray();
             }
             return null;
         }

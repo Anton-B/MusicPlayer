@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Reflection;
+using System.Windows.Media.Imaging;
 
 namespace VKPlugin
 {
@@ -11,7 +12,7 @@ namespace VKPlugin
         private StackPanel dialogSP = new StackPanel();
         private WebBrowser browser = new WebBrowser();        
         private double windowWidth = 650;
-        private double windowHeight = 380;
+        private double windowHeight = 500;
         private VKAudio vkAudio = new VKAudio();        
 
         private BrowserWindow()
@@ -19,6 +20,7 @@ namespace VKPlugin
             window.Width = windowWidth;
             window.Height = windowHeight;
             window.ResizeMode = ResizeMode.NoResize;
+            window.Icon = new BitmapImage(new Uri("http://vk.com/images/faviconnew.ico"));
             window.WindowStartupLocation = WindowStartupLocation.CenterScreen;            
             window.Title = "Пожалуйста, подождите...";
             browser.Width = 640;

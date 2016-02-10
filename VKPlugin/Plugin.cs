@@ -7,12 +7,15 @@ namespace VKPlugin
 {
     public class Plugin : IPlugin
     {
-        public string Name { get; } = "Музыка с vk.com";
+        public string Name { get; } = "Музыка из ВКонтакте";
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Избранное" };
         public string AddButtonImageSource { get; } = @"Plugins\VKPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";
         public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
+        public bool UseDefaultHomeButton { get { return true; } }
+        public bool UseDefaultSearch { get { return false; } }
         public bool DoubleClickToOpenItem { get { return false; } }
+        public bool SortSearchResults { get { return false; } }
         public bool UpdatePlaylistWhenFavoritesChanges { get { return false; } }
         private VKAudio vkAudio = new VKAudio();
         private bool userLogged = false;
@@ -26,7 +29,7 @@ namespace VKPlugin
         private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";        
         private BrowserWindow browserWin;
         private bool isCacheDownloaded;
-        private string loginPath = "Вход";
+        private string loginPath = "Меню";
         private string logoutPath = "Выход";
         private string friendsPath = "Друзья";
         private string groupsPath = "Группы";
@@ -43,11 +46,12 @@ namespace VKPlugin
             {
                 if (!isCacheDownloaded)
                 {
+                    FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
                     vkAudio.GetFriendsList();
-                    vkAudio.GetGroupsList();                    
+                    vkAudio.GetGroupsList();
                     isCacheDownloaded = true;
                 }
-                navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, true, audioImageSource, fontHeight, Cursors.Arrow));
+                navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Друзья", friendsPath, itemHeight, true, false, friendsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Группы", groupsPath, itemHeight, true, false, groupsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Плейлисты", playlistsPath, itemHeight, true, false, playlistsImageSource, fontHeight, Cursors.Arrow));
@@ -74,7 +78,7 @@ namespace VKPlugin
             }
             else
             {
-                navigItems.Add(new NavigationItem("Назад", "Вход", 50, true, false, null, 16, Cursors.Arrow));
+                navigItems.Add(new NavigationItem("[Назад]", loginPath, 50, true, false, null, 16, Cursors.Arrow));
                 if (path == friendsPath)
                     navigItems.AddRange(vkAudio.GetFriendsList());
                 else if (path == groupsPath)
@@ -103,6 +107,16 @@ namespace VKPlugin
         public Song[] GetSongsList(NavigationItem item)
         {            
             return vkAudio.GetAudioList(item).ToArray();
+        }
+
+        public Song[] GetSearchResponse(string request)
+        {
+            return vkAudio.GetSearchResponse(request).ToArray();
+        }
+
+        public Song[] GetHomeButtonSongs()
+        {
+            return new Song[0];
         }
     }
 }

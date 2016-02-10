@@ -12,8 +12,11 @@ namespace MusicPlayerAPI
     {
         public Dictionary<string, IPlugin> PluginInstasnces { get; set; } = new Dictionary<string, IPlugin>();
         public string Key { get; set; }
+        public bool UseDefaultHomeButton { get { return PluginInstasnces[Key].UseDefaultHomeButton; } }
+        public bool UseDefaultSearch { get { return PluginInstasnces[Key].UseDefaultSearch; } }
         public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }
-        public bool UpdatePlaylistWhenFavoritesChanges { get { return PluginInstasnces[Key].UpdatePlaylistWhenFavoritesChanges; } }
+        public bool SortSearchResults { get { return PluginInstasnces[Key].SortSearchResults; } }
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return PluginInstasnces[Key].UpdatePlaylistWhenFavoritesChanges; } }        
 
         public void LoadPlugin(DirectoryInfo directory)
         {
@@ -94,6 +97,16 @@ namespace MusicPlayerAPI
         public Song[] GetSongsList(NavigationItem item)
         {
             return PluginInstasnces[Key].GetSongsList(item);
+        }
+
+        public Song[] GetSearchResponse(string request)
+        {
+            return PluginInstasnces[Key].GetSearchResponse(request);
+        }
+
+        public Song[] GetHomeButtonSongs()
+        {
+            return PluginInstasnces[Key].GetHomeButtonSongs();
         }
     }
 }

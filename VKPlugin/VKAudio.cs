@@ -12,25 +12,34 @@ namespace VKPlugin
     internal class VKAudio
     {
         private const string clientID = "5193448";
-        private const string redirectUri = "https://oauth.vk.com/blank.html";
+        private const string redirectUrl = "https://oauth.vk.com/blank.html";
         private const string display = "popup";
         private const string scope = "friends,audio,groups,offline";
         private const string responseType = "token";
-        private const string APIVersion = "5.44";        
+        private const string APIVersion = "5.45";        
         private const string lang = "ru";
         private const string friendsOrder = "hints";
         private const string friendsFields = "photo_50";
         private const string groupsInfoType = "1";
+        private const string autoComplete = "1";
+        private const string lyrics = "0";
+        private const string performerOnly = "0";
+        private const string sort = "2";
+        private const string searchOwn = "1";
+        private const string count = "300";
         private string userID;
         private string accessToken;
         private const string cacheFolder = @"vkcache\";
+        private const string friendsFolder = @"vkcache\friends\";
+        private const string groupsFolder = @"vkcache\groups\";
+        private const string linksFileName = @"\ids.links";
         private const string playlistImageSource = @"Plugins\VKPlugin\Images\playlist.png";
         internal string UserID { get { return userID; } }
         internal string AccessToken { get { return accessToken; } }
         internal bool HasAccessData { get { return !string.IsNullOrEmpty(UserID) && !string.IsNullOrEmpty(AccessToken); } }
         internal string AuthUrl { get { return string.Format(
-            "https://oauth.vk.com/authorize?client_id={0}&display={1}&redirect_uri={2}&scope={3}&response_type={4}&v={5}",
-            clientID, display, redirectUri, scope, responseType, APIVersion); } }
+            "https://oauth.vk.com/authorize?client_id={0}&display={1}&redirect_uri={2}&scope={3}&response_type={4}&v={5}&lang={6}",
+            clientID, display, redirectUrl, scope, responseType, APIVersion, lang); } }
         internal string FriendsUrl { get { return string.Format(
             "https://api.vk.com/method/friends.get?order={0}&fields={1}&lang={2}&v={3}&access_token={4}",
             friendsOrder, friendsFields, lang, APIVersion, AccessToken); } }
@@ -41,6 +50,9 @@ namespace VKPlugin
             "https://api.vk.com/method/audio.getAlbums?lang={0}&v={1}&access_token={2}",
             lang, APIVersion, accessToken); } }
         internal string AudioListUrl { get { return "https://api.vk.com/method/audio.get?{0}{1}&lang={2}&v={3}&access_token={4}"; } }
+        internal string AudioSearchUrl { get { return 
+        "https://api.vk.com/method/audio.search?q={0}&auto_complete={1}&lyrics={2}&performer_only={3}&sort={4}&search_own={5}&count={6}&lang={7}&v={8}&access_token={9}";
+        } }
         [DllImport("wininet.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
 
@@ -79,12 +91,12 @@ namespace VKPlugin
 
         internal List<NavigationItem> GetFriendsList()
         {
-            return GetList(FriendsUrl, cacheFolder + @"\friends\", RequestedListType.Friends);
+            return GetList(FriendsUrl, friendsFolder, RequestedListType.Friends);
         }
 
         internal List<NavigationItem> GetGroupsList()
         {
-            return GetList(GroupsUrl, cacheFolder + @"\groups\", RequestedListType.Groups);
+            return GetList(GroupsUrl, groupsFolder, RequestedListType.Groups);
         }
 
         internal List<NavigationItem> GetPlaylistsList()
@@ -106,7 +118,7 @@ namespace VKPlugin
                 client.Encoding = Encoding.UTF8;
                 Dictionary<string, string> idsDict = new Dictionary<string, string>();
                 Directory.CreateDirectory(cacheFolderPath);
-                using (StreamReader streamR = new StreamReader(new FileStream(cacheFolderPath + @"\ids.links", FileMode.OpenOrCreate)))
+                using (StreamReader streamR = new StreamReader(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
                 {
                     string[] lines = streamR.ReadToEnd().Split('\n');
                     foreach (string line in lines)
@@ -137,7 +149,7 @@ namespace VKPlugin
                         true, idsDict[res.id], 16, System.Windows.Input.Cursors.Arrow));
                 }
 
-                using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + @"\ids.links", FileMode.OpenOrCreate)))
+                using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
                     foreach (var kvp in idsDict)
                         streamW.WriteLine(kvp.Key + " " + kvp.Value);
                 return list;
@@ -173,6 +185,25 @@ namespace VKPlugin
                     return songs;
                 foreach (var res in resp.response.items)
                     songs.Add(new Song(res.title, res.artist, TimeFormatter.Format(res.duration / 60) 
+                        + ":" + TimeFormatter.Format(res.duration % 60), res.url, res.date));
+                return songs;
+            }
+        }
+
+        internal List<Song> GetSearchResponse(string request)
+        {
+            using (WebClient client = new WebClient())
+            {
+                client.Encoding = Encoding.UTF8;
+                List<Song> songs = new List<Song>();
+                var jsonResponseStr = client.DownloadString(string.Format(AudioSearchUrl, request, autoComplete,
+                    lyrics, performerOnly, sort, searchOwn, count, lang, APIVersion, accessToken));
+                var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
+                var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
+                if (resp == null || resp.response == null || resp.response.count == 0)
+                    return songs;
+                foreach (var res in resp.response.items)
+                    songs.Add(new Song(res.title, res.artist, TimeFormatter.Format(res.duration / 60)
                         + ":" + TimeFormatter.Format(res.duration % 60), res.url, res.date));
                 return songs;
             }
