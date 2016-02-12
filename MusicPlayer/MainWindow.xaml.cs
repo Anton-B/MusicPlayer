@@ -3,12 +3,16 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Collections.Generic;
-using MusicPlayerAPI;
+using System.Collections.Specialized;
 using System.Windows.Input;
 using System.IO;
 using System.Windows.Media.Imaging;
 using System.Linq;
 using System.Windows.Media;
+using System.Reflection;
+using System.Xml;
+using System.Configuration;
+using MusicPlayerAPI;
 
 namespace MusicPlayer
 {
@@ -40,14 +44,21 @@ namespace MusicPlayer
         private ListView currentListView { get { return (navigTabControl.SelectedIndex == 0) ? navigListView : favoritesListView; } }
         private int currentTabIndex = 0;
 
-        #region CONSTRUCTORS
+        #region WINDOW
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();            
             InitializeTimer();
             pluginsManager.LoadPlugin(pluginsDirectory);
             SetModeComboBoxItems();
-            modeComboBox.SelectedIndex = 0;
+            try { LoadSettings(); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            //modeComboBox.SelectedIndex = 0;
+        }
+
+        private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            SaveSettings();
         }
         #endregion
 
@@ -496,6 +507,83 @@ namespace MusicPlayer
                 return;
             mediaElement.Source = new Uri(((Song)busyDataGrid.SelectedItem).Path);
         }
-        #endregion        
+        #endregion
+
+        #region CONFIG
+        private void SaveSettings()
+        {
+            XmlDocument doc = LoadConfigDocument();
+            XmlNode node = doc.SelectSingleNode("//appSettings");
+            if (node == null)
+            {
+                node = doc.CreateNode(XmlNodeType.Element, "appSettings", "");
+                doc.LastChild.AppendChild(node);
+            }
+            string[] keys = new string[] {  "Window.Left",
+                                            "Window.Top",
+                                            "Window.Width",
+                                            "Window.Height",
+                                            "Window.WindowState",
+                                            "Plugin.Key" };
+            string[] values = new string[] {this.Left.ToString(),
+                                            this.Top.ToString(),
+                                            this.Width.ToString(),
+                                            this.Height.ToString(),
+                                            this.WindowState.ToString(),
+                                            pluginsManager.Key };
+            for (int i = 0; i < keys.Length; i++)
+            {
+                XmlElement element = node.SelectSingleNode(string.Format("//add[@key='{0}']", keys[i])) as XmlElement;
+                if (element != null)
+                    element.SetAttribute("value", values[i]);
+                else
+                {
+                    element = doc.CreateElement("add");
+                    element.SetAttribute("key", keys[i]);
+                    element.SetAttribute("value", values[i]);
+                    node.AppendChild(element);
+                }
+            }
+            doc.Save(Assembly.GetExecutingAssembly().Location + ".config");
+        }
+
+        private void LoadSettings()
+        {
+            NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
+            if (allAppSettings.Count < 1)
+                return;
+            this.Left = Convert.ToDouble(allAppSettings["Window.Left"]);
+            this.Top = Convert.ToDouble(allAppSettings["Window.Top"]);
+            this.Width = Convert.ToDouble(allAppSettings["Window.Width"]);
+            this.Height = Convert.ToDouble(allAppSettings["Window.Height"]);
+            this.WindowState = (WindowState)WindowState.Parse(WindowState.GetType(), allAppSettings["Window.WindowState"]);
+
+            if (allAppSettings["Plugin.Key"] == string.Empty && modeComboBox.Items.Count > 0)
+                allAppSettings["Plugin.Key"] = (modeComboBox.Items[0] as TextBlock).Tag.ToString();
+            for (int i = 0; i < modeComboBox.Items.Count; i++)
+                if ((modeComboBox.Items[i] as TextBlock).Tag.ToString() == allAppSettings["Plugin.Key"])
+                {
+                    modeComboBox.SelectedIndex = i;
+                    break;
+                }
+            if (modeComboBox.SelectedIndex == -1 && modeComboBox.Items.Count > 0)
+                modeComboBox.SelectedIndex = 0;
+        }
+
+        private XmlDocument LoadConfigDocument()
+        {
+            XmlDocument doc;
+            try
+            {
+                doc = new XmlDocument();
+                doc.Load(Assembly.GetExecutingAssembly().Location + ".config");
+                return doc;
+            }
+            catch (FileNotFoundException ex)
+            {
+                throw new Exception("Конфигурационный файл не найден.", ex);
+            }
+        }
+        #endregion
     }
 }

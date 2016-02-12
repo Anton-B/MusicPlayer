@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MusicPlayer"
         xmlns:MusicPlayerAPI="clr-namespace:MusicPlayerAPI;assembly=MusicPlayerAPI" xmlns:System="clr-namespace:System;assembly=mscorlib" x:Name="mainWindow" x:Class="MusicPlayer.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Background="White" WindowStartupLocation="CenterScreen" Width="1130" Height="700" MinHeight="460" MinWidth="860">
+        Title="MainWindow" Background="White" Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing">
     <DockPanel x:Name="mainDockPanel" LastChildFill="True" Background="#FFABADB3">
         <DockPanel x:Name="playerDockPanel" DockPanel.Dock="Bottom" LastChildFill="True" Height="82" Background="#FF7E8EA4">
             <StackPanel x:Name="infoStackPanel" DockPanel.Dock="Top" Orientation="Horizontal" Height="32" Margin="0,4,0,0">
@@ -16,16 +16,6 @@
 					VerticalAlignment="Top" FontSize="16" Foreground="White"/>
             </StackPanel>
             <DockPanel x:Name="controlsDockPanel" DockPanel.Dock="Bottom" LastChildFill="True">
-                <!--<Button x:Name="prevButton" DockPanel.Dock="Left" Content="Prev" HorizontalAlignment="Left" Margin="10,10,0,10"
-					VerticalAlignment="Top" Width="30" Height="30" Click="PrevButton_Click"/>
-                <Button x:Name="playPauseButton" DockPanel.Dock="Left" Content="Play" HorizontalAlignment="Left" Margin="10,10,0,10" 
-					VerticalAlignment="Top" Width="30" Height="30" Click="PlayPauseButton_Click" Background="#FFDDDDDD"/>
-                <Button x:Name="nextButton" DockPanel.Dock="Left" Content="Next" HorizontalAlignment="Left" Margin="10,10,0,10" 
-					VerticalAlignment="Top" Width="30" Height="30" Click="NextButton_Click"/>-->
-                <!--<Button x:Name="randButton" DockPanel.Dock="Left" Content="-Rand" HorizontalAlignment="Left" Margin="10,10,0,0" 
-					VerticalAlignment="Top" Width="30" Height="30" Click="RandButton_Click"/>
-                <Button x:Name="repeatButton" DockPanel.Dock="Left" Content="-Rep" HorizontalAlignment="Left" Margin="10,10,0,0" 
-					VerticalAlignment="Top" Width="30" Height="30" Click="RepeatButton_Click"/>-->
                 <Label x:Name="prevLabel" DockPanel.Dock="Left" Content="⏮" HorizontalAlignment="Left" Margin="10,-2,0,0"
 					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Prev_Click" Foreground="White" FontSize="26.667" Cursor="Hand" Background="{x:Null}"/>
                 <Label x:Name="playPauseLabel" DockPanel.Dock="Left" Content="⏵" HorizontalAlignment="Left" Margin="2,-4,0,0" 
