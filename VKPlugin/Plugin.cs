@@ -29,7 +29,7 @@ namespace VKPlugin
         private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";        
         private BrowserWindow browserWin;
         private bool isCacheDownloaded;
-        private string loginPath = "Меню";
+        private string loginPath = "Вход";
         private string logoutPath = "Выход";
         private string friendsPath = "Друзья";
         private string groupsPath = "Группы";
@@ -39,10 +39,23 @@ namespace VKPlugin
         {
             List<NavigationItem> navigItems = new List<NavigationItem>();
             if (path == null && !userLogged)
-            {
-                navigItems.Add(new NavigationItem("Вход", loginPath, itemHeight, true, false, loginImageSource, fontHeight, Cursors.Arrow));
+            {                
+                browserWin = new BrowserWindow(vkAudio);
+                browserWin.Navigate(vkAudio.AuthUrl);
+                bool? result = browserWin.Show();
+                if (vkAudio.HasAccessData)
+                {
+                    userLogged = true;
+                    navigItems = GetNavigationItems(null);
+                }
+                else
+                    navigItems = GetNavigationItems(loginPath);
             }
-            else if (path == loginPath && userLogged)
+            else if (path == loginPath)
+            {
+                navigItems.Add(new NavigationItem("Вход", null, itemHeight, true, false, loginImageSource, fontHeight, Cursors.Arrow));
+            }
+            else if (path == null && userLogged)
             {
                 if (!isCacheDownloaded)
                 {
@@ -56,29 +69,16 @@ namespace VKPlugin
                 navigItems.Add(new NavigationItem("Группы", groupsPath, itemHeight, true, false, groupsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Плейлисты", playlistsPath, itemHeight, true, false, playlistsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Выход", logoutPath, itemHeight, true, false, logoutImageSource, fontHeight, Cursors.Arrow));
-            }
-            else if (path == loginPath && !userLogged)
-            {
-                browserWin = new BrowserWindow(vkAudio);
-                browserWin.Navigate(vkAudio.AuthUrl);
-                bool? result = browserWin.Show();
-                if (vkAudio.HasAccessData)
-                {
-                    userLogged = true;
-                    navigItems = GetNavigationItems(loginPath);
-                }
-                else
-                    navigItems = GetNavigationItems(null);
-            }
+            }            
             else if (path == logoutPath)
             {
                 vkAudio.LogOut();
                 userLogged = false;
-                navigItems = GetNavigationItems(null);
+                navigItems = GetNavigationItems(loginPath);
             }
             else
             {
-                navigItems.Add(new NavigationItem("[Назад]", loginPath, 50, true, false, null, 16, Cursors.Arrow));
+                navigItems.Add(new NavigationItem("[Назад]", null, 50, true, false, null, 16, Cursors.Arrow));
                 if (path == friendsPath)
                     navigItems.AddRange(vkAudio.GetFriendsList());
                 else if (path == groupsPath)

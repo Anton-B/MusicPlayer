@@ -123,10 +123,14 @@ namespace VKPlugin
                     string[] lines = streamR.ReadToEnd().Split('\n');
                     foreach (string line in lines)
                     {
-                        if (string.IsNullOrEmpty(line))
-                            continue;
-                        string[] data = line.Split(' ', '\r');
-                        idsDict.Add(data[0], data[1]);
+                        try
+                        {
+                            if (string.IsNullOrEmpty(line))
+                                continue;
+                            string[] data = line.Split(' ', '\r');
+                            idsDict.Add(data[0], data[1]);
+                        }
+                        catch { }
                     }
                 }
                 

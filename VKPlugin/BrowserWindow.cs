@@ -64,7 +64,7 @@ namespace VKPlugin
 
         private void Browser_LoadCompleted(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            window.Title = "ВКонтакте";
+            window.Title = "Вход | ВКонтакте";
             vkAudio.GetAccessData(browser.Source.ToString());
             if (vkAudio.HasAccessData)
                 window.Close();
