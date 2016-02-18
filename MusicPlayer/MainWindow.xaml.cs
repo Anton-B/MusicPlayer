@@ -42,17 +42,18 @@ namespace MusicPlayer
         private Brush busyDGRandMode = Brushes.LightGray;
         private RepeatType repeatType;
         private ListView currentListView { get { return (navigTabControl.SelectedIndex == 0) ? navigListView : favoritesListView; } }
-        private int currentTabIndex = 0;
 
         #region WINDOW
         public MainWindow()
         {
-            InitializeComponent();            
+            InitializeComponent();
             InitializeTimer();
             pluginsManager.LoadPlugin(pluginsDirectory);
             SetModeComboBoxItems();
             try { LoadSettings(); }
             catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            if (modeComboBox.SelectedIndex == -1 && modeComboBox.Items.Count > 0)
+                modeComboBox.SelectedIndex = 0;
             //modeComboBox.SelectedIndex = 0;
         }
 
@@ -221,15 +222,16 @@ namespace MusicPlayer
             pluginsManager.Key = ((TextBlock)modeComboBox.SelectedItem).Tag.ToString();
             for (int i = 0; i < navigTabControl.Items.Count; i++)
                 ((TabItem)navigTabControl.Items[i]).Header = pluginsManager.GetHeader(i);
+            navigTabControl.SelectedIndex = pluginsManager.OpenedTabIndex;
             ShowItems(addressTextBox.Tag?.ToString(), true);
             SetSongsList(pluginsManager.GetDefaultSongsList(), true, true, true);
         }
 
         private void NavigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (currentTabIndex != navigTabControl.SelectedIndex)
+            if (pluginsManager.OpenedTabIndex != navigTabControl.SelectedIndex)
             {
-                currentTabIndex = (currentTabIndex == 0) ? 1 : 0;
+                pluginsManager.OpenedTabIndex = (pluginsManager.OpenedTabIndex == 0) ? 1 : 0;
                 ShowItems(addressTextBox.Tag?.ToString(), false);
             }
         }
@@ -513,27 +515,51 @@ namespace MusicPlayer
         private void SaveSettings()
         {
             XmlDocument doc = LoadConfigDocument();
-            XmlNode node = doc.SelectSingleNode("//appSettings");
-            if (node == null)
+            XmlNode settingsNode = doc.SelectSingleNode("//appSettings");
+            if (settingsNode != null)
+                doc.SelectSingleNode("//configuration").RemoveChild(settingsNode);
+            settingsNode = doc.CreateNode(XmlNodeType.Element, "appSettings", "");
+            doc.LastChild.AppendChild(settingsNode);
+            List<string> keys = new List<string> {  "Window.Left",
+                                                    "Window.Top",
+                                                    "Window.Width",
+                                                    "Window.Height",
+                                                    "Window.WindowState",
+                                                    "Plugins.Key" };
+            List<string> values = new List<string> {this.Left.ToString(),
+                                                    this.Top.ToString(),
+                                                    this.Width.ToString(),
+                                                    this.Height.ToString(),
+                                                    this.WindowState.ToString(),
+                                                    pluginsManager.Key };
+            string str = "{0}.FavoriteItems.{1}.{2}";
+            foreach (var instance in pluginsManager.PluginInstasnces)
             {
-                node = doc.CreateNode(XmlNodeType.Element, "appSettings", "");
-                doc.LastChild.AppendChild(node);
+                keys.Add(string.Format("{0}.{1}", instance.Key, "OpenedTabIndex"));
+                values.Add(instance.Value.OpenedTabIndex.ToString());
+                for (int i = 0; i < instance.Value.FavoriteItems.Count; i++)
+                {
+                    keys.Add(string.Format(str, instance.Key, i, "Name"));
+                    keys.Add(string.Format(str, instance.Key, i, "Path"));
+                    keys.Add(string.Format(str, instance.Key, i, "Height"));
+                    keys.Add(string.Format(str, instance.Key, i, "CanBeOpened"));
+                    keys.Add(string.Format(str, instance.Key, i, "CanBeFavorite"));
+                    keys.Add(string.Format(str, instance.Key, i, "ImageSource"));
+                    keys.Add(string.Format(str, instance.Key, i, "FontSize"));
+                    keys.Add(string.Format(str, instance.Key, i, "CursorType"));
+                    values.Add(instance.Value.FavoriteItems[i].Name);
+                    values.Add(instance.Value.FavoriteItems[i].Path);
+                    values.Add(instance.Value.FavoriteItems[i].Height.ToString());
+                    values.Add(instance.Value.FavoriteItems[i].CanBeOpened.ToString());
+                    values.Add(instance.Value.FavoriteItems[i].CanBeFavorite.ToString());
+                    values.Add(instance.Value.FavoriteItems[i].ImageSource);
+                    values.Add(instance.Value.FavoriteItems[i].FontSize.ToString());
+                    values.Add(new CursorConverter().ConvertToString(instance.Value.FavoriteItems[i].CursorType));
+                }
             }
-            string[] keys = new string[] {  "Window.Left",
-                                            "Window.Top",
-                                            "Window.Width",
-                                            "Window.Height",
-                                            "Window.WindowState",
-                                            "Plugin.Key" };
-            string[] values = new string[] {this.Left.ToString(),
-                                            this.Top.ToString(),
-                                            this.Width.ToString(),
-                                            this.Height.ToString(),
-                                            this.WindowState.ToString(),
-                                            pluginsManager.Key };
-            for (int i = 0; i < keys.Length; i++)
+            for (int i = 0; i < keys.Count; i++)
             {
-                XmlElement element = node.SelectSingleNode(string.Format("//add[@key='{0}']", keys[i])) as XmlElement;
+                XmlElement element = settingsNode.SelectSingleNode(string.Format("//add[@key='{0}']", keys[i])) as XmlElement;
                 if (element != null)
                     element.SetAttribute("value", values[i]);
                 else
@@ -541,7 +567,7 @@ namespace MusicPlayer
                     element = doc.CreateElement("add");
                     element.SetAttribute("key", keys[i]);
                     element.SetAttribute("value", values[i]);
-                    node.AppendChild(element);
+                    settingsNode.AppendChild(element);
                 }
             }
             doc.Save(Assembly.GetExecutingAssembly().Location + ".config");
@@ -552,22 +578,47 @@ namespace MusicPlayer
             NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
             if (allAppSettings.Count < 1)
                 return;
+            foreach (var instance in pluginsManager.PluginInstasnces)
+            {
+                if (allAppSettings[string.Format("{0}.{1}", instance.Key, "OpenedTabIndex")] == null)
+                    continue;
+                instance.Value.OpenedTabIndex = Convert.ToInt32(allAppSettings[string.Format("{0}.{1}", instance.Key, "OpenedTabIndex")]);
+                string str = "{0}.FavoriteItems.{1}.{2}";
+                int i = 0;
+
+                while (true)
+                {
+                    if (allAppSettings[string.Format(str, instance.Key, i, "Name")] != null)
+                    {
+                        instance.Value.AddToFavorites(new NavigationItem(allAppSettings[string.Format(str, instance.Key, i, "Name")],
+                                                                         allAppSettings[string.Format(str, instance.Key, i, "Path")],
+                                                                         Convert.ToDouble(allAppSettings[string.Format(str, instance.Key, i, "Height")]),
+                                                                         Convert.ToBoolean(allAppSettings[string.Format(str, instance.Key, i, "CanBeOpened")]),
+                                                                         Convert.ToBoolean(allAppSettings[string.Format(str, instance.Key, i, "CanBeFavorite")]),
+                                                                         allAppSettings[string.Format(str, instance.Key, i, "ImageSource")],
+                                                                         Convert.ToDouble(allAppSettings[string.Format(str, instance.Key, i, "FontSize")]),
+                                                                         new CursorConverter().ConvertFromString(allAppSettings[string.Format(str, instance.Key, i, "CursorType")]) as Cursor));
+                    }
+                    else
+                        break;
+                    i++;
+                }
+            }
+
             this.Left = Convert.ToDouble(allAppSettings["Window.Left"]);
             this.Top = Convert.ToDouble(allAppSettings["Window.Top"]);
             this.Width = Convert.ToDouble(allAppSettings["Window.Width"]);
             this.Height = Convert.ToDouble(allAppSettings["Window.Height"]);
             this.WindowState = (WindowState)WindowState.Parse(WindowState.GetType(), allAppSettings["Window.WindowState"]);
 
-            if (allAppSettings["Plugin.Key"] == string.Empty && modeComboBox.Items.Count > 0)
-                allAppSettings["Plugin.Key"] = (modeComboBox.Items[0] as TextBlock).Tag.ToString();
+            if (allAppSettings["Plugins.Key"] == string.Empty && modeComboBox.Items.Count > 0)
+                allAppSettings["Plugins.Key"] = (modeComboBox.Items[0] as TextBlock).Tag.ToString();
             for (int i = 0; i < modeComboBox.Items.Count; i++)
-                if ((modeComboBox.Items[i] as TextBlock).Tag.ToString() == allAppSettings["Plugin.Key"])
+                if ((modeComboBox.Items[i] as TextBlock).Tag.ToString() == allAppSettings["Plugins.Key"])
                 {
                     modeComboBox.SelectedIndex = i;
                     break;
                 }
-            if (modeComboBox.SelectedIndex == -1 && modeComboBox.Items.Count > 0)
-                modeComboBox.SelectedIndex = 0;
         }
 
         private XmlDocument LoadConfigDocument()

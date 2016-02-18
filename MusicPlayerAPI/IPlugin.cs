@@ -9,6 +9,7 @@ namespace MusicPlayerAPI
         string[] TabItemHeaders { get; }
         string AddButtonImageSource { get; }
         string DeleteButtonImageSource { get; }
+        int OpenedTabIndex { get; set; }
         bool UseDefaultHomeButton { get; }
         bool UseDefaultSearch { get; }
         bool DoubleClickToOpenItem { get; }

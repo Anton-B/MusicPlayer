@@ -13,6 +13,7 @@ namespace FileSystemPlugin
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Выбранное" };
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
+        public int OpenedTabIndex { get; set; }
         public bool UseDefaultHomeButton { get { return false; } }
         public bool UseDefaultSearch { get { return true; } }
         public bool DoubleClickToOpenItem { get { return true; } }

@@ -12,6 +12,7 @@ namespace MusicPlayerAPI
     {
         public Dictionary<string, IPlugin> PluginInstasnces { get; set; } = new Dictionary<string, IPlugin>();
         public string Key { get; set; }
+        public int OpenedTabIndex { get { return (Key == null) ? 0 : PluginInstasnces[Key].OpenedTabIndex; } set { PluginInstasnces[Key].OpenedTabIndex = value; } }
         public bool UseDefaultHomeButton { get { return PluginInstasnces[Key].UseDefaultHomeButton; } }
         public bool UseDefaultSearch { get { return PluginInstasnces[Key].UseDefaultSearch; } }
         public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }

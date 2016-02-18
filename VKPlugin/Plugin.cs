@@ -10,13 +10,14 @@ namespace VKPlugin
         public string Name { get; } = "Музыка из ВКонтакте";
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Избранное" };
         public string AddButtonImageSource { get; } = @"Plugins\VKPlugin\Images\add.png";
-        public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";
-        public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
+        public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";        
+        public int OpenedTabIndex { get; set; }
         public bool UseDefaultHomeButton { get { return true; } }
         public bool UseDefaultSearch { get { return false; } }
         public bool DoubleClickToOpenItem { get { return false; } }
         public bool SortSearchResults { get { return false; } }
         public bool UpdatePlaylistWhenFavoritesChanges { get { return false; } }
+        public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
         private VKAudio vkAudio = new VKAudio();
         private bool userLogged = false;
         private const double itemHeight = 50;
@@ -59,7 +60,8 @@ namespace VKPlugin
             {
                 if (!isCacheDownloaded)
                 {
-                    FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
+                    if (FavoriteItems.Count > 0 && FavoriteItems[0].Name != "Мои аудиозаписи" || FavoriteItems.Count == 0)
+                        FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
                     vkAudio.GetFriendsList();
                     vkAudio.GetGroupsList();
                     isCacheDownloaded = true;
