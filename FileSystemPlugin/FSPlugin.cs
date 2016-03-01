@@ -4,6 +4,7 @@ using System.IO;
 using MusicPlayerAPI;
 using TagLib;
 using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace FileSystemPlugin
 {
@@ -29,7 +30,7 @@ namespace FileSystemPlugin
         private const string parentFolderImageSource = @"Plugins\FileSystemPlugin\Images\parent_folder.png";
         private Song[] lastLoadedSongs;
 
-        public List<NavigationItem> GetNavigationItems(string path)
+        public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
             List<NavigationItem> navigItems = new List<NavigationItem>();
             if (path == null)
@@ -65,14 +66,14 @@ namespace FileSystemPlugin
             FavoriteItems.Remove(item);
         }
 
-        public Song[] GetDefaultSongsList()
+        public async Task<Song[]> GetDefaultSongsList()
         {
             List<Song> allSongsList = new List<Song>();
             try
             {
                 foreach (var ni in FavoriteItems)
                 {
-                    var mp3FilePaths = GetFiles(ni.Path, "*.mp3").ToArray();
+                    var mp3FilePaths = await Task.Run(() => GetFiles(ni.Path, "*.mp3").ToArray());
                     List<Song> songs = new List<Song>();
                     for (int i = 0; i < mp3FilePaths.Length; i++)
                     {
@@ -117,17 +118,17 @@ namespace FileSystemPlugin
             return files;
         }
 
-        public Song[] GetSongsList(NavigationItem item)
+        public async Task<Song[]> GetSongsList(NavigationItem item)
         {
             return new Song[0];
         }
 
-        public Song[] GetSearchResponse(string request)
+        public async Task<Song[]> GetSearchResponse(string request)
         {
             return new Song[0];
         }
         
-        public Song[] GetHomeButtonSongs()
+        public async Task<Song[]> GetHomeButtonSongs()
         {
             return lastLoadedSongs;
         }        

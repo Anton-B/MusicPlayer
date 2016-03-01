@@ -20,7 +20,11 @@ namespace VKPlugin
             window.Width = windowWidth;
             window.Height = windowHeight;
             window.ResizeMode = ResizeMode.NoResize;
-            window.Icon = new BitmapImage(new Uri("http://vk.com/images/faviconnew.ico"));
+            try
+            {
+                window.Icon = new BitmapImage(new Uri(Environment.CurrentDirectory + @"\Plugins\VKPlugin\Images\faviconnew.ico"));
+            }
+            catch { }
             window.WindowStartupLocation = WindowStartupLocation.CenterScreen;            
             window.Title = "Пожалуйста, подождите...";
             browser.Width = 640;

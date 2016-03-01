@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace MusicPlayerAPI
 {
@@ -58,11 +59,11 @@ namespace MusicPlayerAPI
             return PluginInstasnces[Key].TabItemHeaders[index];
         }
 
-        public List<NavigationItem> GetNavigationItems(string path)
+        public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
             try
             {
-                return PluginInstasnces[Key].GetNavigationItems(path);
+                return await PluginInstasnces[Key].GetNavigationItems(path);
             }
             catch (Exception ex)
             {
@@ -90,24 +91,24 @@ namespace MusicPlayerAPI
                 : PluginInstasnces[Key].AddButtonImageSource;
         }
 
-        public Song[] GetDefaultSongsList()
+        public async Task<Song[]> GetDefaultSongsList()
         {
-            return PluginInstasnces[Key].GetDefaultSongsList();
+            return await PluginInstasnces[Key].GetDefaultSongsList();
         }
 
-        public Song[] GetSongsList(NavigationItem item)
+        public async Task<Song[]> GetSongsList(NavigationItem item)
         {
-            return PluginInstasnces[Key].GetSongsList(item);
+            return await PluginInstasnces[Key].GetSongsList(item);
         }
 
-        public Song[] GetSearchResponse(string request)
+        public async Task<Song[]> GetSearchResponse(string request)
         {
-            return PluginInstasnces[Key].GetSearchResponse(request);
+            return await PluginInstasnces[Key].GetSearchResponse(request);
         }
 
-        public Song[] GetHomeButtonSongs()
+        public async Task<Song[]> GetHomeButtonSongs()
         {
-            return PluginInstasnces[Key].GetHomeButtonSongs();
+            return await PluginInstasnces[Key].GetHomeButtonSongs();
         }
     }
 }

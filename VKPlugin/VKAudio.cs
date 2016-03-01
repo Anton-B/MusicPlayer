@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Net;
 using MusicPlayerAPI;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace VKPlugin
 {
@@ -89,29 +90,29 @@ namespace VKPlugin
             accessToken = strData[tokenIndex];
         }
 
-        internal List<NavigationItem> GetFriendsList()
+        internal async Task<List<NavigationItem>> GetFriendsList()
         {
-            return GetList(FriendsUrl, friendsFolder, RequestedListType.Friends);
+            return await GetList(FriendsUrl, friendsFolder, RequestedListType.Friends);
         }
 
-        internal List<NavigationItem> GetGroupsList()
+        internal async Task<List<NavigationItem>> GetGroupsList()
         {
-            return GetList(GroupsUrl, groupsFolder, RequestedListType.Groups);
+            return await GetList(GroupsUrl, groupsFolder, RequestedListType.Groups);
         }
 
-        internal List<NavigationItem> GetPlaylistsList()
+        internal async Task<List<NavigationItem>> GetPlaylistsList()
         {
             using (WebClient client = new WebClient())
             {
                 List<NavigationItem> list = new List<NavigationItem>();
-                foreach (var res in GetResponseItems(client, PlaylistsUrl))
-                    list.Add(new NavigationItem(res.title, res.id, 50, false, true, 
+                foreach (var res in await GetResponseItems(client, PlaylistsUrl))
+                    list.Add(new NavigationItem(res.title, res.id, 50, false, true,
                         playlistImageSource, 16, System.Windows.Input.Cursors.Arrow));
                 return list;
-            }                
-         }
+            }
+        }
 
-        private List<NavigationItem> GetList(string requestUrl, string cacheFolderPath, RequestedListType listType)
+        private async Task<List<NavigationItem>> GetList(string requestUrl, string cacheFolderPath, RequestedListType listType)
         {
             using (WebClient client = new WebClient())
             {
@@ -134,8 +135,8 @@ namespace VKPlugin
                     }
                 }
                 
-                List<NavigationItem> list = new List<NavigationItem>();                
-                foreach (var res in GetResponseItems(client, requestUrl))
+                List<NavigationItem> list = new List<NavigationItem>();
+                foreach (var res in await GetResponseItems(client, requestUrl))
                 {
                     res.id = (listType == RequestedListType.Friends) ? res.id : ("-" + res.id);
                     if (idsDict.ContainsKey(res.id))
@@ -143,14 +144,14 @@ namespace VKPlugin
                         if (!res.photo_50.Equals(idsDict[res.id]))
                         {
                             File.Delete(cacheFolderPath + res.id + ".jpg");
-                            client.DownloadFile(new Uri(res.photo_50), cacheFolderPath + res.id + ".jpg");
+                            await client.DownloadFileTaskAsync(res.photo_50, cacheFolderPath + res.id + ".jpg");
                         }
                     }
                     else
-                        client.DownloadFile(new Uri(res.photo_50), cacheFolderPath + res.id + ".jpg");
+                        await client.DownloadFileTaskAsync(res.photo_50, cacheFolderPath + res.id + ".jpg");
                     idsDict[res.id] = res.photo_50;
                     list.Add(new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), res.id, 50, false,
-                        true, idsDict[res.id], 16, System.Windows.Input.Cursors.Arrow));
+                        true, cacheFolderPath + res.id + ".jpg", 16, System.Windows.Input.Cursors.Arrow));
                 }
 
                 using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
@@ -160,15 +161,15 @@ namespace VKPlugin
             }
         }
 
-        private List<ResponseList> GetResponseItems(WebClient client, string requestUrl)
+        private async Task<List<ResponseList>> GetResponseItems(WebClient client, string requestUrl)
         {
-            var jsonResponseStr = client.DownloadString(requestUrl);
+            var jsonResponseStr = await client.DownloadStringTaskAsync(requestUrl);
             var vkResponse = new { response = new { count = 0, items = new List<ResponseList>() } };
             var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
             return resp.response.items;
         }
 
-        internal List<Song> GetAudioList(NavigationItem item)
+        internal async Task<List<Song>> GetAudioList(NavigationItem item)
         {
             List<Song> songs = new List<Song>();
             if (accessToken == null)
@@ -182,7 +183,7 @@ namespace VKPlugin
                 else
                     url = string.Format(AudioListUrl, (item.ImageSource == playlistImageSource) ? "album_id=" : "owner_id=",
                         item.Path, lang, APIVersion, accessToken);
-                var jsonResponseStr = client.DownloadString(url);
+                var jsonResponseStr = await client.DownloadStringTaskAsync(url);
                 var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
                 var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
                 if (resp == null || resp.response == null || resp.response.count == 0)
@@ -194,13 +195,13 @@ namespace VKPlugin
             }
         }
 
-        internal List<Song> GetSearchResponse(string request)
+        internal async Task<List<Song>> GetSearchResponse(string request)
         {
             using (WebClient client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 List<Song> songs = new List<Song>();
-                var jsonResponseStr = client.DownloadString(string.Format(AudioSearchUrl, request, autoComplete,
+                var jsonResponseStr = await client.DownloadStringTaskAsync(string.Format(AudioSearchUrl, request, autoComplete,
                     lyrics, performerOnly, sort, searchOwn, count, lang, APIVersion, accessToken));
                 var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
                 var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);

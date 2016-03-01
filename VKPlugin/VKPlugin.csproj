@@ -69,6 +69,9 @@
     <Content Include="Images\delete.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Images\faviconnew.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Images\login.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

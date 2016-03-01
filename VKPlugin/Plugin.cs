@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using MusicPlayerAPI;
 using System.Windows.Input;
+using System.Threading.Tasks;
 
 namespace VKPlugin
 {
@@ -36,21 +37,21 @@ namespace VKPlugin
         private string groupsPath = "Группы";
         private string playlistsPath = "Плейлисты";
 
-        public List<NavigationItem> GetNavigationItems(string path)
+        public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
             List<NavigationItem> navigItems = new List<NavigationItem>();
             if (path == null && !userLogged)
-            {                
+            {
                 browserWin = new BrowserWindow(vkAudio);
                 browserWin.Navigate(vkAudio.AuthUrl);
                 bool? result = browserWin.Show();
                 if (vkAudio.HasAccessData)
                 {
                     userLogged = true;
-                    navigItems = GetNavigationItems(null);
+                    navigItems = await GetNavigationItems(null);
                 }
                 else
-                    navigItems = GetNavigationItems(loginPath);
+                    navigItems = await GetNavigationItems(loginPath);
             }
             else if (path == loginPath)
             {
@@ -62,8 +63,8 @@ namespace VKPlugin
                 {
                     if (FavoriteItems.Count > 0 && FavoriteItems[0].Name != "Мои аудиозаписи" || FavoriteItems.Count == 0)
                         FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
-                    vkAudio.GetFriendsList();
-                    vkAudio.GetGroupsList();
+                    await vkAudio.GetFriendsList();
+                    await vkAudio.GetGroupsList();
                     isCacheDownloaded = true;
                 }
                 navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
@@ -71,23 +72,23 @@ namespace VKPlugin
                 navigItems.Add(new NavigationItem("Группы", groupsPath, itemHeight, true, false, groupsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Плейлисты", playlistsPath, itemHeight, true, false, playlistsImageSource, fontHeight, Cursors.Arrow));
                 navigItems.Add(new NavigationItem("Выход", logoutPath, itemHeight, true, false, logoutImageSource, fontHeight, Cursors.Arrow));
-            }            
+            }
             else if (path == logoutPath)
             {
                 vkAudio.LogOut();
                 userLogged = false;
-                navigItems = GetNavigationItems(loginPath);
+                navigItems = await GetNavigationItems(loginPath);
             }
             else
             {
                 navigItems.Add(new NavigationItem("[Назад]", null, 50, true, false, null, 16, Cursors.Arrow));
                 if (path == friendsPath)
-                    navigItems.AddRange(vkAudio.GetFriendsList());
+                    navigItems.AddRange(await vkAudio.GetFriendsList());
                 else if (path == groupsPath)
-                    navigItems.AddRange(vkAudio.GetGroupsList());
+                    navigItems.AddRange(await vkAudio.GetGroupsList());
                 else if (path == playlistsPath)
-                    navigItems.AddRange(vkAudio.GetPlaylistsList());
-            }            
+                    navigItems.AddRange(await vkAudio.GetPlaylistsList());
+            }
             return navigItems;
         }
 
@@ -101,22 +102,22 @@ namespace VKPlugin
             FavoriteItems.Remove(item);
         }
 
-        public Song[] GetDefaultSongsList()
+        public async Task<Song[]> GetDefaultSongsList()
         {
-            return vkAudio.GetAudioList(null).ToArray();
+            return (await vkAudio.GetAudioList(null)).ToArray();
         }
 
-        public Song[] GetSongsList(NavigationItem item)
-        {            
-            return vkAudio.GetAudioList(item).ToArray();
-        }
-
-        public Song[] GetSearchResponse(string request)
+        public async Task<Song[]> GetSongsList(NavigationItem item)
         {
-            return vkAudio.GetSearchResponse(request).ToArray();
+            return (await vkAudio.GetAudioList(item)).ToArray();
         }
 
-        public Song[] GetHomeButtonSongs()
+        public async Task<Song[]> GetSearchResponse(string request)
+        {
+            return (await vkAudio.GetSearchResponse(request)).ToArray();
+        }
+
+        public async Task<Song[]> GetHomeButtonSongs()
         {
             return new Song[0];
         }

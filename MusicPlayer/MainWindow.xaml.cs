@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Xml;
 using System.Configuration;
 using MusicPlayerAPI;
+using System.Threading.Tasks;
 
 namespace MusicPlayer
 {
@@ -54,7 +55,8 @@ namespace MusicPlayer
             catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
             if (modeComboBox.SelectedIndex == -1 && modeComboBox.Items.Count > 0)
                 modeComboBox.SelectedIndex = 0;
-            //modeComboBox.SelectedIndex = 0;
+            if (modeComboBox.Items.Count > 1)
+                modeComboBox.Visibility = Visibility.Visible;
         }
 
         private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -212,7 +214,7 @@ namespace MusicPlayer
         #endregion
 
         #region WORKING WITH PLUGINS & NAVIGATION
-        private void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mediaElement.Close();
             mediaElement.Source = null;
@@ -223,16 +225,18 @@ namespace MusicPlayer
             for (int i = 0; i < navigTabControl.Items.Count; i++)
                 ((TabItem)navigTabControl.Items[i]).Header = pluginsManager.GetHeader(i);
             navigTabControl.SelectedIndex = pluginsManager.OpenedTabIndex;
-            ShowItems(addressTextBox.Tag?.ToString(), true);
-            SetSongsList(pluginsManager.GetDefaultSongsList(), true, true, true);
+            await ShowItems(addressTextBox.Tag?.ToString(), true);
+            loadingProgressBar.IsIndeterminate = true;
+            SetSongsList(await pluginsManager.GetDefaultSongsList(), true, true, true);
+            loadingProgressBar.IsIndeterminate = false;
         }
 
-        private void NavigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void NavigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (pluginsManager.OpenedTabIndex != navigTabControl.SelectedIndex)
             {
                 pluginsManager.OpenedTabIndex = (pluginsManager.OpenedTabIndex == 0) ? 1 : 0;
-                ShowItems(addressTextBox.Tag?.ToString(), false);
+                await ShowItems(addressTextBox.Tag?.ToString(), false);
             }
         }
 
@@ -254,24 +258,24 @@ namespace MusicPlayer
                 OpenItem((sender as DockPanel)?.Parent as DockPanel);
         }
 
-        private void OpenItem(DockPanel outerPanel)
+        private async void OpenItem(DockPanel outerPanel)
         {
             DockPanel innerPanel = outerPanel?.Children[outerPanel.Children.Count - 1] as DockPanel;
             if (innerPanel == null)
                 return;
             NavigationItem item = innerPanel.Tag as NavigationItem;
             if (item != null && item.CanBeOpened)
-                ShowItems(item.Path, true);
+                await ShowItems(item.Path, true);
             else if (item != null && !pluginsManager.UpdatePlaylistWhenFavoritesChanges)
-                SetSongsList(pluginsManager.GetSongsList(item), true, false, (mediaElement.Source == null) ? true : false);
+                SetSongsList(await pluginsManager.GetSongsList(item), true, false, (mediaElement.Source == null) ? true : false);
         }
 
-        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        private async void UpdateButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowItems(addressTextBox.Tag?.ToString(), false);
+            await ShowItems(addressTextBox.Tag?.ToString(), false);
         }
 
-        private void ChangeFavorites(object sender, MouseButtonEventArgs e)
+        private async void ChangeFavorites(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton != MouseButton.Left)
                 return;
@@ -280,40 +284,43 @@ namespace MusicPlayer
                 pluginsManager.DeleteFromFavorites(ni);
             else
                 pluginsManager.AddToFavorites(ni);
-            ShowItems(addressTextBox.Tag?.ToString(), false);
+            await ShowItems(addressTextBox.Tag?.ToString(), false);
             if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
             {
                 mediaElement.Close();
                 mediaElement.Source = null;
-                SetSongsList(pluginsManager.GetDefaultSongsList(), true, false, (mediaElement.Source == null) ? true : false);
+                loadingProgressBar.IsIndeterminate = true;
+                SetSongsList(await pluginsManager.GetDefaultSongsList(), true, false, (mediaElement.Source == null) ? true : false);
+                loadingProgressBar.IsIndeterminate = false;
                 if (visibDataGrid.ItemsSource == null || visibDataGrid.Items.Count == 0)
                     ClearControls();
             }
         }
 
-        private void ShowItems(string path, bool isScrollToUp)
+        private async Task ShowItems(string path, bool isScrollToUp)
         {
-            Cursor = Cursors.Wait;
-            ShowNavigationItems(path, isScrollToUp);
+            await ShowNavigationItems(path, isScrollToUp);
             ShowFavoriteItems();
-            Cursor = Cursors.Arrow;
         }
 
-        private void ShowNavigationItems(string path, bool isScrollToUp)
+        private async Task ShowNavigationItems(string path, bool isScrollToUp)
         {
+            loadingProgressBar.IsIndeterminate = true;
             navigListView.Items.Clear();
-            List<NavigationItem> navItems = pluginsManager.GetNavigationItems(path);
+            List<NavigationItem> navItems = await pluginsManager.GetNavigationItems(path);
+            loadingProgressBar.IsIndeterminate = false;
             addressTextBox.Tag = (navItems == null) ? addressTextBox.Tag?.ToString() : path;
             addressTextBox.Text = (addressTextBox.Tag == null) ? string.Empty : addressTextBox.Tag.ToString();
             if (navItems == null)
-                navItems = pluginsManager.GetNavigationItems(addressTextBox.Tag?.ToString());
+                navItems = await pluginsManager.GetNavigationItems(addressTextBox.Tag?.ToString());
             foreach (var ni in navItems)
                 ShowNavigationItem(navigListView, ni);
+
             if (navigListView.Items.Count > 0 && isScrollToUp)
                 navigListView.ScrollIntoView(navigListView.Items[0]);
         }
 
-        void ShowFavoriteItems()
+        private void ShowFavoriteItems()
         {
             favoritesListView.Items.Clear();
             List<NavigationItem> favItems = pluginsManager.GetFavoriteItems();
@@ -325,7 +332,7 @@ namespace MusicPlayer
                 favoritesListView.ScrollIntoView(favoritesListView.Items[0]);
         }
 
-        void ShowNavigationItem(ListView listView, NavigationItem ni)
+        private void ShowNavigationItem(ListView listView, NavigationItem ni)
         {
             DockPanel outerDP = new DockPanel();
             outerDP.LastChildFill = true;
@@ -415,26 +422,26 @@ namespace MusicPlayer
             Play();
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             var input = e as KeyEventArgs;
             if (input != null && input.Key != Key.Enter || searchTextBox.Text == string.Empty)
                 return;
             List<Song> resultSongs = new List<Song>();
             if (!pluginsManager.UseDefaultSearch)
-                resultSongs.AddRange(pluginsManager.GetSearchResponse(searchTextBox.Text));
+                resultSongs.AddRange(await pluginsManager.GetSearchResponse(searchTextBox.Text));
             else
-                foreach (var currentSong in pluginsManager.GetHomeButtonSongs())
+                foreach (var currentSong in await pluginsManager.GetHomeButtonSongs())
                     if (currentSong.Title.ToLower().Contains(searchTextBox.Text.ToLower())
                         || currentSong.Artist.ToLower().Contains(searchTextBox.Text.ToLower()))
                         resultSongs.Add(currentSong);
             SetSongsList(resultSongs.ToArray(), pluginsManager.SortSearchResults, false, (mediaElement.Source == null) ? true : false);
         }
 
-        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        private async void HomeButton_Click(object sender, RoutedEventArgs e)
         {
             if (!pluginsManager.UseDefaultHomeButton)
-                SetSongsList(pluginsManager.GetHomeButtonSongs(), true, false, false);
+                SetSongsList(await pluginsManager.GetHomeButtonSongs(), true, false, false);
             else
                 ShowBusyPlaylist();
         }

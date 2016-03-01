@@ -13,3 +13,4 @@ D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\groups.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\playlists.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\audio.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\playlist.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\faviconnew.ico

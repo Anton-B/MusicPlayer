@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace MusicPlayerAPI
@@ -17,12 +18,12 @@ namespace MusicPlayerAPI
         bool UpdatePlaylistWhenFavoritesChanges { get; }
         List<NavigationItem> FavoriteItems { get; }
 
-        List<NavigationItem> GetNavigationItems(string path);
+        Task<List<NavigationItem>> GetNavigationItems(string path);
         void AddToFavorites(NavigationItem item);
         void DeleteFromFavorites(NavigationItem item);
-        Song[] GetDefaultSongsList();
-        Song[] GetSongsList(NavigationItem item);
-        Song[] GetSearchResponse(string request);
-        Song[] GetHomeButtonSongs();
+        Task<Song[]> GetDefaultSongsList();
+        Task<Song[]> GetSongsList(NavigationItem item);
+        Task<Song[]> GetSearchResponse(string request);
+        Task<Song[]> GetHomeButtonSongs();
     }
 }
