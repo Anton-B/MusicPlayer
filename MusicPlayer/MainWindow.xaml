@@ -50,7 +50,7 @@
                 <ComboBox x:Name="modeComboBox" Margin="20,40,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged" Visibility="Hidden"/>
                 <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
                     <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3" Background="White" Click="UpdateButton_Click" ToolTip="Обновить"/>
-                    <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True" ToolTip="{Binding Text, ElementName=addressTextBox}"/>
+                    <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True"/>
                 </DockPanel>
                 <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
                     <TabItem Width="178">
@@ -61,6 +61,7 @@
                     </TabItem>
                 </TabControl>
             </DockPanel>
+            <Border DockPanel.Dock="Top" BorderThickness="2" BorderBrush="#FF819FB4">
             <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="#FF2B587A">
                 <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
                            ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="#FFF3F3F3" BorderThickness="1,1,1,1" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Количество песен в открытом списке"/>
@@ -70,19 +71,20 @@
                     <System:String>По названию</System:String>
                     <System:String>По исполнителю</System:String>
                 </ComboBox>
-                <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0,1" FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF2B587A" Background="#FFF3F3F3" ToolTip="Переход к изначальному списку"/>
+                <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0,1,1,1" FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF2B587A" Background="#FFF3F3F3" ToolTip="Переход к изначальному списку"/>
                 <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" Background="#FFF3F3F3" BorderBrush="#FF2B587A" FontSize="13.333" ToolTip="Поиск"/>
                 <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" KeyDown="SearchButton_Click" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Введите поисковой запрос"/>
             </DockPanel>
+            </Border>
             <DataGrid x:Name="playlist1DataGrid" SelectionChanged="playlistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
 				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
 				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" 
 				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
 				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
-                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Visible">
+                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Visible" HorizontalGridLinesBrush="{x:Null}" VerticalGridLinesBrush="{x:Null}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Width="*" Binding="{Binding Artist}" FontSize="13.333"/>
-                    <DataGridTextColumn Width="*" Binding="{Binding Title}"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
+                    <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
                     <DataGridTextColumn Width="50" Binding="{Binding Duration}"/>
                 </DataGrid.Columns>
                 <DataGrid.AlternatingRowBackground>
@@ -94,7 +96,7 @@
 				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3"
 				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
 				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
-                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Collapsed">
+                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Collapsed" HorizontalGridLinesBrush="{x:Null}" VerticalGridLinesBrush="{x:Null}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
                     <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>

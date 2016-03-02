@@ -264,6 +264,12 @@ namespace MusicPlayer
             if (innerPanel == null)
                 return;
             NavigationItem item = innerPanel.Tag as NavigationItem;
+            if (item.UseAreYouSureMessageBox)
+            {
+                var answer = MessageBox.Show(this, item.AreYouSureMessageBoxMessage, item.Name, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                if (answer == MessageBoxResult.No)
+                    return;
+            }                
             if (item != null && item.CanBeOpened)
                 await ShowItems(item.Path, true);
             else if (item != null && !pluginsManager.UpdatePlaylistWhenFavoritesChanges)
@@ -539,29 +545,33 @@ namespace MusicPlayer
                                                     this.Height.ToString(),
                                                     this.WindowState.ToString(),
                                                     pluginsManager.Key };
-            string str = "{0}.FavoriteItems.{1}.{2}";
-            foreach (var instance in pluginsManager.PluginInstasnces)
+            string pattern = "{0}.FavoriteItems.{1}.{2}";
+            foreach (var pluginInstance in pluginsManager.PluginInstasnces)
             {
-                keys.Add(string.Format("{0}.{1}", instance.Key, "OpenedTabIndex"));
-                values.Add(instance.Value.OpenedTabIndex.ToString());
-                for (int i = 0; i < instance.Value.FavoriteItems.Count; i++)
+                keys.Add(string.Format("{0}.{1}", pluginInstance.Key, "OpenedTabIndex"));
+                values.Add(pluginInstance.Value.OpenedTabIndex.ToString());
+                for (int i = 0; i < pluginInstance.Value.FavoriteItems.Count; i++)
                 {
-                    keys.Add(string.Format(str, instance.Key, i, "Name"));
-                    keys.Add(string.Format(str, instance.Key, i, "Path"));
-                    keys.Add(string.Format(str, instance.Key, i, "Height"));
-                    keys.Add(string.Format(str, instance.Key, i, "CanBeOpened"));
-                    keys.Add(string.Format(str, instance.Key, i, "CanBeFavorite"));
-                    keys.Add(string.Format(str, instance.Key, i, "ImageSource"));
-                    keys.Add(string.Format(str, instance.Key, i, "FontSize"));
-                    keys.Add(string.Format(str, instance.Key, i, "CursorType"));
-                    values.Add(instance.Value.FavoriteItems[i].Name);
-                    values.Add(instance.Value.FavoriteItems[i].Path);
-                    values.Add(instance.Value.FavoriteItems[i].Height.ToString());
-                    values.Add(instance.Value.FavoriteItems[i].CanBeOpened.ToString());
-                    values.Add(instance.Value.FavoriteItems[i].CanBeFavorite.ToString());
-                    values.Add(instance.Value.FavoriteItems[i].ImageSource);
-                    values.Add(instance.Value.FavoriteItems[i].FontSize.ToString());
-                    values.Add(new CursorConverter().ConvertToString(instance.Value.FavoriteItems[i].CursorType));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "Name"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "Path"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "Height"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "CanBeOpened"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "FontSize"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "CursorType"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "ImageSource"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "AreYouSureMessageBoxMessage"));
+                    values.Add(pluginInstance.Value.FavoriteItems[i].Name);
+                    values.Add(pluginInstance.Value.FavoriteItems[i].Path);
+                    values.Add(pluginInstance.Value.FavoriteItems[i].Height.ToString());
+                    values.Add(pluginInstance.Value.FavoriteItems[i].CanBeOpened.ToString());
+                    values.Add(pluginInstance.Value.FavoriteItems[i].CanBeFavorite.ToString());
+                    values.Add(pluginInstance.Value.FavoriteItems[i].FontSize.ToString());
+                    values.Add(new CursorConverter().ConvertToString(pluginInstance.Value.FavoriteItems[i].CursorType));
+                    values.Add(pluginInstance.Value.FavoriteItems[i].ImageSource);
+                    values.Add(pluginInstance.Value.FavoriteItems[i].UseAreYouSureMessageBox.ToString());
+                    values.Add(pluginInstance.Value.FavoriteItems[i].AreYouSureMessageBoxMessage);
                 }
             }
             for (int i = 0; i < keys.Count; i++)
@@ -585,26 +595,28 @@ namespace MusicPlayer
             NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
             if (allAppSettings.Count < 1)
                 return;
-            foreach (var instance in pluginsManager.PluginInstasnces)
+            foreach (var pluginInstance in pluginsManager.PluginInstasnces)
             {
-                if (allAppSettings[string.Format("{0}.{1}", instance.Key, "OpenedTabIndex")] == null)
+                if (allAppSettings[string.Format("{0}.{1}", pluginInstance.Key, "OpenedTabIndex")] == null)
                     continue;
-                instance.Value.OpenedTabIndex = Convert.ToInt32(allAppSettings[string.Format("{0}.{1}", instance.Key, "OpenedTabIndex")]);
-                string str = "{0}.FavoriteItems.{1}.{2}";
+                pluginInstance.Value.OpenedTabIndex = Convert.ToInt32(allAppSettings[string.Format("{0}.{1}", pluginInstance.Key, "OpenedTabIndex")]);
+                string pattern = "{0}.FavoriteItems.{1}.{2}";
                 int i = 0;
 
                 while (true)
                 {
-                    if (allAppSettings[string.Format(str, instance.Key, i, "Name")] != null)
+                    if (allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Name")] != null)
                     {
-                        instance.Value.AddToFavorites(new NavigationItem(allAppSettings[string.Format(str, instance.Key, i, "Name")],
-                                                                         allAppSettings[string.Format(str, instance.Key, i, "Path")],
-                                                                         Convert.ToDouble(allAppSettings[string.Format(str, instance.Key, i, "Height")]),
-                                                                         Convert.ToBoolean(allAppSettings[string.Format(str, instance.Key, i, "CanBeOpened")]),
-                                                                         Convert.ToBoolean(allAppSettings[string.Format(str, instance.Key, i, "CanBeFavorite")]),
-                                                                         allAppSettings[string.Format(str, instance.Key, i, "ImageSource")],
-                                                                         Convert.ToDouble(allAppSettings[string.Format(str, instance.Key, i, "FontSize")]),
-                                                                         new CursorConverter().ConvertFromString(allAppSettings[string.Format(str, instance.Key, i, "CursorType")]) as Cursor));
+                        pluginInstance.Value.AddToFavorites(new NavigationItem(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Name")],
+                                                                         allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Path")],
+                                                                         Convert.ToDouble(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Height")]),
+                                                                         Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CanBeOpened")]),
+                                                                         Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite")]),
+                                                                         Convert.ToDouble(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "FontSize")]),
+                                                                         new CursorConverter().ConvertFromString(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CursorType")]) as Cursor,
+                                                                         allAppSettings[string.Format(pattern, pluginInstance.Key, i, "ImageSource")],
+                                                                         Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox")]),
+                                                                         allAppSettings[string.Format(pattern, pluginInstance.Key, i, "AreYouSureMessageBoxMessage")]));
                     }
                     else
                         break;

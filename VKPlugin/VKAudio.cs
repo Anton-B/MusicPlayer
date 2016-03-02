@@ -107,7 +107,7 @@ namespace VKPlugin
                 List<NavigationItem> list = new List<NavigationItem>();
                 foreach (var res in await GetResponseItems(client, PlaylistsUrl))
                     list.Add(new NavigationItem(res.title, res.id, 50, false, true,
-                        playlistImageSource, 16, System.Windows.Input.Cursors.Arrow));
+                        16, System.Windows.Input.Cursors.Arrow, playlistImageSource));
                 return list;
             }
         }
@@ -151,7 +151,7 @@ namespace VKPlugin
                         await client.DownloadFileTaskAsync(res.photo_50, cacheFolderPath + res.id + ".jpg");
                     idsDict[res.id] = res.photo_50;
                     list.Add(new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), res.id, 50, false,
-                        true, cacheFolderPath + res.id + ".jpg", 16, System.Windows.Input.Cursors.Arrow));
+                        true, 16, System.Windows.Input.Cursors.Arrow, cacheFolderPath + res.id + ".jpg"));
                 }
 
                 using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))

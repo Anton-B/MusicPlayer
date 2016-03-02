@@ -38,19 +38,19 @@ namespace FileSystemPlugin
                 DriveInfo[] drives = DriveInfo.GetDrives();
                 foreach (var drive in drives)
                     navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
-                        itemHeight, true, false, diskImageSource, fontHeight, Cursors.Arrow));
+                        itemHeight, true, false, fontHeight, Cursors.Arrow, diskImageSource));
             }
             else
             {
                 var parent = Directory.GetParent(path);
-                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, parentFolderImageSource, fontHeight, Cursors.Arrow));
+                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, fontHeight, Cursors.Arrow, parentFolderImageSource));
                 DirectoryInfo di = new DirectoryInfo(path);
                 var dirs = di.GetDirectories();
                 foreach (var dir in dirs)
-                    navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, folderImageSource, fontHeight, Cursors.Arrow));
+                    navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, fontHeight, Cursors.Arrow, folderImageSource));
                 FileInfo[] files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
                 foreach (var file in files)
-                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, audioImageSource, fontHeight, Cursors.Arrow));
+                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, fontHeight, Cursors.Arrow, audioImageSource));
             }
             return navigItems;
         }

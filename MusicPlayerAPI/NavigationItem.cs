@@ -9,23 +9,47 @@ namespace MusicPlayerAPI
         public double Height { get; set; } = 24;
         public bool CanBeOpened { get; set; }
         public bool CanBeFavorite { get; set; }
-        public string ImageSource { get; set; }
         public double FontSize { get; set; } = 12;
         public Cursor CursorType { get; set; } = Cursors.Arrow;
+        public string ImageSource { get; set; }
+        public bool UseAreYouSureMessageBox { get; set; }
+        public string AreYouSureMessageBoxMessage { get; set; }
 
-        public NavigationItem() { }
+        private NavigationItem() { }
 
         public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
-            string imageSource, double fontSize, Cursor cursorType)
+            double fontSize, Cursor cursorType)
         {
             Name = name;
             Path = path;
             Height = height;
             CanBeOpened = canBeOpened;
             CanBeFavorite = canBeFavorite;
-            ImageSource = imageSource;
             FontSize = fontSize;
             CursorType = cursorType;
+        }
+
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
+            double fontSize, Cursor cursorType, string imageSource)
+            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType)
+        {
+            ImageSource = imageSource;
+        }
+
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
+            double fontSize, Cursor cursorType, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
+            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType)
+        {
+            UseAreYouSureMessageBox = useAreYouSureMessageBox;
+            AreYouSureMessageBoxMessage = areYouSureMessageBoxMessage;
+        }
+
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
+            double fontSize, Cursor cursorType, string imageSource, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
+            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType, imageSource)
+        {
+            UseAreYouSureMessageBox = useAreYouSureMessageBox;
+            AreYouSureMessageBoxMessage = areYouSureMessageBoxMessage;
         }
 
         public override bool Equals(object obj)
