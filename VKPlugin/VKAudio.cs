@@ -102,7 +102,7 @@ namespace VKPlugin
 
         internal async Task<List<NavigationItem>> GetPlaylistsList()
         {
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 List<NavigationItem> list = new List<NavigationItem>();
                 foreach (var res in await GetResponseItems(client, PlaylistsUrl))
@@ -114,12 +114,12 @@ namespace VKPlugin
 
         private async Task<List<NavigationItem>> GetList(string requestUrl, string cacheFolderPath, RequestedListType listType)
         {
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 Dictionary<string, string> idsDict = new Dictionary<string, string>();
                 Directory.CreateDirectory(cacheFolderPath);
-                using (StreamReader streamR = new StreamReader(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
+                using (var streamR = new StreamReader(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
                 {
                     string[] lines = streamR.ReadToEnd().Split('\n');
                     foreach (string line in lines)
@@ -154,7 +154,7 @@ namespace VKPlugin
                         true, 16, System.Windows.Input.Cursors.Arrow, cacheFolderPath + res.id + ".jpg"));
                 }
 
-                using (StreamWriter streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
+                using (var streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
                     foreach (var kvp in idsDict)
                         streamW.WriteLine(kvp.Key + " " + kvp.Value);
                 return list;
@@ -174,7 +174,7 @@ namespace VKPlugin
             List<Song> songs = new List<Song>();
             if (accessToken == null)
                 return songs;
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 string url;
@@ -197,7 +197,7 @@ namespace VKPlugin
 
         internal async Task<List<Song>> GetSearchResponse(string request)
         {
-            using (WebClient client = new WebClient())
+            using (var client = new WebClient())
             {
                 client.Encoding = Encoding.UTF8;
                 List<Song> songs = new List<Song>();

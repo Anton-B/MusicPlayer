@@ -62,19 +62,19 @@
                 </TabControl>
             </DockPanel>
             <Border DockPanel.Dock="Top" BorderThickness="2" BorderBrush="#FF819FB4">
-            <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="#FF2B587A">
-                <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
+                <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="#FF2B587A">
+                    <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
                            ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="#FFF3F3F3" BorderThickness="1,1,1,1" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Количество песен в открытом списке"/>
-                <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="169" ToolTip="Сортировка песен" BorderThickness="0,0,0,0" FontSize="13.333" 
+                    <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="169" ToolTip="Сортировка песен" BorderThickness="0,0,0,0" FontSize="13.333" 
                           SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF2B587A" Foreground="#FF2B587A" Background="#FFF3F3F3" Margin="0,1">
-                    <System:String>По дате добавления</System:String>
-                    <System:String>По названию</System:String>
-                    <System:String>По исполнителю</System:String>
-                </ComboBox>
-                <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0,1,1,1" FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF2B587A" Background="#FFF3F3F3" ToolTip="Переход к изначальному списку"/>
-                <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" Background="#FFF3F3F3" BorderBrush="#FF2B587A" FontSize="13.333" ToolTip="Поиск"/>
-                <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" KeyDown="SearchButton_Click" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Введите поисковой запрос"/>
-            </DockPanel>
+                        <System:String>По дате добавления</System:String>
+                        <System:String>По названию</System:String>
+                        <System:String>По исполнителю</System:String>
+                    </ComboBox>
+                    <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0,1,1,1" FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF2B587A" Background="#FFF3F3F3" ToolTip="Переход к изначальному списку"/>
+                    <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" Background="#FFF3F3F3" BorderBrush="#FF2B587A" FontSize="13.333" ToolTip="Поиск"/>
+                    <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" KeyDown="SearchButton_Click" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Введите поисковой запрос"/>
+                </DockPanel>
             </Border>
             <DataGrid x:Name="playlist1DataGrid" SelectionChanged="playlistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
 				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 

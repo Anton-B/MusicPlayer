@@ -11,7 +11,7 @@ namespace VKPlugin
         public string Name { get; } = "Музыка из ВКонтакте";
         public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Избранное" };
         public string AddButtonImageSource { get; } = @"Plugins\VKPlugin\Images\add.png";
-        public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";        
+        public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";
         public int OpenedTabIndex { get; set; }
         public bool UseDefaultHomeButton { get { return true; } }
         public bool UseDefaultSearch { get { return false; } }
@@ -28,7 +28,7 @@ namespace VKPlugin
         private const string audioImageSource = @"Plugins\VKPlugin\Images\audio.png";
         private const string friendsImageSource = @"Plugins\VKPlugin\Images\friends.png";
         private const string groupsImageSource = @"Plugins\VKPlugin\Images\groups.png";
-        private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";        
+        private const string playlistsImageSource = @"Plugins\VKPlugin\Images\playlists.png";
         private BrowserWindow browserWin;
         private bool isCacheDownloaded;
         private string loginPath = "Вход";

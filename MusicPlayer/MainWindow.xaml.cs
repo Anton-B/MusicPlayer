@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Windows.Input;
 using System.IO;
 using System.Windows.Media.Imaging;
@@ -214,6 +213,17 @@ namespace MusicPlayer
         #endregion
 
         #region WORKING WITH PLUGINS & NAVIGATION
+        private void SetModeComboBoxItems()
+        {
+            foreach (var kvp in pluginsManager.PluginInstasnces)
+            {
+                TextBlock tb = new TextBlock();
+                tb.Text = kvp.Value.Name;
+                tb.Tag = kvp.Key;
+                modeComboBox.Items.Add(tb);
+            }
+        }
+
         private async void ModeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             mediaElement.Close();
@@ -269,7 +279,7 @@ namespace MusicPlayer
                 var answer = MessageBox.Show(this, item.AreYouSureMessageBoxMessage, item.Name, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                 if (answer == MessageBoxResult.No)
                     return;
-            }                
+            }
             if (item != null && item.CanBeOpened)
                 await ShowItems(item.Path, true);
             else if (item != null && !pluginsManager.UpdatePlaylistWhenFavoritesChanges)
@@ -342,9 +352,13 @@ namespace MusicPlayer
         {
             DockPanel outerDP = new DockPanel();
             outerDP.LastChildFill = true;
+            outerDP.Background = Brushes.Transparent;
+            outerDP.MouseEnter += NavigationDockPanel_MouseEnterLeave;
+            outerDP.MouseLeave += NavigationDockPanel_MouseEnterLeave;
             DockPanel innerDP = new DockPanel();
             DockPanel.SetDock(innerDP, Dock.Left);
             innerDP.LastChildFill = true;
+            innerDP.Background = Brushes.Transparent;
             outerDP.Tag = innerDP.Tag = ni;
             innerDP.Height = ni.Height;
             innerDP.Width = listView.MinWidth;
@@ -368,8 +382,9 @@ namespace MusicPlayer
             if (ni.CanBeFavorite)
             {
                 Image imgAddDel = new Image();
-                BitmapImage bmImage = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + pluginsManager.GetItemButtonImage(ni), UriKind.RelativeOrAbsolute)); ;
+                BitmapImage bmImage = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + pluginsManager.GetItemButtonImage(ni), UriKind.RelativeOrAbsolute));
                 imgAddDel.Source = bmImage;
+                imgAddDel.Visibility = Visibility.Hidden;
                 imgAddDel.ToolTip = "Добавить в избранное / удалить из избранного";
                 imgAddDel.Cursor = Cursors.Hand;
                 imgAddDel.Width = bmImage.Width;
@@ -383,15 +398,16 @@ namespace MusicPlayer
             innerDP.MouseDown += NavigListView_MouseDown;
         }
 
-        private void SetModeComboBoxItems()
+        private void NavigationDockPanel_MouseEnterLeave(object sender, MouseEventArgs e)
         {
-            foreach (var kvp in pluginsManager.PluginInstasnces)
-            {
-                TextBlock tb = new TextBlock();
-                tb.Text = kvp.Value.Name;
-                tb.Tag = kvp.Key;
-                modeComboBox.Items.Add(tb);
-            }
+            var outerDp = (DockPanel)sender;
+            if (outerDp.Children.Count == 1 && outerDp.Children[0] as Image == null)
+                return;
+            var image = (Image)outerDp.Children[0];
+            if (e.RoutedEvent.Name == "MouseEnter")
+                image.Visibility = Visibility.Visible;
+            else if (e.RoutedEvent.Name == "MouseLeave")
+                image.Visibility = Visibility.Hidden;
         }
         #endregion
 
@@ -527,8 +543,8 @@ namespace MusicPlayer
         #region CONFIG
         private void SaveSettings()
         {
-            XmlDocument doc = LoadConfigDocument();
-            XmlNode settingsNode = doc.SelectSingleNode("//appSettings");
+            var doc = LoadConfigDocument();
+            var settingsNode = doc.SelectSingleNode("//appSettings");
             if (settingsNode != null)
                 doc.SelectSingleNode("//configuration").RemoveChild(settingsNode);
             settingsNode = doc.CreateNode(XmlNodeType.Element, "appSettings", "");
@@ -576,7 +592,7 @@ namespace MusicPlayer
             }
             for (int i = 0; i < keys.Count; i++)
             {
-                XmlElement element = settingsNode.SelectSingleNode(string.Format("//add[@key='{0}']", keys[i])) as XmlElement;
+                var element = settingsNode.SelectSingleNode(string.Format("//add[@key='{0}']", keys[i])) as XmlElement;
                 if (element != null)
                     element.SetAttribute("value", values[i]);
                 else
@@ -592,7 +608,7 @@ namespace MusicPlayer
 
         private void LoadSettings()
         {
-            NameValueCollection allAppSettings = ConfigurationManager.AppSettings;
+            var allAppSettings = ConfigurationManager.AppSettings;
             if (allAppSettings.Count < 1)
                 return;
             foreach (var pluginInstance in pluginsManager.PluginInstasnces)

@@ -10,10 +10,10 @@ namespace VKPlugin
     {
         private Window window = new Window();
         private StackPanel dialogSP = new StackPanel();
-        private WebBrowser browser = new WebBrowser();        
+        private WebBrowser browser = new WebBrowser();
         private double windowWidth = 650;
         private double windowHeight = 500;
-        private VKAudio vkAudio = new VKAudio();        
+        private VKAudio vkAudio = new VKAudio();
 
         private BrowserWindow()
         {
@@ -25,7 +25,7 @@ namespace VKPlugin
                 window.Icon = new BitmapImage(new Uri(Environment.CurrentDirectory + @"\Plugins\VKPlugin\Images\faviconnew.ico"));
             }
             catch { }
-            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;            
+            window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             window.Title = "Пожалуйста, подождите...";
             browser.Width = 640;
             browser.Height = 520;
@@ -35,7 +35,7 @@ namespace VKPlugin
             dialogSP.Orientation = Orientation.Vertical;
             dialogSP.Children.Add(browser);
             window.Content = dialogSP;
-        }        
+        }
 
         internal BrowserWindow(VKAudio vk) : this()
         {
@@ -72,6 +72,6 @@ namespace VKPlugin
             vkAudio.GetAccessData(browser.Source.ToString());
             if (vkAudio.HasAccessData)
                 window.Close();
-        }        
+        }
     }
 }

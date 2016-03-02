@@ -19,7 +19,7 @@ namespace FileSystemPlugin
         public bool UseDefaultSearch { get { return true; } }
         public bool DoubleClickToOpenItem { get { return true; } }
         public bool SortSearchResults { get { return true; } }
-        public bool UpdatePlaylistWhenFavoritesChanges { get { return true; } } 
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return true; } }
         public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
         private const double itemHeight = 24;
         private const double fontHeight = 12;
@@ -35,7 +35,7 @@ namespace FileSystemPlugin
             List<NavigationItem> navigItems = new List<NavigationItem>();
             if (path == null)
             {
-                DriveInfo[] drives = DriveInfo.GetDrives();
+                var drives = DriveInfo.GetDrives();
                 foreach (var drive in drives)
                     navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
                         itemHeight, true, false, fontHeight, Cursors.Arrow, diskImageSource));
@@ -48,7 +48,7 @@ namespace FileSystemPlugin
                 var dirs = di.GetDirectories();
                 foreach (var dir in dirs)
                     navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, fontHeight, Cursors.Arrow, folderImageSource));
-                FileInfo[] files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
+                var files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
                 foreach (var file in files)
                     navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, fontHeight, Cursors.Arrow, audioImageSource));
             }
@@ -82,10 +82,10 @@ namespace FileSystemPlugin
                             using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
                             {
                                 var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
-                                Song song = new Song();                                
+                                Song song = new Song();
                                 song.Path = mp3FilePaths[i];
                                 song.Title = (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title;
-                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;                                
+                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;
                                 song.Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
                                     + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
                                 FileInfo file = new FileInfo(mp3FilePaths[i]);
@@ -127,10 +127,10 @@ namespace FileSystemPlugin
         {
             return new Song[0];
         }
-        
+
         public async Task<Song[]> GetHomeButtonSongs()
         {
             return lastLoadedSongs;
-        }        
+        }
     }
 }

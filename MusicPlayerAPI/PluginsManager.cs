@@ -17,7 +17,7 @@ namespace MusicPlayerAPI
         public bool UseDefaultSearch { get { return PluginInstasnces[Key].UseDefaultSearch; } }
         public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }
         public bool SortSearchResults { get { return PluginInstasnces[Key].SortSearchResults; } }
-        public bool UpdatePlaylistWhenFavoritesChanges { get { return PluginInstasnces[Key].UpdatePlaylistWhenFavoritesChanges; } }        
+        public bool UpdatePlaylistWhenFavoritesChanges { get { return PluginInstasnces[Key].UpdatePlaylistWhenFavoritesChanges; } }
 
         public void LoadPlugin(DirectoryInfo directory)
         {
