@@ -7,6 +7,7 @@ using System.Net;
 using MusicPlayerAPI;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace VKPlugin
 {
@@ -30,11 +31,13 @@ namespace VKPlugin
         private const string count = "300";
         private string userID;
         private string accessToken;
-        private const string cacheFolder = @"vkcache\";
-        private const string friendsFolder = @"vkcache\friends\";
-        private const string groupsFolder = @"vkcache\groups\";
+        private const string cacheFolder = @"Plugins\VKPlugin\vkcache\";
+        private const string friendsFolder = @"Plugins\VKPlugin\vkcache\friends\";
+        private const string groupsFolder = @"Plugins\VKPlugin\vkcache\groups\";
         private const string linksFileName = @"\ids.links";
-        private const string playlistImageSource = @"Plugins\VKPlugin\Images\playlist.png";
+        private readonly string addButtonImageSource;
+        private readonly string deleteButtonImageSource;
+        private List<NavigationItem> favorites;
         internal string UserID { get { return userID; } }
         internal string AccessToken { get { return accessToken; } }
         internal bool HasAccessData { get { return !string.IsNullOrEmpty(UserID) && !string.IsNullOrEmpty(AccessToken); } }
@@ -50,12 +53,20 @@ namespace VKPlugin
         internal string PlaylistsUrl { get { return string.Format(
             "https://api.vk.com/method/audio.getAlbums?lang={0}&v={1}&access_token={2}",
             lang, APIVersion, accessToken); } }
-        internal string AudioListUrl { get { return "https://api.vk.com/method/audio.get?{0}{1}&lang={2}&v={3}&access_token={4}"; } }
+        internal string AudioListUrl { get { return "https://api.vk.com/method/audio.get?{0}&lang={1}&v={2}&access_token={3}"; } }
         internal string AudioSearchUrl { get { return 
         "https://api.vk.com/method/audio.search?q={0}&auto_complete={1}&lyrics={2}&performer_only={3}&sort={4}&search_own={5}&count={6}&lang={7}&v={8}&access_token={9}";
         } }
         [DllImport("wininet.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
+
+        internal VKAudio() { }
+        internal VKAudio(string addButtonImageSource, string deleteButtonImageSource, List<NavigationItem> favorites)
+        {
+            this.addButtonImageSource = addButtonImageSource;
+            this.deleteButtonImageSource = deleteButtonImageSource;
+            this.favorites = favorites;
+        }
 
         private enum RequestedListType { Friends, Groups }
 
@@ -106,8 +117,12 @@ namespace VKPlugin
             {
                 List<NavigationItem> list = new List<NavigationItem>();
                 foreach (var res in await GetResponseItems(client, PlaylistsUrl))
-                    list.Add(new NavigationItem(res.title, res.id, 50, false, true,
-                        16, System.Windows.Input.Cursors.Arrow, playlistImageSource));
+                {
+                    var item = new NavigationItem(res.title, "album_id=" + res.id, 50, false, true, null,
+                        16, new SolidColorBrush(Color.FromRgb(43, 88, 122)), System.Windows.Input.Cursors.Hand);
+                    item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (favorites.Contains(item) ? deleteButtonImageSource : addButtonImageSource);
+                    list.Add(item);
+                }                    
                 return list;
             }
         }
@@ -150,8 +165,10 @@ namespace VKPlugin
                     else
                         await client.DownloadFileTaskAsync(res.photo_50, cacheFolderPath + res.id + ".jpg");
                     idsDict[res.id] = res.photo_50;
-                    list.Add(new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), res.id, 50, false,
-                        true, 16, System.Windows.Input.Cursors.Arrow, cacheFolderPath + res.id + ".jpg"));
+                    var item = new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), "owner_id=" + res.id, 50, false,
+                        true, null, 16, new SolidColorBrush(Color.FromRgb(43, 88, 122)), System.Windows.Input.Cursors.Hand, Environment.CurrentDirectory + "\\" + cacheFolderPath + res.id + ".jpg");
+                    item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (favorites.Contains(item) ? deleteButtonImageSource : addButtonImageSource);
+                    list.Add(item);
                 }
 
                 using (var streamW = new StreamWriter(new FileStream(cacheFolderPath + linksFileName, FileMode.OpenOrCreate)))
@@ -176,13 +193,13 @@ namespace VKPlugin
                 return songs;
             using (var client = new WebClient())
             {
-                client.Encoding = Encoding.UTF8;
+                client.Encoding = Encoding.UTF8;                
                 string url;
                 if (item == null)
-                    url = string.Format(AudioListUrl, string.Empty, string.Empty, lang, APIVersion, accessToken);
+                    url = string.Format(AudioListUrl, string.Empty, lang, APIVersion, accessToken);
                 else
-                    url = string.Format(AudioListUrl, (item.ImageSource == playlistImageSource) ? "album_id=" : "owner_id=",
-                        item.Path, lang, APIVersion, accessToken);
+                    url = string.Format(AudioListUrl, item.Path, lang, APIVersion, accessToken);
+                    
                 var jsonResponseStr = await client.DownloadStringTaskAsync(url);
                 var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
                 var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);

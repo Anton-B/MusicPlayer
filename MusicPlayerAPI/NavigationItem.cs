@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System.Windows.Media;
+using System.Windows.Input;
 
 namespace MusicPlayerAPI
 {
@@ -10,43 +11,47 @@ namespace MusicPlayerAPI
         public bool CanBeOpened { get; set; }
         public bool CanBeFavorite { get; set; }
         public double FontSize { get; set; } = 12;
+        public Brush Foreground { get; set; } = Brushes.Black;
         public Cursor CursorType { get; set; } = Cursors.Arrow;
         public string ImageSource { get; set; }
+        public string AddRemoveFavoriteImageSource { get; set; }
         public bool UseAreYouSureMessageBox { get; set; }
         public string AreYouSureMessageBoxMessage { get; set; }
 
-        private NavigationItem() { }
+        public NavigationItem() { }
 
-        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
-            double fontSize, Cursor cursorType)
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite, string addRemoveFavoriteImageSource,
+            double fontSize, Brush foreground, Cursor cursorType)
         {
             Name = name;
             Path = path;
             Height = height;
             CanBeOpened = canBeOpened;
             CanBeFavorite = canBeFavorite;
+            AddRemoveFavoriteImageSource = addRemoveFavoriteImageSource;
             FontSize = fontSize;
+            Foreground = foreground;
             CursorType = cursorType;
         }
 
-        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
-            double fontSize, Cursor cursorType, string imageSource)
-            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType)
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite, string addRemoveFavoriteImageSource,
+            double fontSize, Brush foreground, Cursor cursorType, string imageSource)
+            : this(name, path, height, canBeOpened, canBeFavorite, addRemoveFavoriteImageSource, fontSize, foreground, cursorType)
         {
             ImageSource = imageSource;
         }
 
-        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
-            double fontSize, Cursor cursorType, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
-            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType)
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite, string addRemoveFavoriteImageSource,
+            double fontSize, Brush foreground, Cursor cursorType, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
+            : this(name, path, height, canBeOpened, canBeFavorite, addRemoveFavoriteImageSource, fontSize, foreground, cursorType)
         {
             UseAreYouSureMessageBox = useAreYouSureMessageBox;
             AreYouSureMessageBoxMessage = areYouSureMessageBoxMessage;
         }
 
-        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite,
-            double fontSize, Cursor cursorType, string imageSource, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
-            : this(name, path, height, canBeOpened, canBeFavorite, fontSize, cursorType, imageSource)
+        public NavigationItem(string name, string path, double height, bool canBeOpened, bool canBeFavorite, string addRemoveFavoriteImageSource,
+            double fontSize, Brush foreground, Cursor cursorType, string imageSource, bool useAreYouSureMessageBox, string areYouSureMessageBoxMessage)
+            : this(name, path, height, canBeOpened, canBeFavorite, addRemoveFavoriteImageSource, fontSize, foreground, cursorType, imageSource)
         {
             UseAreYouSureMessageBox = useAreYouSureMessageBox;
             AreYouSureMessageBoxMessage = areYouSureMessageBoxMessage;

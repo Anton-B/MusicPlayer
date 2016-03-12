@@ -1,0 +1,16 @@
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\MusicPlayer.exe.config
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\MusicPlayer.exe
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\MusicPlayer.pdb
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\MusicPlayerAPI.dll
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\MusicPlayerAPI.pdb
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.csprojResolveAssemblyReference.cache
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MainWindow.g.cs
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\App.g.cs
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer_MarkupCompile.cache
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer_MarkupCompile.lref
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MainWindow.baml
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.g.resources
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.Properties.Resources.resources
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.csproj.GenerateResource.Cache
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.exe
+D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.pdb

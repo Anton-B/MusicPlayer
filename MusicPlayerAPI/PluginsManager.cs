@@ -39,7 +39,7 @@ namespace MusicPlayerAPI
             }
             catch (IOException ex)
             {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(ex.Message, "Ошибка загрузки плагинов", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

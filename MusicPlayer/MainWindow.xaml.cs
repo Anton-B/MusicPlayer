@@ -42,16 +42,32 @@ namespace MusicPlayer
         private Brush busyDGRandMode = Brushes.LightGray;
         private RepeatType repeatType;
         private ListView currentListView { get { return (navigTabControl.SelectedIndex == 0) ? navigListView : favoritesListView; } }
+        private const int numOfSongsToAddWhenScrolling = 5;
+        private Song[] playlist1Songs;
+        private Song[] playlist2Songs;
+        private Song[] visibleSongs
+        {
+            get { return visibDataGrid == playlist1DataGrid ? playlist1Songs : playlist2Songs; }
+            set
+            {
+                if (visibDataGrid == playlist1DataGrid)
+                    playlist1Songs = value;
+                else
+                    playlist2Songs = value;
+            }
+        }
 
         #region WINDOW
         public MainWindow()
         {
             InitializeComponent();
             InitializeTimer();
+            playlist1DataGrid.Tag = playlist1Songs;
+            playlist2DataGrid.Tag = playlist2Songs;
             pluginsManager.LoadPlugin(pluginsDirectory);
             SetModeComboBoxItems();
             try { LoadSettings(); }
-            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error); }
+            catch (Exception ex) { MessageBox.Show(ex.Message, "Ошибка чтения конфигурационного файла", MessageBoxButton.OK, MessageBoxImage.Error); }
             if (modeComboBox.SelectedIndex == -1 && modeComboBox.Items.Count > 0)
                 modeComboBox.SelectedIndex = 0;
             if (modeComboBox.Items.Count > 1)
@@ -139,8 +155,7 @@ namespace MusicPlayer
             randLabel.Foreground = (randLabel.Foreground == Brushes.LightGray) ? Brushes.White : Brushes.LightGray;
             if (visibDataGrid == busyDataGrid)
                 busyDGRandMode = randLabel.Foreground;
-            Song[] songs = (Song[])visibDataGrid.ItemsSource;
-            SetSongsList(songs, true, true, false);
+            SetSongsList(visibleSongs, true, true, false);
         }
 
         private void Repeat_Click(object sender, RoutedEventArgs e)
@@ -235,6 +250,7 @@ namespace MusicPlayer
             for (int i = 0; i < navigTabControl.Items.Count; i++)
                 ((TabItem)navigTabControl.Items[i]).Header = pluginsManager.GetHeader(i);
             navigTabControl.SelectedIndex = pluginsManager.OpenedTabIndex;
+            loadingProgressBar.IsIndeterminate = true;
             await ShowItems(addressTextBox.Tag?.ToString(), true);
             loadingProgressBar.IsIndeterminate = true;
             SetSongsList(await pluginsManager.GetDefaultSongsList(), true, true, true);
@@ -291,28 +307,6 @@ namespace MusicPlayer
             await ShowItems(addressTextBox.Tag?.ToString(), false);
         }
 
-        private async void ChangeFavorites(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton != MouseButton.Left)
-                return;
-            NavigationItem ni = (NavigationItem)((DockPanel)((Image)sender).Parent).Tag;
-            if (pluginsManager.IsFavorite(ni))
-                pluginsManager.DeleteFromFavorites(ni);
-            else
-                pluginsManager.AddToFavorites(ni);
-            await ShowItems(addressTextBox.Tag?.ToString(), false);
-            if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
-            {
-                mediaElement.Close();
-                mediaElement.Source = null;
-                loadingProgressBar.IsIndeterminate = true;
-                SetSongsList(await pluginsManager.GetDefaultSongsList(), true, false, (mediaElement.Source == null) ? true : false);
-                loadingProgressBar.IsIndeterminate = false;
-                if (visibDataGrid.ItemsSource == null || visibDataGrid.Items.Count == 0)
-                    ClearControls();
-            }
-        }
-
         private async Task ShowItems(string path, bool isScrollToUp)
         {
             await ShowNavigationItems(path, isScrollToUp);
@@ -366,7 +360,7 @@ namespace MusicPlayer
             try
             {
                 Image img = new Image();
-                img.Source = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + ni.ImageSource, UriKind.RelativeOrAbsolute));
+                img.Source = new BitmapImage(new Uri(ni.ImageSource, UriKind.RelativeOrAbsolute));
                 img.Height = ni.Height;
                 DockPanel.SetDock(img, Dock.Left);
                 innerDP.Children.Add(img);
@@ -376,13 +370,14 @@ namespace MusicPlayer
             label.VerticalContentAlignment = VerticalAlignment.Center;
             label.Content = ni.Name;
             label.FontSize = ni.FontSize;
+            label.Foreground = ni.Foreground;
             label.Height = ni.Height;
             label.Padding = new Thickness(5, 0, 0, 0);
             innerDP.Children.Add(label);
             if (ni.CanBeFavorite)
             {
                 Image imgAddDel = new Image();
-                BitmapImage bmImage = new BitmapImage(new Uri("pack://siteoforigin:,,,/" + pluginsManager.GetItemButtonImage(ni), UriKind.RelativeOrAbsolute));
+                BitmapImage bmImage = new BitmapImage(new Uri(ni.AddRemoveFavoriteImageSource, UriKind.RelativeOrAbsolute));
                 imgAddDel.Source = bmImage;
                 imgAddDel.Visibility = Visibility.Hidden;
                 imgAddDel.ToolTip = "Добавить в избранное / удалить из избранного";
@@ -409,9 +404,48 @@ namespace MusicPlayer
             else if (e.RoutedEvent.Name == "MouseLeave")
                 image.Visibility = Visibility.Hidden;
         }
+
+        private async void ChangeFavorites(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left)
+                return;
+            NavigationItem ni = (NavigationItem)((DockPanel)((Image)sender).Parent).Tag;
+            if (pluginsManager.IsFavorite(ni))
+                pluginsManager.DeleteFromFavorites(ni);
+            else
+                pluginsManager.AddToFavorites(ni);
+            await ShowItems(addressTextBox.Tag?.ToString(), false);
+            if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
+            {
+                mediaElement.Close();
+                mediaElement.Source = null;
+                loadingProgressBar.IsIndeterminate = true;
+                SetSongsList(await pluginsManager.GetDefaultSongsList(), true, false, (mediaElement.Source == null) ? true : false);
+                loadingProgressBar.IsIndeterminate = false;
+                if (visibDataGrid.Items.Count == 0)
+                    ClearControls();
+            }
+        }
         #endregion
 
         #region WORKING WITH SONGS
+        private void searchTextBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            searchTextBox.Text = "Поиск...";
+        }
+
+        private void searchTextBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            searchTextBox.Text = searchTextBox.Text == "Поиск..." && searchTextBox.Foreground == Brushes.LightGray ? string.Empty : searchTextBox.Text;
+            searchTextBox.Foreground = (Brush)new BrushConverter().ConvertFromString("#FF2B587A");
+        }
+
+        private void searchTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            searchTextBox.Foreground = searchTextBox.Text == string.Empty ? Brushes.LightGray : Brushes.Black;
+            searchTextBox.Text = searchTextBox.Text == string.Empty ? "Поиск..." : searchTextBox.Text;
+        }
+
         private void SortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             randLabel.Foreground = Brushes.LightGray;
@@ -419,7 +453,7 @@ namespace MusicPlayer
                 return;
             if (visibDataGrid == busyDataGrid)
                 busyDGSortIndex = sortComboBox.SelectedIndex;
-            SetSongsList((Song[])visibDataGrid.ItemsSource, true, true, false);
+            SetSongsList(visibleSongs, true, true, false);
             if (visibDataGrid != busyDataGrid)
                 visibDataGrid.SelectedIndex = -1;
         }
@@ -438,7 +472,7 @@ namespace MusicPlayer
             }
             else
                 visibDataGrid.SelectedIndex = -1;
-            if (busyDataGrid?.ItemsSource == null || busyDataGrid.SelectedIndex == -1)
+            if (busyDataGrid.SelectedIndex == -1)
                 return;
             SetMediaElementSource();
             Play();
@@ -446,6 +480,7 @@ namespace MusicPlayer
 
         private async void SearchButton_Click(object sender, RoutedEventArgs e)
         {
+            searchTextBox.Focus();
             var input = e as KeyEventArgs;
             if (input != null && input.Key != Key.Enter || searchTextBox.Text == string.Empty)
                 return;
@@ -472,21 +507,25 @@ namespace MusicPlayer
         {
             visibDataGrid.Visibility = Visibility.Collapsed;
             busyDataGrid.Visibility = Visibility.Visible;
-            if (busyDGRandMode == Brushes.White)
-                randLabel.Foreground = busyDGRandMode;
-            else
+            if (busyDGRandMode != Brushes.White)
                 sortComboBox.SelectedIndex = busyDGSortIndex;
-            numOfAudioTextBlock.Content = string.Format("Песен: {0}", visibDataGrid.Items.Count);
+            randLabel.Foreground = busyDGRandMode;
+            numOfAudioTextBlock.Content = string.Format("Песен: {0}", visibleSongs.Length);
         }
 
         private void SetSongsList(Song[] list, bool sortList, bool changeCurrentPlaylist, bool moveToFirstSong)
         {
             if (!changeCurrentPlaylist)
             {
-                if (songsManager.SortSongs((Song[])visibDataGrid.ItemsSource, 0)
+                if (songsManager.SortSongs(visibleSongs, 0)
                 .SequenceEqual(songsManager.SortSongs(list, 0), new Song() as IEqualityComparer<Song>))
                     return;
-                if (visibDataGrid != busyDataGrid && songsManager.SortSongs((Song[])busyDataGrid.ItemsSource, 0)
+                Song[] busyDataGridSongs;
+                if (busyDataGrid == playlist1DataGrid)
+                    busyDataGridSongs = playlist1Songs;
+                else
+                    busyDataGridSongs = playlist2Songs;
+                if (visibDataGrid != busyDataGrid && songsManager.SortSongs(busyDataGridSongs, 0)
                     .SequenceEqual(songsManager.SortSongs(list, 0), new Song() as IEqualityComparer<Song>))
                 {
                     ShowBusyPlaylist();
@@ -498,20 +537,53 @@ namespace MusicPlayer
                 freeDataGrid.Visibility = Visibility.Visible;
             }
             if (list == null || list.Length == 0)
-                visibDataGrid.ItemsSource = new Song[0];
+            {
+                visibleSongs = new Song[0];
+                visibDataGrid.Items.Clear();
+            }
             else
             {
-                visibDataGrid.ItemsSource = (randLabel.Foreground == Brushes.White)
-                    ? songsManager.MixSongs(list) : (sortList) ? songsManager.SortSongs(list, sortComboBox.SelectedIndex) : list;
+                Song currSong = new Song();
+                if (visibDataGrid == busyDataGrid && visibDataGrid.SelectedIndex != -1
+                    && (randLabel.Foreground == Brushes.White || sortList))
+                {
+                    currSong = (Song)visibDataGrid.SelectedItem;
+                    int count = visibDataGrid.Items.Count;
+                    int i = 0;
+                    while (visibDataGrid.Items.Count != 1)
+                    {
+                        if (((Song)visibDataGrid.Items[i]).Path != currSong.Path)
+                            visibDataGrid.Items.RemoveAt(i);
+                        else
+                            i++;
+                    }
+                    var songsList = list.ToList();
+                    songsList.Remove(currSong);
+                    list = songsList.ToArray();
+                }
+                else
+                    visibDataGrid.Items.Clear();
+
+                Song[] songs = (randLabel.Foreground == Brushes.White) ? songsManager.MixSongs(list) : (sortList) ?
+                    songsManager.SortSongs(list, sortComboBox.SelectedIndex) : list;
+                var newSongsList = new List<Song>();
+                if (currSong.Path != null)
+                    newSongsList.Add(currSong);
+                newSongsList.AddRange(songs);
+                visibleSongs = newSongsList.ToArray();
+                for (int i = 0; i < songs.Length && i < (currSong.Path != null ? numOfSongsToAddWhenScrolling - 1 : numOfSongsToAddWhenScrolling); i++)
+                    visibDataGrid.Items.Add(songs[i]);
                 if (moveToFirstSong)
                     MoveToFirstSong();
             }
-            numOfAudioTextBlock.Content = string.Format("Песен: {0}", visibDataGrid.Items.Count);
+            numOfAudioTextBlock.Content = string.Format("Песен: {0}", visibleSongs.Length);
         }
 
         private void ClearControls()
         {
-            playlist1DataGrid.ItemsSource = playlist2DataGrid.ItemsSource = new Song[0];
+            playlist1Songs = playlist2Songs = new Song[0];
+            playlist1DataGrid.Items.Clear();
+            playlist2DataGrid.Items.Clear();
             playlist1DataGrid.SelectedIndex = playlist2DataGrid.SelectedIndex = -1;
             randLabel.Foreground = Brushes.LightGray;
             numOfAudioTextBlock.Content = "Песен: 0";
@@ -527,7 +599,11 @@ namespace MusicPlayer
 
         private void MoveToFirstSong()
         {
-            visibDataGrid.SelectedIndex = 0;
+            if (visibDataGrid.Items.Count != 0)
+            {
+                visibDataGrid.SelectedIndex = 0;
+                visibDataGrid.ScrollIntoView(visibDataGrid.SelectedItem);
+            }
             SetMediaElementSource();
             Pause();
         }
@@ -537,6 +613,20 @@ namespace MusicPlayer
             if (busyDataGrid.SelectedIndex == -1)
                 return;
             mediaElement.Source = new Uri(((Song)busyDataGrid.SelectedItem).Path);
+        }
+
+        private void playlistsScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            ScrollViewer sw = e.OriginalSource as ScrollViewer;
+            sw.UpdateLayout();
+            if (sw.ExtentHeight != 0 && sw.ExtentHeight - sw.ViewportHeight - sw.VerticalOffset <= 250)
+            {
+                int maxLength = visibleSongs.Length;
+                int curLength = visibDataGrid.Items.Count;
+                int n = (maxLength - curLength >= numOfSongsToAddWhenScrolling) ? numOfSongsToAddWhenScrolling + curLength : maxLength;
+                for (int i = curLength; i < n; i++)
+                    visibDataGrid.Items.Add(visibleSongs[i]);
+            }
         }
         #endregion
 
@@ -573,7 +663,9 @@ namespace MusicPlayer
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "Height"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "CanBeOpened"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "AddRemoveFavoriteImageSource"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "FontSize"));
+                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "Foreground"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "CursorType"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "ImageSource"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox"));
@@ -583,7 +675,9 @@ namespace MusicPlayer
                     values.Add(pluginInstance.Value.FavoriteItems[i].Height.ToString());
                     values.Add(pluginInstance.Value.FavoriteItems[i].CanBeOpened.ToString());
                     values.Add(pluginInstance.Value.FavoriteItems[i].CanBeFavorite.ToString());
+                    values.Add(pluginInstance.Value.FavoriteItems[i].AddRemoveFavoriteImageSource);
                     values.Add(pluginInstance.Value.FavoriteItems[i].FontSize.ToString());
+                    values.Add(new BrushConverter().ConvertToString(pluginInstance.Value.FavoriteItems[i].Foreground));
                     values.Add(new CursorConverter().ConvertToString(pluginInstance.Value.FavoriteItems[i].CursorType));
                     values.Add(pluginInstance.Value.FavoriteItems[i].ImageSource);
                     values.Add(pluginInstance.Value.FavoriteItems[i].UseAreYouSureMessageBox.ToString());
@@ -628,7 +722,9 @@ namespace MusicPlayer
                                                                          Convert.ToDouble(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Height")]),
                                                                          Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CanBeOpened")]),
                                                                          Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite")]),
+                                                                         allAppSettings[string.Format(pattern, pluginInstance.Key, i, "AddRemoveFavoriteImageSource")],
                                                                          Convert.ToDouble(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "FontSize")]),
+                                                                         new BrushConverter().ConvertFromString(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Foreground")]) as Brush,
                                                                          new CursorConverter().ConvertFromString(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CursorType")]) as Cursor,
                                                                          allAppSettings[string.Format(pattern, pluginInstance.Key, i, "ImageSource")],
                                                                          Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox")]),

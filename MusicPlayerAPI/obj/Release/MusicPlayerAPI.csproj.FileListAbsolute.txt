@@ -1,0 +1,5 @@
+D:\C#\MusicPlayer\MusicPlayerAPI\bin\Release\MusicPlayerAPI.dll
+D:\C#\MusicPlayer\MusicPlayerAPI\bin\Release\MusicPlayerAPI.pdb
+D:\C#\MusicPlayer\MusicPlayerAPI\obj\Release\MusicPlayerAPI.csprojResolveAssemblyReference.cache
+D:\C#\MusicPlayer\MusicPlayerAPI\obj\Release\MusicPlayerAPI.dll
+D:\C#\MusicPlayer\MusicPlayerAPI\obj\Release\MusicPlayerAPI.pdb

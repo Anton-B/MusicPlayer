@@ -16,6 +16,8 @@ namespace MusicPlayer
         {
             switch (index)
             {
+                case -1:
+                    return songs;
                 case 0:
                     return songs.OrderBy(s => s.Path).OrderByDescending(s => s.CreationTime).ToArray();
                 case 1:

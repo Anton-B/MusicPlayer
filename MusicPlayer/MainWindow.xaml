@@ -6,105 +6,183 @@
         xmlns:local="clr-namespace:MusicPlayer"
         xmlns:MusicPlayerAPI="clr-namespace:MusicPlayerAPI;assembly=MusicPlayerAPI" xmlns:System="clr-namespace:System;assembly=mscorlib" x:Name="mainWindow" x:Class="MusicPlayer.MainWindow"
         mc:Ignorable="d" Background="White" Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing">
-    <DockPanel x:Name="mainDockPanel" LastChildFill="True" Background="#FFABADB3">
-        <DockPanel x:Name="playerDockPanel" DockPanel.Dock="Bottom" LastChildFill="True" Height="82" Background="#FF7E8EA4">
-            <StackPanel x:Name="infoStackPanel" DockPanel.Dock="Top" Orientation="Horizontal" Height="32" Margin="0,4,0,0">
-                <Label x:Name="artistLabel" Padding="0,2,0,5" Content="Исполнитель" HorizontalAlignment="Left" Margin="10,0,0,0" 
-					VerticalAlignment="Top" FontSize="18.667" Foreground="White"/>
-                <Label x:Name="titleLabel" Padding="0,4,0,5" Content="-  Название" HorizontalAlignment="Left" Margin="10,0,0,0"
-					VerticalAlignment="Top" FontSize="16" Foreground="White"/>
-            </StackPanel>
-            <DockPanel x:Name="controlsDockPanel" DockPanel.Dock="Bottom" LastChildFill="True">
-                <Label x:Name="prevLabel" DockPanel.Dock="Left" Content="⏮" HorizontalAlignment="Left" Margin="10,-2,0,0"
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Prev_Click" Foreground="White" FontSize="26.667" Cursor="Hand" Background="{x:Null}"/>
-                <Label x:Name="playPauseLabel" DockPanel.Dock="Left" Content="⏵" HorizontalAlignment="Left" Margin="2,-4,0,0" 
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="PlayPause_Click" Background="{x:Null}" Foreground="White" FontSize="29.333" Cursor="Hand"/>
-                <Label x:Name="nextLabel" DockPanel.Dock="Left" Content="⏭" HorizontalAlignment="Left" Margin="10,-2,0,0" 
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Next_Click" Background="{x:Null}" Foreground="White" Cursor="Hand" FontSize="26.667"/>
-                <Label x:Name="randLabel" DockPanel.Dock="Left" Content="🔀" HorizontalAlignment="Left" Margin="6,2,0,0" 
-					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Rand_Click" Foreground="LightGray" Cursor="Hand" FontSize="24" Background="{x:Null}"/>
-                <Label x:Name="repeatLabel" DockPanel.Dock="Left" Content="🔁" HorizontalAlignment="Left" Margin="0,2,0,0" 
-					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Repeat_Click" Cursor="Hand" Background="{x:Null}" Foreground="LightGray" FontSize="24"/>
-                <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,17,10,0" 
-					ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Top" Width="80" Value="1" 
-					Maximum="1" LargeChange="0.1" IsMoveToPointEnabled="True"/>
-                <Label x:Name="volumeLabel" DockPanel.Dock="Right" Content="🔊" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Margin="0,8,0,0" Foreground="White" FontSize="18.667"/>
-                <Label x:Name="maxTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="39" Margin="0,13,0,0" Foreground="White"/>
-                <Label x:Name="slashLabel" Content="/" DockPanel.Dock="Right" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="19" Margin="0,13,0,0" Foreground="White"/>
-                <Label x:Name="currTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="38" Margin="0,13,0,0" Foreground="White"/>
-                <Slider  x:Name="musicTimelineSlider" ValueChanged="MusicTimelineSlider_ValueChanged" SmallChange="1"
-					IsMoveToPointEnabled="True" Margin="10,17,0,0" LostMouseCapture="MusicTimelineSlider_LostMouseCapture"/>
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type MusicPlayerAPI:NavigationItem}">
+            <DockPanel LastChildFill="True" Background="Transparent" MouseEnter="NavigationDockPanel_MouseEnterLeave" MouseLeave="NavigationDockPanel_MouseEnterLeave">
+                <Image DockPanel.Dock="Right" Width="Auto" Height="Auto" Source="{Binding AddRemoveFavoriteImageSource}" Visibility="Hidden"
+                       ToolTip="Добавить в избранное / удалить из избранного" Cursor="Hand" MouseDown="ChangeFavorites"/>
+                <DockPanel DockPanel.Dock="Left" LastChildFill="True" Background="Transparent" Height="{Binding Height}" Cursor="{Binding Cursor}">
+                    <Image DockPanel.Dock="Left" Height="{Binding Height}" Source="{Binding ImageSource}" Cursor="Help"/>
+                    <Label VerticalContentAlignment="Center" Content="{Binding Name}" FontSize="{Binding FontSize}" Foreground="{Binding Foreground}" Height="{Binding Height}" Padding="5,0,0,0"/>
+                </DockPanel>
             </DockPanel>
-        </DockPanel>
+        </DataTemplate>
+        <Style TargetType="DataGrid">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsReadOnly" Value="True"/>
+            <Setter Property="Background" Value="{x:Null}"/>
+            <Setter Property="BorderBrush" Value="#FF699CBF"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+            <Setter Property="VerticalScrollBarVisibility" Value="Visible"/>
+            <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="{x:Null}"/>
+            <Setter Property="VerticalGridLinesBrush" Value="{x:Null}"/>
+            <Setter Property="HeadersVisibility" Value="None"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserResizeColumns" Value="False"/>
+            <Setter Property="CanUserReorderColumns" Value="False"/>
+            <Setter Property="CanUserSortColumns" Value="False"/>
+            <Setter Property="RowHeight" Value="52"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="AlternatingRowBackground" Value="#FFF0F0F0"/>
+            <Setter Property="CellStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridCell">
+                        <Style.Setters>
+                            <Setter Property="Focusable" Value="False"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Foreground" Value="Gray"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                        </Style.Setters>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF4D7FA4"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Cursor" Value="Arrow"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter Property="Background" Value="LightGray"/>
+                            </MultiTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <DataTemplate x:Key="musicListCellTemplate">
+            <Border>
+                <DockPanel Focusable="False" LastChildFill="False">
+                    <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"></TextBlock>
+                    <TextBlock x:Name="titleTextBlock" DockPanel.Dock="Top" Text="{Binding Title}" Margin="10,6,0,0" FontSize="16">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Style.Setters>
+                                    <Setter Property="Foreground" Value="#FF2B587A"/>
+                                </Style.Setters>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ElementName=artistTextBlock, Path=Foreground}" Value="White">
+                                        <Setter Property="Foreground" Value="White"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock x:Name="artistTextBlock" DockPanel.Dock="Bottom" Text="{Binding Artist}" Margin="10,0,0,6"></TextBlock>
+                </DockPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+    <DockPanel x:Name="mainDockPanel" LastChildFill="True">
+        <Border DockPanel.Dock="Bottom">
+            <DockPanel x:Name="playerDockPanel" LastChildFill="True" Height="82" Background="#FF7E8EA4">
+                <StackPanel x:Name="infoStackPanel" DockPanel.Dock="Top" Orientation="Horizontal" Height="32" Margin="0,4,0,0">
+                    <Label x:Name="artistLabel" Padding="0,2,0,5" Content="Исполнитель" HorizontalAlignment="Left" Margin="10,0,0,0" 
+					VerticalAlignment="Top" FontSize="18.667" Foreground="White"/>
+                    <Label x:Name="titleLabel" Padding="0,4,0,5" Content="-  Название" HorizontalAlignment="Left" Margin="10,0,0,0"
+					VerticalAlignment="Top" FontSize="16" Foreground="White"/>
+                </StackPanel>
+                <DockPanel x:Name="controlsDockPanel" DockPanel.Dock="Bottom" LastChildFill="True">
+                    <Label x:Name="prevLabel" DockPanel.Dock="Left" Content="⏮" HorizontalAlignment="Left" Margin="10,-2,0,0"
+					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Prev_Click" Foreground="White" FontSize="26.667" Cursor="Hand" Background="{x:Null}"/>
+                    <Label x:Name="playPauseLabel" DockPanel.Dock="Left" Content="⏵" HorizontalAlignment="Left" Margin="2,-4,0,0" 
+					VerticalAlignment="Top" Width="32" Height="42" MouseDown="PlayPause_Click" Background="{x:Null}" Foreground="White" FontSize="29.333" Cursor="Hand"/>
+                    <Label x:Name="nextLabel" DockPanel.Dock="Left" Content="⏭" HorizontalAlignment="Left" Margin="10,-2,0,0" 
+					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Next_Click" Background="{x:Null}" Foreground="White" Cursor="Hand" FontSize="26.667"/>
+                    <Label x:Name="randLabel" DockPanel.Dock="Left" Content="🔀" HorizontalAlignment="Left" Margin="6,2,0,0" 
+					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Rand_Click" Foreground="LightGray" Cursor="Hand" FontSize="24" Background="{x:Null}"/>
+                    <Label x:Name="repeatLabel" DockPanel.Dock="Left" Content="🔁" HorizontalAlignment="Left" Margin="0,2,0,0" 
+					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Repeat_Click" Cursor="Hand" Background="{x:Null}" Foreground="LightGray" FontSize="24"/>
+                    <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,17,10,0" 
+					ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Top" Width="80" Value="1" 
+					Maximum="1" LargeChange="0.1" IsMoveToPointEnabled="True" Focusable="False"/>
+                    <Label x:Name="volumeLabel" DockPanel.Dock="Right" Content="🔊" HorizontalAlignment="Left" 
+					VerticalAlignment="Top" Margin="0,8,0,0" Foreground="White" FontSize="18.667"/>
+                    <Label x:Name="maxTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
+					VerticalAlignment="Top" Width="39" Margin="0,13,0,0" Foreground="White"/>
+                    <Label x:Name="slashLabel" Content="/" DockPanel.Dock="Right" HorizontalAlignment="Left" 
+					VerticalAlignment="Top" Width="19" Margin="0,13,0,0" Foreground="White"/>
+                    <Label x:Name="currTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
+					VerticalAlignment="Top" Width="38" Margin="0,13,0,0" Foreground="White"/>
+                    <Slider x:Name="musicTimelineSlider" ValueChanged="MusicTimelineSlider_ValueChanged" SmallChange="1"
+					IsMoveToPointEnabled="True" Margin="10,17,0,0" LostMouseCapture="MusicTimelineSlider_LostMouseCapture" Focusable="False"/>
+                </DockPanel>
+            </DockPanel>
+        </Border>
         <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48"
 			MediaEnded="MediaElement_MediaEnded" VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill"
 			Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Manual"/>
         <DockPanel x:Name="mainAreaDockPanel" LastChildFill="False">
-            <DockPanel x:Name="navigDockPanel" Background="#FFF3F3F3" Margin="0,1,0,0" Width="400" LastChildFill="True"
+            <Border x:Name="navigBorder" BorderThickness="0" BorderBrush="#FF699CBF">
+                <DockPanel x:Name="navigDockPanel" Background="White" Margin="0" Width="400" LastChildFill="True"
                        Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
-                <ProgressBar x:Name="loadingProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF7E8EA4" BorderBrush="#FFF3F3F3" Background="#FFF3F3F3"/>
-                <ComboBox x:Name="modeComboBox" Margin="20,40,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged" Visibility="Hidden"/>
-                <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
-                    <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3" Background="White" Click="UpdateButton_Click" ToolTip="Обновить"/>
-                    <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True"/>
-                </DockPanel>
-                <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1" Background="White" SelectionChanged="NavigTabControl_SelectionChanged">
-                    <TabItem Width="178">
-                        <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MouseDoubleClick="NavigListView_MouseDoubleClick" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
-                    </TabItem>
-                    <TabItem Width="178">
-                        <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320" ScrollViewer.VerticalScrollBarVisibility="Visible"></ListView>
-                    </TabItem>
-                </TabControl>
-            </DockPanel>
-            <Border DockPanel.Dock="Top" BorderThickness="2" BorderBrush="#FF819FB4">
-                <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27" Background="#FF2B587A">
-                    <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
-                           ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="#FFF3F3F3" BorderThickness="1,1,1,1" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Количество песен в открытом списке"/>
-                    <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="169" ToolTip="Сортировка песен" BorderThickness="0,0,0,0" FontSize="13.333" 
-                          SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF2B587A" Foreground="#FF2B587A" Background="#FFF3F3F3" Margin="0,1">
-                        <System:String>По дате добавления</System:String>
-                        <System:String>По названию</System:String>
-                        <System:String>По исполнителю</System:String>
-                    </ComboBox>
-                    <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0,1,1,1" FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF2B587A" Background="#FFF3F3F3" ToolTip="Переход к изначальному списку"/>
-                    <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" Background="#FFF3F3F3" BorderBrush="#FF2B587A" FontSize="13.333" ToolTip="Поиск"/>
-                    <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" KeyDown="SearchButton_Click" BorderBrush="#FF2B587A" Foreground="#FF2B587A" ToolTip="Введите поисковой запрос"/>
+                    <ProgressBar x:Name="loadingProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF7E8EA4" BorderBrush="{x:Null}" Background="{x:Null}"/>
+                    <ComboBox x:Name="modeComboBox" Margin="20,3,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged" Visibility="Hidden" Focusable="False"/>
+                    <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
+                        <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3"
+                                Background="White" Click="UpdateButton_Click" ToolTip="Обновить" Focusable="False"/>
+                        <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True"/>
+                    </DockPanel>
+                    <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1"
+                                Background="White" SelectionChanged="NavigTabControl_SelectionChanged" Focusable="False">
+                        <TabItem Width="178">
+                            <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="320" 
+                                      MouseDoubleClick="NavigListView_MouseDoubleClick" ScrollViewer.VerticalScrollBarVisibility="Visible" Focusable="False" BorderBrush="{x:Null}"></ListView>
+                        </TabItem>
+                        <TabItem Width="178">
+                            <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320"
+                                      ScrollViewer.VerticalScrollBarVisibility="Visible" Focusable="False" BorderBrush="{x:Null}"></ListView>
+                        </TabItem>
+                    </TabControl>
                 </DockPanel>
             </Border>
-            <DataGrid x:Name="playlist1DataGrid" SelectionChanged="playlistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
-				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
-				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3" 
-				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
-				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
-                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Visible" HorizontalGridLinesBrush="{x:Null}" VerticalGridLinesBrush="{x:Null}">
+            <Border x:Name="audioParamsBorder" DockPanel.Dock="Top" BorderThickness="0" BorderBrush="#FF699CBF" Margin="0,0,0,0">
+                <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27">
+                    <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
+                           ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="White" BorderThickness="0" BorderBrush="#FF819FB4"
+                           Foreground="#FF2B587A" ToolTip="Количество песен в открытом списке" Height="27" VerticalAlignment="Bottom"/>
+                    <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="169" ToolTip="Сортировка песен" BorderThickness="0" FontSize="13.333" 
+                          SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF819FB4" Foreground="#FF2B587A" Background="#FFF3F3F3" Margin="0,1" Focusable="False">
+                        <ComboBoxItem>По дате добавления</ComboBoxItem>
+                        <ComboBoxItem>По названию</ComboBoxItem>
+                        <ComboBoxItem>По исполнителю</ComboBoxItem>
+                    </ComboBox>
+                    <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0" 
+                            FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF819FB4" Background="White" ToolTip="Переход к изначальному списку" Focusable="False"/>
+                    <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" 
+                            Background="White" BorderBrush="#FF819FB4" FontSize="13.333" ToolTip="Поиск" Focusable="False" BorderThickness="0,1,1,1"/>
+                    <TextBox x:Name="searchTextBox" FontSize="16" Margin="1,0,0,0" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" 
+                             KeyDown="SearchButton_Click" BorderBrush="#FF819FB4" ToolTip="Введите поисковой запрос" Text="Поиск..." Loaded="searchTextBox_Loaded" 
+                             GotFocus="searchTextBox_GotFocus" LostFocus="searchTextBox_LostFocus" Background="White" Foreground="LightGray"></TextBox>
+                </DockPanel>
+            </Border>
+            <DataGrid x:Name="playlist1DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}"
+                      Visibility="Visible" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
-                    <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
-                    <DataGridTextColumn Width="50" Binding="{Binding Duration}"/>
+                    <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
                 </DataGrid.Columns>
-                <DataGrid.AlternatingRowBackground>
-                    <SolidColorBrush Color="#FFCDE8FB"/>
-                </DataGrid.AlternatingRowBackground>
             </DataGrid>
-            <DataGrid x:Name="playlist2DataGrid" SelectionChanged="playlistDataGrid_SelectionChanged" RowHeight="30" GridLinesVisibility="None"
-				CanUserResizeColumns="False" CanUserReorderColumns="False" Focusable="False" HeadersVisibility="None" 
-				SelectionMode="Single" CanUserResizeRows="False" IsHitTestVisible="True" BorderBrush="#FFABADB3"
-				Background="{x:Null}" CanUserSortColumns="False" HorizontalScrollBarVisibility="Hidden" IsReadOnly="True"
-				ColumnWidth="220" RowDetailsVisibilityMode="Visible" AutoGenerateColumns="False" Margin="0,0,0,0" FrozenColumnCount="3"
-                BorderThickness="1,0,0,0" VerticalScrollBarVisibility="Visible" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}" Visibility="Collapsed" HorizontalGridLinesBrush="{x:Null}" VerticalGridLinesBrush="{x:Null}">
+            <DataGrid x:Name="playlist2DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}"
+                      Visibility="Collapsed" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Width="*" Binding="{Binding Title}" FontSize="13.333"/>
-                    <DataGridTextColumn Width="*" Binding="{Binding Artist}"/>
-                    <DataGridTextColumn Width="50" Binding="{Binding Duration}"/>
+                    <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
                 </DataGrid.Columns>
-                <DataGrid.AlternatingRowBackground>
-                    <SolidColorBrush Color="#FFCDE8FB"/>
-                </DataGrid.AlternatingRowBackground>
             </DataGrid>
         </DockPanel>
     </DockPanel>

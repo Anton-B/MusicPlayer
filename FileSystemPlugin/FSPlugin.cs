@@ -5,13 +5,15 @@ using MusicPlayerAPI;
 using TagLib;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.Windows.Media;
+using System;
 
 namespace FileSystemPlugin
 {
     public class FSPlugin : IPlugin
     {
         public string Name { get; } = "Музыка с компьютера";
-        public string[] TabItemHeaders { get; } = { "Выбрать музыку", "Выбранное" };
+        public string[] TabItemHeaders { get; } = { "Выбор музыки", "Выбранные папки" };
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
         public int OpenedTabIndex { get; set; }
@@ -38,31 +40,41 @@ namespace FileSystemPlugin
                 var drives = DriveInfo.GetDrives();
                 foreach (var drive in drives)
                     navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
-                        itemHeight, true, false, fontHeight, Cursors.Arrow, diskImageSource));
+                        itemHeight, true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + diskImageSource));
             }
             else
             {
                 var parent = Directory.GetParent(path);
-                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight, true, false, fontHeight, Cursors.Arrow, parentFolderImageSource));
+                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight,
+                    true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
                 DirectoryInfo di = new DirectoryInfo(path);
                 var dirs = di.GetDirectories();
                 foreach (var dir in dirs)
-                    navigItems.Add(new NavigationItem(dir.Name, dir.FullName, itemHeight, true, true, fontHeight, Cursors.Arrow, folderImageSource));
+                {
+                    var item = new NavigationItem(dir.Name, dir.FullName, itemHeight,
+                        true, true, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + folderImageSource);
+                    item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (FavoriteItems.Contains(item) ? DeleteButtonImageSource : AddButtonImageSource);
+                    navigItems.Add(item);
+                }
+                    
                 var files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
                 foreach (var file in files)
-                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight, false, false, fontHeight, Cursors.Arrow, audioImageSource));
+                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight,
+                        false, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + audioImageSource));
             }
             return navigItems;
         }
 
         public void AddToFavorites(NavigationItem item)
         {
-            item.ImageSource = favoriteImageSource;
+            item.ImageSource = Environment.CurrentDirectory + "\\" + favoriteImageSource;
+            item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + DeleteButtonImageSource;
             FavoriteItems.Add(item);
         }
 
         public void DeleteFromFavorites(NavigationItem item)
         {
+            item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + AddButtonImageSource;
             FavoriteItems.Remove(item);
         }
 
