@@ -12,7 +12,11 @@ namespace MusicPlayerAPI
     {
         public Dictionary<string, IPlugin> PluginInstasnces { get; set; } = new Dictionary<string, IPlugin>();
         public string Key { get; set; }
+        public string AddButtonImageSource { get { return PluginInstasnces[Key].AddButtonImageSource; } }
+        public string DeleteButtonImageSource { get { return PluginInstasnces[Key].DeleteButtonImageSource; } }
         public int OpenedTabIndex { get { return (Key == null) ? 0 : PluginInstasnces[Key].OpenedTabIndex; } set { PluginInstasnces[Key].OpenedTabIndex = value; } }
+        public bool UsUseDefaultNavigListStyle { get { return PluginInstasnces[Key].UseDefaultNavigListStyle; } }
+        public bool SupportsSongMenuButton { get { return PluginInstasnces[Key].SupportsSongMenuButton; } }
         public bool UseDefaultHomeButton { get { return PluginInstasnces[Key].UseDefaultHomeButton; } }
         public bool UseDefaultSearch { get { return PluginInstasnces[Key].UseDefaultSearch; } }
         public bool DoubleClickToOpenItem { get { return PluginInstasnces[Key].DoubleClickToOpenItem; } }
@@ -60,15 +64,7 @@ namespace MusicPlayerAPI
 
         public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
-            try
-            {
-                return await PluginInstasnces[Key].GetNavigationItems(path);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
+            return await PluginInstasnces[Key].GetNavigationItems(path);
         }
 
         public List<NavigationItem> GetFavoriteItems()
@@ -97,7 +93,8 @@ namespace MusicPlayerAPI
 
         public async Task<Song[]> GetSongsList(NavigationItem item)
         {
-            return await PluginInstasnces[Key].GetSongsList(item);
+            var songs = await PluginInstasnces[Key].GetSongsList(item);
+            return songs;
         }
 
         public async Task<Song[]> GetSearchResponse(string request)
@@ -105,9 +102,19 @@ namespace MusicPlayerAPI
             return await PluginInstasnces[Key].GetSearchResponse(request);
         }
 
-        public async Task<Song[]> GetHomeButtonSongs()
+        public async Task<Song[]> GetMyMusicSongs()
         {
-            return await PluginInstasnces[Key].GetHomeButtonSongs();
+            return await PluginInstasnces[Key].GetMyMusicSongs();
+        }
+
+        public async Task<List<string>> GetSongMenuItems(Song song)
+        {
+            return await PluginInstasnces[Key].GetSongMenuItems(song);
+        }
+
+        public async Task<UpdateBehavior> HandleMenuItemClick(string itemText, Song song)
+        {
+            return await PluginInstasnces[Key].HandleMenuItemClick(itemText, song);
         }
     }
 }

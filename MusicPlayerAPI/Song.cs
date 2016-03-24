@@ -4,19 +4,23 @@ namespace MusicPlayerAPI
 {
     public class Song : IEqualityComparer<Song>
     {
-        public string Title { get; set; }
-        public string Artist { get; set; }        
-        public string Duration { get; set; }
-        public string Path { get; set; }
-        public long CreationTime { get; set; }
+        public string ID { get; }
+        public string Title { get; }
+        public string Artist { get; }        
+        public string Duration { get; }
+        public string Lyrics { get; }
+        public string Path { get; }
+        public long CreationTime { get; }
 
         public Song() { }
 
-        public Song(string title, string artist, string duration, string path, long creationTime)
+        public Song(string id, string title, string artist, string duration, string lyrics, string path, long creationTime)
         {
+            ID = id;
             Title = title;
             Artist = artist;
             Duration = duration;
+            Lyrics = lyrics;
             Path = path;
             CreationTime = creationTime;
         }

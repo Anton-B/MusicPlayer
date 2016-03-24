@@ -4,19 +4,441 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MusicPlayer"
-        xmlns:MusicPlayerAPI="clr-namespace:MusicPlayerAPI;assembly=MusicPlayerAPI" xmlns:System="clr-namespace:System;assembly=mscorlib" x:Name="mainWindow" x:Class="MusicPlayer.MainWindow"
-        mc:Ignorable="d" Background="White" Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing">
+        xmlns:MusicPlayerAPI="clr-namespace:MusicPlayerAPI;assembly=MusicPlayerAPI" xmlns:System="clr-namespace:System;assembly=mscorlib"
+        x:Name="mainWindow" x:Class="MusicPlayer.MainWindow" mc:Ignorable="d" Background="White" 
+        Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing" Icon="Images/icon.ico" KeyDown="mainWindow_KeyDown">
+    <Window.TaskbarItemInfo>
+        <TaskbarItemInfo>
+            <TaskbarItemInfo.ThumbButtonInfos>
+                <ThumbButtonInfo x:Name="taskbarPrevButton" ImageSource="Images\prev_taskbar.png" Description="Назад" Click="prevButton_Click"/>
+                <ThumbButtonInfo x:Name="taskbarPlayPauseButton" ImageSource="Images\play_taskbar.png" Description="Воспроизвести" Click="playPauseButton_Click"/>
+                <ThumbButtonInfo x:Name="taskBarNextButton" ImageSource="Images\next_taskbar.png" Description="Вперёд" Click="nextButton_Click"/>
+            </TaskbarItemInfo.ThumbButtonInfos>
+        </TaskbarItemInfo>
+    </Window.TaskbarItemInfo>
     <Window.Resources>
-        <DataTemplate DataType="{x:Type MusicPlayerAPI:NavigationItem}">
-            <DockPanel LastChildFill="True" Background="Transparent" MouseEnter="NavigationDockPanel_MouseEnterLeave" MouseLeave="NavigationDockPanel_MouseEnterLeave">
-                <Image DockPanel.Dock="Right" Width="Auto" Height="Auto" Source="{Binding AddRemoveFavoriteImageSource}" Visibility="Hidden"
-                       ToolTip="Добавить в избранное / удалить из избранного" Cursor="Hand" MouseDown="ChangeFavorites"/>
-                <DockPanel DockPanel.Dock="Left" LastChildFill="True" Background="Transparent" Height="{Binding Height}" Cursor="{Binding Cursor}">
-                    <Image DockPanel.Dock="Left" Height="{Binding Height}" Source="{Binding ImageSource}" Cursor="Help"/>
-                    <Label VerticalContentAlignment="Center" Content="{Binding Name}" FontSize="{Binding FontSize}" Foreground="{Binding Foreground}" Height="{Binding Height}" Padding="5,0,0,0"/>
-                </DockPanel>
-            </DockPanel>
-        </DataTemplate>
+
+        <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="Border" Grid.ColumnSpan="2" CornerRadius="0" Background="Transparent" BorderBrush="Transparent"
+                    BorderThickness="0" />
+            </Grid>
+            <ControlTemplate.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                        <Condition Property="IsChecked" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="IsMouseOver" Value="False"/>
+                        <Condition Property="IsChecked" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter TargetName="Border" Property="Background" Value="White"/>
+                </MultiTrigger>
+                <Trigger Property="ToggleButton.IsChecked" Value="True">
+                    <Setter TargetName="Border" Property="BorderThickness" Value="1,1,1,0" />
+                    <Setter TargetName="Border" Property="BorderBrush" Value="#FF4D7FA4" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter TargetName="Border" Property="Background" Value="White" />
+                    <Setter TargetName="Border" Property="BorderBrush" Value="Gray" />
+                    <Setter Property="Foreground" Value="Gray"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ComboBoxTextBox" TargetType="TextBox">
+            <Border x:Name="PART_ContentHost" Focusable="False" Background="{TemplateBinding Background}" />
+        </ControlTemplate>
+
+        <Style x:Key="{x:Type ComboBox}" TargetType="ComboBox">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
+            <Setter Property="ScrollViewer.CanContentScroll" Value="True"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="MinHeight" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton" Template="{DynamicResource ComboBoxToggleButton}" Grid.Column="2"
+                                Focusable="False" IsChecked="{Binding Path=IsDropDownOpen,Mode=TwoWay,RelativeSource={RelativeSource TemplatedParent}}"
+                                ClickMode="Press">
+                            </ToggleButton>
+                            <TextBlock Name="ContentSite" IsHitTestVisible="False" Text="{TemplateBinding Text}"
+                                  Margin="8,3,23,0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="#FF2B587A">
+                            </TextBlock>
+                            <TextBox x:Name="PART_EditableTextBox" Style="{x:Null}" Template="{StaticResource ComboBoxTextBox}" Height="30" VerticalContentAlignment="Center"
+                                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="3,3,23,3" Focusable="True" 
+                                Visibility="Hidden" IsReadOnly="{TemplateBinding IsReadOnly}"/>
+                            <Popup Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True"
+                                Focusable="False" PopupAnimation="Slide">
+                                <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" Margin="0,0,0,4"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder" Background="White" Padding="0,4"
+                                        BorderThickness="1,0,1,1" BorderBrush="#FF4D7FA4"/>
+                                    <ScrollViewer Margin="0" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger SourceName="ToggleButton" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ContentSite" Property="Foreground" Value="#FF5585A8"></Setter>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition SourceName="ToggleButton" Property="IsMouseOver" Value="False"/>
+                                    <Condition SourceName="ToggleButton" Property="IsChecked" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ContentSite" Property="Foreground" Value="#FF2B587A"/>
+                            </MultiTrigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition SourceName="ToggleButton" Property="IsMouseOver" Value="True"/>
+                                    <Condition SourceName="ToggleButton" Property="IsChecked" Value="True"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="ContentSite" Property="Foreground" Value="White"/>
+                            </MultiTrigger>
+                            <Trigger Property="HasItems" Value="False">
+                                <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Trigger>
+                            <Trigger Property="IsGrouping" Value="True">
+                                <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
+                            </Trigger>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
+                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                                <Setter TargetName="DropDownBorder" Property="Margin" Value="0,-20,0,0"/>
+                            </Trigger>
+                            <Trigger Property="IsEditable" Value="True">
+                                <Setter Property="IsTabStop" Value="False"/>
+                                <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="ContentSite" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="{x:Type ComboBoxItem}" TargetType="ComboBoxItem">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Border" Padding="4" Margin="0,0,0,0" SnapsToDevicePixels="True" Background="Transparent">
+                            <Label x:Name="contentPresenter" Content="{TemplateBinding Content}" Foreground="#FF2B587A"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="contentPresenter" Property="Foreground" Value="White"/>
+                                <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ListViewItem">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Cursor" Value="{Binding Cursor}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="navigItemBorder" Background="Transparent" BorderBrush="#664D7FA4"
+                            BorderThickness="1" MouseDown="NavigListView_MouseDown" Margin="2,0,2,4"
+                            MouseEnter="NavigationDockPanel_MouseEnterLeave" MouseLeave="NavigationDockPanel_MouseEnterLeave">
+                            <Label Content="{TemplateBinding Content}" Margin="0" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="navigItemBorder" Property="BorderBrush" Value="#334D7FA4"/>
+                                <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
+
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
+                                <Setter TargetName="navigItemBorder" Property="BorderBrush" Value="#FF4D7FA4"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="TabStripPlacement" Value="Bottom"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid KeyboardNavigation.TabNavigation="Local">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TabPanel x:Name="tabControlHeaderPanel" Grid.Row="1" Panel.ZIndex="1" Margin="0,0,0,0" IsItemsHost="True" 
+                                KeyboardNavigation.TabIndex="1" Background="Transparent"/>
+                            <Border x:Name="tabControlBorder" Grid.Row="0" BorderThickness="0" CornerRadius="0" KeyboardNavigation.TabNavigation="Local"
+                                KeyboardNavigation.DirectionalNavigation="Contained" KeyboardNavigation.TabIndex="2" Background="Transparent" BorderBrush="#FF4D7FA4">
+                                <ContentPresenter x:Name="PART_SelectedContentHost" Margin="4" ContentSource="SelectedContent"/>
+                            </Border>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid x:Name="Root">
+                            <Border x:Name="Border" Margin="0,0,0,0" BorderThickness="1,1,1,1" CornerRadius="0" 
+                                BorderBrush="#FF4D7FA4" Background="Transparent" Cursor="Hand">
+                                <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" 
+                                    HorizontalAlignment="Center" ContentSource="Header" Margin="12,2,12,2" RecognizesAccessKey="True"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter Property="Foreground" Value="#FF2A638D"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Panel.ZIndex" Value="100"/>
+                                <Setter TargetName="Border" Property="Cursor" Value="Arrow"/>
+                                <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#FF4D7FA4"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="playerButtonSlyle" TargetType="Button">
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="Height" Value="Auto"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="buttonGrid" Background="Transparent">
+                            <Rectangle x:Name="buttonSurface"/>
+                            <ContentPresenter x:Name="buttonCaption" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Content="{TemplateBinding Content}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonSurface" Property="Fill" Value="#FF52729C"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="buttonSurface" Property="Fill" Value="#FF425C81"/>
+                                <Setter TargetName="buttonCaption" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="buttonCaption" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Image x:Key="contentButtonImage" Stretch="Uniform" StretchDirection="DownOnly"/>
+
+        <Style x:Key="buttonSlyle" TargetType="Button">
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="buttonGrid" Background="Transparent">
+                            <Rectangle x:Name="buttonSurface" StrokeThickness="1" Stroke="Transparent"/>
+                            <ContentPresenter x:Name="buttonCaption" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Content="{TemplateBinding Content}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonSurface" Property="Stroke" Value="#FF4D7FA4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="buttonCaption" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="buttonCaption" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="sliderButtonStyle" TargetType="RepeatButton">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="IsTabStop" Value="False"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent"/>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="sliderThumbStyle" TargetType="Thumb">
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Ellipse x:Name="ellipseThumb" Fill="#FF50687A" Width="16" Height="16" HorizontalAlignment="Center" Stroke="White" StrokeThickness="2">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard TargetName="ellipseThumb">
+                                            <DoubleAnimation Storyboard.TargetProperty="Height" To="16" Duration="0:0:0:0.1"></DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="16" Duration="0:0:0:0.1"></DoubleAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard TargetName="ellipseThumb">
+                                            <DoubleAnimation Storyboard.TargetProperty="Height" To="18" Duration="0:0:0:0.1"></DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="18" Duration="0:0:0:0.1"></DoubleAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard TargetName="ellipseThumb">
+                                            <DoubleAnimation Storyboard.TargetProperty="Height" To="18" Duration="0:0:0:0.1"></DoubleAnimation>
+                                            <DoubleAnimation Storyboard.TargetProperty="Width" To="18" Duration="0:0:0:0.1"></DoubleAnimation>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </Ellipse>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="sliderStyle" TargetType="Slider">
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="IsMoveToPointEnabled" Value="True"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="IsSelectionRangeEnabled" Value="True"/>
+            <Setter Property="SelectionEnd" Value="{Binding Value, RelativeSource={RelativeSource Self}}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Slider">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                            </Grid.RowDefinitions>
+                            <Border x:Name="TrackBackground" Margin="0" CornerRadius="0" Height="2" Grid.Row="0"
+                                BorderThickness="0" Background="LightGray" BorderBrush="{x:Null}"/>
+                            <Track x:Name="PART_Track" Grid.Row="0">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource sliderButtonStyle}"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb x:Name="thumb" Style="{StaticResource sliderThumbStyle}" IsEnabled="False"/>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{StaticResource sliderButtonStyle}"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                            <Rectangle x:Name="PART_SelectionRange" Grid.Row="0" HorizontalAlignment="Left" 
+                                       Height="{Binding ElementName=TrackBackground, Path=Height}" Fill="White"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="contextMenuStyle" TargetType="ContextMenu">
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
+            <Setter Property="HasDropShadow" Value="False"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border x:Name="contextMenuBorder" Background="White" BorderThickness="1" BorderBrush="#FF4D7FA4" HorizontalAlignment="Left">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="HasDropShadow" Value="False">
+                                <Setter TargetName="contextMenuBorder" Property="Padding" Value="0,4,0,4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="contextMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="contextMenuItemBorder">
+                            <Grid Background="Transparent">
+                                <TextBlock x:Name="contextMenuItemTextBox" Text="{TemplateBinding InputGestureText}" Margin="6,3,20,3"
+                                    Foreground="#FF2B587A" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="contextMenuItemTextBox" Property="Foreground" Value="White"/>
+                                <Setter TargetName="contextMenuItemBorder" Property="Background" Value="#FF4D7FA4"/>
+                                <Setter TargetName="contextMenuItemBorder" Property="BorderBrush" Value="Transparent"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style TargetType="DataGrid">
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="IsReadOnly" Value="True"/>
@@ -36,15 +458,16 @@
             <Setter Property="CanUserResizeColumns" Value="False"/>
             <Setter Property="CanUserReorderColumns" Value="False"/>
             <Setter Property="CanUserSortColumns" Value="False"/>
-            <Setter Property="RowHeight" Value="52"/>
+            <Setter Property="RowHeight" Value="70"/>
             <Setter Property="CanUserResizeRows" Value="False"/>
-            <Setter Property="AlternatingRowBackground" Value="#FFF0F0F0"/>
             <Setter Property="CellStyle">
                 <Setter.Value>
                     <Style TargetType="DataGridCell">
                         <Style.Setters>
                             <Setter Property="Focusable" Value="False"/>
-                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Margin" Value="10,0,10,0"/>
+                            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                            <Setter Property="BorderBrush" Value="#334D7FA4"/>
                             <Setter Property="Foreground" Value="Gray"/>
                             <Setter Property="Cursor" Value="Hand"/>
                         </Style.Setters>
@@ -59,7 +482,7 @@
                                     <Condition Property="IsMouseOver" Value="True"/>
                                     <Condition Property="IsSelected" Value="False"/>
                                 </MultiTrigger.Conditions>
-                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="Background" Value="#334D7FA4"/>
                             </MultiTrigger>
                         </Style.Triggers>
                     </Style>
@@ -69,60 +492,115 @@
         <DataTemplate x:Key="musicListCellTemplate">
             <Border>
                 <DockPanel Focusable="False" LastChildFill="False">
-                    <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"></TextBlock>
-                    <TextBlock x:Name="titleTextBlock" DockPanel.Dock="Top" Text="{Binding Title}" Margin="10,6,0,0" FontSize="16">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Setters>
-                                    <Setter Property="Foreground" Value="#FF2B587A"/>
-                                </Style.Setters>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ElementName=artistTextBlock, Path=Foreground}" Value="White">
-                                        <Setter Property="Foreground" Value="White"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <TextBlock x:Name="artistTextBlock" DockPanel.Dock="Bottom" Text="{Binding Artist}" Margin="10,0,0,6"></TextBlock>
+                    <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"/>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0">
+                        <TextBlock x:Name="titleTextBlock" Text="{Binding Title}" Margin="0,0,0,0" FontSize="16">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Style.Setters>
+                                        <Setter Property="Foreground" Value="#FF2B587A"/>
+                                    </Style.Setters>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ElementName=artistTextBlock, Path=Foreground}" Value="White">
+                                            <Setter Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock x:Name="artistTextBlock" Text="{Binding Artist}" Margin="0,4,0,0"/>
+                    </StackPanel>
                 </DockPanel>
             </Border>
         </DataTemplate>
     </Window.Resources>
+
     <DockPanel x:Name="mainDockPanel" LastChildFill="True">
-        <Border DockPanel.Dock="Bottom">
-            <DockPanel x:Name="playerDockPanel" LastChildFill="True" Height="82" Background="#FF7E8EA4">
-                <StackPanel x:Name="infoStackPanel" DockPanel.Dock="Top" Orientation="Horizontal" Height="32" Margin="0,4,0,0">
-                    <Label x:Name="artistLabel" Padding="0,2,0,5" Content="Исполнитель" HorizontalAlignment="Left" Margin="10,0,0,0" 
-					VerticalAlignment="Top" FontSize="18.667" Foreground="White"/>
-                    <Label x:Name="titleLabel" Padding="0,4,0,5" Content="-  Название" HorizontalAlignment="Left" Margin="10,0,0,0"
-					VerticalAlignment="Top" FontSize="16" Foreground="White"/>
+        <Border x:Name="playerBorder" DockPanel.Dock="Bottom" Height="74">
+            <DockPanel x:Name="playerDockPanel" Background="#FF50687A" LastChildFill="True" Margin="0,0,0,0">
+                <StackPanel x:Name="controlButtonsStackPanel" DockPanel.Dock="Left" 
+                    Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
+                    <Button x:Name="prevButton" DockPanel.Dock="Left"
+					    Click="prevButton_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\prev.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="playPauseButton" DockPanel.Dock="Left"
+                        Click="playPauseButton_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\play.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="nextButton" DockPanel.Dock="Left"
+					    Click="nextButton_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\next.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="randButton" DockPanel.Dock="Left"
+					    Click="Rand_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\rand.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="repeatButton" DockPanel.Dock="Left"
+					    Click="Repeat_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\repeat.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="currentListButton" DockPanel.Dock="Left" ToolTip="К текущему списку воспроизведения"
+					    Click="currentListButton_Click" Style="{StaticResource playerButtonSlyle}">
+                        <Image Source="Images\current_songs.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
+                    <Button x:Name="songMenuButton" DockPanel.Dock="Left"
+					    Click="songMenuButton_Click" Style="{StaticResource playerButtonSlyle}" ToolTip="Меню аудиозаписи">
+                        <Image Source="Images\settings.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                    </Button>
                 </StackPanel>
-                <DockPanel x:Name="controlsDockPanel" DockPanel.Dock="Bottom" LastChildFill="True">
-                    <Label x:Name="prevLabel" DockPanel.Dock="Left" Content="⏮" HorizontalAlignment="Left" Margin="10,-2,0,0"
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Prev_Click" Foreground="White" FontSize="26.667" Cursor="Hand" Background="{x:Null}"/>
-                    <Label x:Name="playPauseLabel" DockPanel.Dock="Left" Content="⏵" HorizontalAlignment="Left" Margin="2,-4,0,0" 
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="PlayPause_Click" Background="{x:Null}" Foreground="White" FontSize="29.333" Cursor="Hand"/>
-                    <Label x:Name="nextLabel" DockPanel.Dock="Left" Content="⏭" HorizontalAlignment="Left" Margin="10,-2,0,0" 
-					VerticalAlignment="Top" Width="32" Height="42" MouseDown="Next_Click" Background="{x:Null}" Foreground="White" Cursor="Hand" FontSize="26.667"/>
-                    <Label x:Name="randLabel" DockPanel.Dock="Left" Content="🔀" HorizontalAlignment="Left" Margin="6,2,0,0" 
-					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Rand_Click" Foreground="LightGray" Cursor="Hand" FontSize="24" Background="{x:Null}"/>
-                    <Label x:Name="repeatLabel" DockPanel.Dock="Left" Content="🔁" HorizontalAlignment="Left" Margin="0,2,0,0" 
-					VerticalAlignment="Top" Width="34" Height="42" MouseDown="Repeat_Click" Cursor="Hand" Background="{x:Null}" Foreground="LightGray" FontSize="24"/>
-                    <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="0,17,10,0" 
-					ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Top" Width="80" Value="1" 
-					Maximum="1" LargeChange="0.1" IsMoveToPointEnabled="True" Focusable="False"/>
-                    <Label x:Name="volumeLabel" DockPanel.Dock="Right" Content="🔊" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Margin="0,8,0,0" Foreground="White" FontSize="18.667"/>
-                    <Label x:Name="maxTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="39" Margin="0,13,0,0" Foreground="White"/>
-                    <Label x:Name="slashLabel" Content="/" DockPanel.Dock="Right" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="19" Margin="0,13,0,0" Foreground="White"/>
-                    <Label x:Name="currTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
-					VerticalAlignment="Top" Width="38" Margin="0,13,0,0" Foreground="White"/>
-                    <Slider x:Name="musicTimelineSlider" ValueChanged="MusicTimelineSlider_ValueChanged" SmallChange="1"
-					IsMoveToPointEnabled="True" Margin="10,17,0,0" LostMouseCapture="MusicTimelineSlider_LostMouseCapture" Focusable="False"/>
-                </DockPanel>
+                <StackPanel Orientation="Vertical" Margin="10, 0, 10, 0">
+                    <StackPanel x:Name="infoStackPanel" DockPanel.Dock="Top" Orientation="Horizontal" Height="32" Margin="0,6,0,0">
+                        <Label x:Name="artistLabel" Padding="0,4,0,5" Content="" HorizontalAlignment="Left"
+					        VerticalAlignment="Top" FontSize="16" Foreground="White"/>
+                        <Label x:Name="titleLabel" Padding="0,4,0,5" Content="" HorizontalAlignment="Left" Margin="10,0,0,0"
+					        VerticalAlignment="Top" FontSize="16" Foreground="White"/>
+                    </StackPanel>
+                    <DockPanel x:Name="controlsDockPanel" DockPanel.Dock="Bottom" LastChildFill="True">
+                        <Slider x:Name="volumeSlider" DockPanel.Dock="Right" HorizontalAlignment="Center" Margin="0,0,0,0" 
+					        ValueChanged="VolumeSlider_ValueChanged" VerticalAlignment="Center" Width="80" Value="1" Style="{StaticResource sliderStyle}"
+					        Maximum="1" LargeChange="0.1" IsMoveToPointEnabled="True" Focusable="False" MouseMove="slider_OnMouseMove"/>
+                        <Button x:Name="volumeButton" DockPanel.Dock="Right" HorizontalAlignment="Center" Width="28" 
+					        VerticalAlignment="Center" Margin="0,0,0,0" Click="volumeButton_Click" Focusable="False">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid x:Name="volumeButtonGrid" Background="Transparent">
+                                                    <Rectangle x:Name="volumeButtonSurface"/>
+                                                    <ContentControl x:Name="volumeButtonCaption" HorizontalAlignment="Center" Focusable="False"
+                                                        VerticalAlignment="Center" Content="{TemplateBinding Content}"/>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="volumeButtonCaption" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                                        <Setter TargetName="volumeButtonCaption" Property="RenderTransform">
+                                                            <Setter.Value>
+                                                                <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <Image Source="Images\volume_on.png" Stretch="Uniform" StretchDirection="DownOnly"/>
+                        </Button>
+                        <Label x:Name="maxTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
+					        VerticalAlignment="Center" Width="39" Margin="0,0,0,0" Foreground="White"/>
+                        <Label x:Name="slashLabel" Content=" /" DockPanel.Dock="Right" HorizontalAlignment="Left" 
+					        VerticalAlignment="Center" Width="19" Margin="0,0,0,0" Foreground="White"/>
+                        <Label x:Name="currTimelinePosLabel" DockPanel.Dock="Right" Content="00:00" HorizontalAlignment="Left" 
+					        VerticalAlignment="Center" Width="38" Margin="0,0,0,0" Foreground="White"/>
+                        <Slider x:Name="musicTimelineSlider" SmallChange="1" VerticalAlignment="Center" MouseLeftButtonUp="slider_MouseLeftButtonUp" MouseLeave="slider_MouseLeave"
+                            Thumb.DragCompleted="sliderThumb_DragCompleted" IsMoveToPointEnabled="True" Margin="0,0,6,0" Focusable="False"
+                            Style="{StaticResource sliderStyle}" MouseMove="slider_OnMouseMove"/>
+                    </DockPanel>
+                </StackPanel>
             </DockPanel>
         </Border>
         <MediaElement x:Name="mediaElement" HorizontalAlignment="Left" Height="49" Margin="-54,500,0,-48"
@@ -130,56 +608,98 @@
 			Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Manual"/>
         <DockPanel x:Name="mainAreaDockPanel" LastChildFill="False">
             <Border x:Name="navigBorder" BorderThickness="0" BorderBrush="#FF699CBF">
-                <DockPanel x:Name="navigDockPanel" Background="White" Margin="0" Width="400" LastChildFill="True"
+                <DockPanel x:Name="navigDockPanel" Background="#074D7FA4" Margin="0" Width="360" LastChildFill="True"
                        Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
-                    <ProgressBar x:Name="loadingProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF7E8EA4" BorderBrush="{x:Null}" Background="{x:Null}"/>
-                    <ComboBox x:Name="modeComboBox" Margin="20,3,20,0" DockPanel.Dock="Top" SelectionChanged="ModeComboBox_SelectionChanged" Visibility="Hidden" Focusable="False"/>
-                    <DockPanel x:Name="navigControlsDockPanel" Margin="20,0,20,0" LastChildFill="True" DockPanel.Dock="Top">
-                        <Button x:Name="updateButton" DockPanel.Dock="Right" Height="24" Width="24" Content="↻" FontSize="16" BorderBrush="#FFABADB3"
-                                Background="White" Click="UpdateButton_Click" ToolTip="Обновить" Focusable="False"/>
-                        <TextBox x:Name="addressTextBox" Height="24" VerticalAlignment="Center" Padding="0,3,0,0" BorderThickness="1,1,0,1" IsReadOnly="True"/>
+                    <ProgressBar x:Name="navigProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF4D7FA4" BorderBrush="{x:Null}" Background="{x:Null}"/>
+                    <StackPanel x:Name="modeStackPanel" DockPanel.Dock="Top" Margin="18,0,10,0" Orientation="Horizontal" Height="36" Visibility="Hidden">
+                        <TextBlock x:Name="modeTextBlock" Foreground="#FF787878" Text="Режим: " Margin="0,2,0,0" VerticalAlignment="Center" FontSize="13.333"/>
+                        <ComboBox x:Name="modeComboBox" BorderBrush="#FF819FB4" SelectionChanged="ModeComboBox_SelectionChanged"
+                            Focusable="False" FontSize="13.333"/>
+                    </StackPanel>
+                    <DockPanel x:Name="navigControlsDockPanel" Margin="10,0,10,0" LastChildFill="True" DockPanel.Dock="Top">
+                        <Button x:Name="updateButton" DockPanel.Dock="Right" VerticalContentAlignment="Top" Style="{DynamicResource buttonSlyle}" Height="30" Width="30" FontSize="16" BorderBrush="Transparent"
+                            Background="White" Click="UpdateButton_Click" ToolTip="Обновить" Focusable="False" BorderThickness="1" Foreground="#FF2B587A" Margin="-1,2,0,-1" Visibility="Collapsed">
+                            <Image Source="Images\update.png" Stretch="None"/>
+                        </Button>
+                        <TextBox x:Name="addressTextBox" Height="30" VerticalContentAlignment="Bottom" Padding="0,0,0,0" BorderThickness="0" IsReadOnly="True" Margin="6,2,6,-1"
+                            Foreground="#FF787878" CaretBrush="#FF787878" BorderBrush="#FF4D7FA4" AllowDrop="False" FontSize="13.333" Background="{x:Null}"/>
                     </DockPanel>
-                    <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="20,0,20,20" BorderBrush="#FFABADB3" BorderThickness="1,0,1,1"
-                                Background="White" SelectionChanged="NavigTabControl_SelectionChanged" Focusable="False">
-                        <TabItem Width="178">
-                            <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="320" 
-                                      MouseDoubleClick="NavigListView_MouseDoubleClick" ScrollViewer.VerticalScrollBarVisibility="Visible" Focusable="False" BorderBrush="{x:Null}"></ListView>
+                    <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="10,0,10,20" BorderThickness="1,0,1,1"
+                        SelectionChanged="NavigTabControl_SelectionChanged" Focusable="False">
+                        <TabItem Width="167" Height="26" FontSize="13.333" Margin="8,0,0,0">
+                            <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="332" 
+                                MouseDoubleClick="NavigListView_MouseDoubleClick" ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False" BorderBrush="{x:Null}" Background="{x:Null}"/>
                         </TabItem>
-                        <TabItem Width="178">
-                            <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="320"
-                                      ScrollViewer.VerticalScrollBarVisibility="Visible" Focusable="False" BorderBrush="{x:Null}"></ListView>
+                        <TabItem Width="167" Height="26" FontSize="13.333">
+                            <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="332"
+                                ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False" BorderBrush="{x:Null}" Background="{x:Null}"/>
                         </TabItem>
                     </TabControl>
                 </DockPanel>
             </Border>
             <Border x:Name="audioParamsBorder" DockPanel.Dock="Top" BorderThickness="0" BorderBrush="#FF699CBF" Margin="0,0,0,0">
-                <DockPanel x:Name="audioParamsDockPanel" LastChildFill="True" DockPanel.Dock="Top" Height="27">
-                    <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Width="90" Margin="0,0,0,0" Content="Песен: 0" FontSize="14.667"
-                           ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="4,3,0,0" Background="White" BorderThickness="0" BorderBrush="#FF819FB4"
-                           Foreground="#FF2B587A" ToolTip="Количество песен в открытом списке" Height="27" VerticalAlignment="Bottom"/>
-                    <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Width="169" ToolTip="Сортировка песен" BorderThickness="0" FontSize="13.333" 
-                          SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF819FB4" Foreground="#FF2B587A" Background="#FFF3F3F3" Margin="0,1" Focusable="False">
-                        <ComboBoxItem>По дате добавления</ComboBoxItem>
-                        <ComboBoxItem>По названию</ComboBoxItem>
-                        <ComboBoxItem>По исполнителю</ComboBoxItem>
-                    </ComboBox>
-                    <Button x:Name="myMusicButton" DockPanel.Dock="Right" Width="52" Content="🏠" Click="HomeButton_Click" Height="27" BorderThickness="0" 
-                            FontSize="18.667" Foreground="#FF2B587A" BorderBrush="#FF819FB4" Background="White" ToolTip="Переход к изначальному списку" Focusable="False"/>
-                    <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" 
-                            Background="White" BorderBrush="#FF819FB4" FontSize="13.333" ToolTip="Поиск" Focusable="False" BorderThickness="0,1,1,1"/>
-                    <TextBox x:Name="searchTextBox" FontSize="16" Margin="1,0,0,0" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" 
-                             KeyDown="SearchButton_Click" BorderBrush="#FF819FB4" ToolTip="Введите поисковой запрос" Text="Поиск..." Loaded="searchTextBox_Loaded" 
-                             GotFocus="searchTextBox_GotFocus" LostFocus="searchTextBox_LostFocus" Background="White" Foreground="LightGray"></TextBox>
+                <DockPanel x:Name="audioParamsStackPanel" Height="73">
+                    <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="10,0,10,0">
+                        <TextBlock x:Name="sortTextBlock" DockPanel.Dock="Left" VerticalAlignment="Center" Text="Сортировка: " Margin="0,3,0,0" Foreground="#FF787878" FontSize="13.333"/>
+                        <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Height="36" Width="169" ToolTip="Сортировка песен" BorderThickness="0" FontSize="13.333" 
+                            SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF819FB4" Margin="0,1,0,2" Focusable="False">
+                            <TextBlock>По дате добавления</TextBlock>
+                            <TextBlock>По названию</TextBlock>
+                            <TextBlock>По исполнителю</TextBlock>
+                        </ComboBox>
+                        <Button x:Name="searchButton" DockPanel.Dock="Right" Width="27" Content="🔎" Click="SearchButton_Click" Foreground="#FF2B587A" 
+                            Height="{Binding ActualHeight, ElementName=searchTextBox, Mode=OneWay}" Background="White" BorderBrush="#FF819FB4" FontSize="13.333" 
+                            ToolTip="Поиск" Focusable="False" BorderThickness="0,1,1,1"/>
+                        <TextBox x:Name="searchTextBox" DockPanel.Dock="Right" FontSize="16" Margin="1,0,0,0" VerticalContentAlignment="Center" BorderThickness="1,1,0,1" Height="30"
+                            KeyDown="SearchButton_Click" BorderBrush="#FF819FB4" ToolTip="Введите поисковой запрос" Text="Поиск..." Loaded="searchTextBox_Loaded" 
+                            GotFocus="searchTextBox_GotFocus" LostFocus="searchTextBox_LostFocus" Background="White" HorizontalContentAlignment="Left" Foreground="LightGray" Width="300"/>
+                    </DockPanel>
+                    <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Margin="10,0,10,0">
+                        <Label x:Name="numOfAudioTextBlock" DockPanel.Dock="Left" Margin="0,0,0,0" Content="Количество песен в списке: 0" FontSize="13.333" HorizontalContentAlignment="Left"
+                            ScrollViewer.VerticalScrollBarVisibility="Disabled" Padding="0,3,0,0" Background="White" BorderThickness="0" BorderBrush="#FF819FB4"
+                            Foreground="#FF787878" VerticalAlignment="Center"/>
+                        <Button x:Name="myMusicButton" DockPanel.Dock="Right" Content="Моя музыка" Click="myMusicButton_Click" BorderThickness="0" 
+                            FontSize="13.333" BorderBrush="{x:Null}" Background="White" Focusable="False">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Width" Value="{Binding Width}"/>
+                                    <Setter Property="Height" Value="{Binding Height}"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Focusable" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Grid x:Name="buttonGrid" Background="Transparent">
+                                                    <Rectangle x:Name="buttonSurface" StrokeThickness="0" Stroke="Transparent"/>
+                                                    <Label x:Name="buttonCaption" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                        Content="{TemplateBinding Content}" Foreground="#FF2B587A"/>
+                                                </Grid>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="buttonCaption" Property="Foreground" Value="#FF5585A8"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="buttonCaption" Property="Foreground" Value="#FF76A2C1"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </DockPanel>
                 </DockPanel>
             </Border>
-            <DataGrid x:Name="playlist1DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}"
-                      Visibility="Visible" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
+            <ProgressBar x:Name="songsProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF4D7FA4" BorderBrush="{x:Null}" Background="{x:Null}"/>
+            <DataGrid x:Name="playlist1DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"
+                Visibility="Visible" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <DataGrid x:Name="playlist2DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsDockPanel, Mode=OneWay}"
-                      Visibility="Collapsed" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
+            <DataGrid x:Name="playlist2DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"
+                Visibility="Collapsed" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
                     <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
                 </DataGrid.Columns>

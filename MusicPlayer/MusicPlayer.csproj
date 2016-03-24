@@ -34,6 +34,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Images\icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -93,6 +99,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -109,8 +116,64 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Images\" />
     <Folder Include="Properties\DataSources\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\play.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\pause.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\prev.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\rand.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\rand_active.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\repeat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\repeat_one.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\repeat_all.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\current_songs.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\settings.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_on.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\volume_off.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\update.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\play_taskbar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\pause_taskbar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\prev_taskbar.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\next_taskbar.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

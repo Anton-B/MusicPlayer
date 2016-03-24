@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System;
+using System.Windows;
 
 namespace FileSystemPlugin
 {
@@ -17,12 +18,15 @@ namespace FileSystemPlugin
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
         public int OpenedTabIndex { get; set; }
+        public bool UseDefaultNavigListStyle { get { return true; } }
+        public bool SupportsSongMenuButton { get { return true; } }
         public bool UseDefaultHomeButton { get { return false; } }
         public bool UseDefaultSearch { get { return true; } }
         public bool DoubleClickToOpenItem { get { return true; } }
         public bool SortSearchResults { get { return true; } }
         public bool UpdatePlaylistWhenFavoritesChanges { get { return true; } }
         public List<NavigationItem> FavoriteItems { get; private set; } = new List<NavigationItem>();
+        private const string deleteSongMenuItem = "Удалить аудиозапись с компьютера";
         private const double itemHeight = 24;
         private const double fontHeight = 12;
         private const string diskImageSource = @"Plugins\FileSystemPlugin\Images\disk.png";
@@ -34,35 +38,46 @@ namespace FileSystemPlugin
 
         public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
-            List<NavigationItem> navigItems = new List<NavigationItem>();
-            if (path == null)
+            try
             {
-                var drives = DriveInfo.GetDrives();
-                foreach (var drive in drives)
-                    navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
-                        itemHeight, true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + diskImageSource));
-            }
-            else
-            {
-                var parent = Directory.GetParent(path);
-                navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight,
-                    true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
-                DirectoryInfo di = new DirectoryInfo(path);
-                var dirs = di.GetDirectories();
-                foreach (var dir in dirs)
+                List<NavigationItem> navigItems = new List<NavigationItem>();
+                if (path == null)
                 {
-                    var item = new NavigationItem(dir.Name, dir.FullName, itemHeight,
-                        true, true, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + folderImageSource);
-                    item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (FavoriteItems.Contains(item) ? DeleteButtonImageSource : AddButtonImageSource);
-                    navigItems.Add(item);
+                    var drives = DriveInfo.GetDrives();
+                    foreach (var drive in drives)
+                        navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
+                            itemHeight, true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + diskImageSource));
                 }
-                    
-                var files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
-                foreach (var file in files)
-                    navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight,
-                        false, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + audioImageSource));
+                else
+                {
+                    var parent = Directory.GetParent(path);
+                    navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight,
+                        true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
+                    DirectoryInfo di = new DirectoryInfo(path);
+                    var dirs = di.GetDirectories();
+                    foreach (var dir in dirs)
+                    {
+                        var item = new NavigationItem(dir.Name, dir.FullName, itemHeight,
+                            true, true, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + folderImageSource);
+                        item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (FavoriteItems.Contains(item) ? DeleteButtonImageSource : AddButtonImageSource);
+                        navigItems.Add(item);
+                    }
+
+                    var files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
+                    foreach (var file in files)
+                        navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight,
+                            false, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + audioImageSource));
+                }
+                return navigItems;
             }
-            return navigItems;
+            catch
+            {
+                MessageBox.Show("Ошибка доступа к директории", "Ошибка доступа", MessageBoxButton.OK, MessageBoxImage.Error);
+                var list = new List<NavigationItem>();
+                list.Add(new NavigationItem("[Назад]", Directory.GetParent(path)?.FullName, itemHeight,
+                        true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
+                return list;
+            }
         }
 
         public void AddToFavorites(NavigationItem item)
@@ -94,14 +109,13 @@ namespace FileSystemPlugin
                             using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
                             {
                                 var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
-                                Song song = new Song();
-                                song.Path = mp3FilePaths[i];
-                                song.Title = (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title;
-                                song.Artist = (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer;
-                                song.Duration = TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
-                                    + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds);
-                                FileInfo file = new FileInfo(mp3FilePaths[i]);
-                                song.CreationTime = file.CreationTime.Ticks;
+                                Song song = new Song(i.ToString(), (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title,
+                                                     (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer,
+                                                     TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
+                                                     + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds),
+                                                     tagFile.Tag.Lyrics,
+                                                     mp3FilePaths[i],
+                                                     new FileInfo(mp3FilePaths[i]).CreationTime.Ticks);                                
                                 songs.Add(song);
                             }
                         }
@@ -140,9 +154,43 @@ namespace FileSystemPlugin
             return new Song[0];
         }
 
-        public async Task<Song[]> GetHomeButtonSongs()
+        public async Task<Song[]> GetMyMusicSongs()
         {
             return lastLoadedSongs;
+        }
+
+        public async Task<List<string>> GetSongMenuItems(Song song)
+        {
+            return new List<string>() { deleteSongMenuItem };
+        }
+
+        public async Task<UpdateBehavior> HandleMenuItemClick(string itemText, Song song)
+        {
+            if (itemText == deleteSongMenuItem)
+            {
+                var answer = MessageBox.Show(string.Format("Вы уверены, что хотите безвозвратно удалить аудиозапись \"{0}\" с вашего компьютера?",
+                    new FileInfo(song.Path).Name), "Удаление аудиозаписи", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                if (answer == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        await Task.Run(() => System.IO.File.Delete(song.Path));
+                    }
+                    catch (IOException ex)
+                    {
+                        MessageBox.Show("Возникла ошибка при попытке удаления файла.",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return UpdateBehavior.NoUpdate;
+                    }
+                    var songs = lastLoadedSongs.ToList();
+                    songs.Remove(song);
+                    lastLoadedSongs = songs.ToArray();
+                    MessageBox.Show("Аудиозапись успешно удалена с компьютера!", "Удаление аудиозаписи", 
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return UpdateBehavior.DeleteSongAndUpdateAll;
+                }
+            }
+            return UpdateBehavior.NoUpdate;
         }
     }
 }

@@ -6,11 +6,4 @@ D:\C#\MusicPlayer\VKPlugin\obj\Debug\VKPlugin.dll
 D:\C#\MusicPlayer\VKPlugin\obj\Debug\VKPlugin.pdb
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\add.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\delete.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\login.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\logout.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\friends.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\groups.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\playlists.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\audio.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\playlist.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\VKPlugin\Images\faviconnew.ico
