@@ -23,7 +23,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Border x:Name="Border" Grid.ColumnSpan="2" CornerRadius="0" Background="Transparent" BorderBrush="Transparent"
+                <Border x:Name="Border" Grid.ColumnSpan="2"  Background="Transparent" BorderBrush="Transparent"
                     BorderThickness="0" />
             </Grid>
             <ControlTemplate.Triggers>
@@ -32,7 +32,7 @@
                         <Condition Property="IsMouseOver" Value="True"/>
                         <Condition Property="IsChecked" Value="True"/>
                     </MultiTrigger.Conditions>
-                    <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                    <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>                    
                 </MultiTrigger>
                 <MultiTrigger>
                     <MultiTrigger.Conditions>
@@ -84,9 +84,9 @@
                                 Focusable="False" PopupAnimation="Slide">
                                 <Grid Name="DropDown" SnapsToDevicePixels="True" MinWidth="{TemplateBinding ActualWidth}" Margin="0,0,0,4"
                                     MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                    <Border x:Name="DropDownBorder" Background="White" Padding="0,4"
+                                    <Border x:Name="DropDownBorder" Background="White" Padding="0,4" 
                                         BorderThickness="1,0,1,1" BorderBrush="#FF4D7FA4"/>
-                                    <ScrollViewer Margin="0" SnapsToDevicePixels="True">
+                                    <ScrollViewer SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>
                                 </Grid>
@@ -108,7 +108,7 @@
                                     <Condition SourceName="ToggleButton" Property="IsMouseOver" Value="True"/>
                                     <Condition SourceName="ToggleButton" Property="IsChecked" Value="True"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="ContentSite" Property="Foreground" Value="White"/>
+                                <Setter TargetName="ContentSite" Property="Foreground" Value="White"/>                                
                             </MultiTrigger>
                             <Trigger Property="HasItems" Value="False">
                                 <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
@@ -119,8 +119,7 @@
                             <Trigger Property="IsGrouping" Value="True">
                                 <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
                             </Trigger>
-                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
-                                <Setter TargetName="DropDownBorder" Property="CornerRadius" Value="0"/>
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">                                
                                 <Setter TargetName="DropDownBorder" Property="Margin" Value="0,-20,0,0"/>
                             </Trigger>
                             <Trigger Property="IsEditable" Value="True">
@@ -168,7 +167,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
                         <Border x:Name="navigItemBorder" Background="Transparent" BorderBrush="#664D7FA4"
-                            BorderThickness="1" MouseDown="NavigListView_MouseDown" Margin="2,0,2,4"
+                            BorderThickness="1" MouseDown="NavigListView_MouseDown" Margin="2,0,2,4" CornerRadius="4"
                             MouseEnter="NavigationDockPanel_MouseEnterLeave" MouseLeave="NavigationDockPanel_MouseEnterLeave">
                             <Label Content="{TemplateBinding Content}" Margin="0" VerticalAlignment="Center"/>
                         </Border>
@@ -176,7 +175,6 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="navigItemBorder" Property="BorderBrush" Value="#334D7FA4"/>
                                 <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
-
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
@@ -220,7 +218,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="TabItem">
                         <Grid x:Name="Root">
-                            <Border x:Name="Border" Margin="0,0,0,0" BorderThickness="1,1,1,1" CornerRadius="0" 
+                            <Border x:Name="Border" Margin="0,0,0,0" BorderThickness="1,1,1,1" CornerRadius="2" 
                                 BorderBrush="#FF4D7FA4" Background="Transparent" Cursor="Hand">
                                 <ContentPresenter x:Name="ContentSite" VerticalAlignment="Center" 
                                     HorizontalAlignment="Center" ContentSource="Header" Margin="12,2,12,2" RecognizesAccessKey="True"/>
@@ -231,7 +229,6 @@
                                 <Setter Property="Foreground" Value="#FF2A638D"/>
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Panel.ZIndex" Value="100"/>
                                 <Setter TargetName="Border" Property="Cursor" Value="Arrow"/>
                                 <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
                                 <Setter TargetName="Border" Property="BorderBrush" Value="#FF4D7FA4"/>
@@ -470,49 +467,53 @@
                             <Setter Property="BorderBrush" Value="#334D7FA4"/>
                             <Setter Property="Foreground" Value="Gray"/>
                             <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border x:Name="Border" Background="Transparent" CornerRadius="4" BorderBrush="#334D7FA4" BorderThickness="0,0,0,1">
+                                            <DockPanel Focusable="False" LastChildFill="False">
+                                                <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"/>
+                                                <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0">
+                                                    <TextBlock x:Name="titleTextBlock" Text="{Binding Title}" Margin="0,0,0,0" FontSize="16">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Style.Setters>
+                                                                    <Setter Property="Foreground" Value="#FF2B587A"/>
+                                                                </Style.Setters>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding ElementName=artistTextBlock, Path=Foreground}" Value="White">
+                                                                        <Setter Property="Foreground" Value="White"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
+                                                    <TextBlock x:Name="artistTextBlock" Text="{Binding Artist}" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                            </DockPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                                                <Setter Property="Foreground" Value="White"/>
+                                                <Setter Property="Cursor" Value="Arrow"/>
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True"/>
+                                                    <Condition Property="IsSelected" Value="False"/>
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Border" Property="Background" Value="#334D7FA4"/>
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
                         </Style.Setters>
-                        <Style.Triggers>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#FF4D7FA4"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="Cursor" Value="Arrow"/>
-                            </Trigger>
-                            <MultiTrigger>
-                                <MultiTrigger.Conditions>
-                                    <Condition Property="IsMouseOver" Value="True"/>
-                                    <Condition Property="IsSelected" Value="False"/>
-                                </MultiTrigger.Conditions>
-                                <Setter Property="Background" Value="#334D7FA4"/>
-                            </MultiTrigger>
-                        </Style.Triggers>
                     </Style>
                 </Setter.Value>
             </Setter>
         </Style>
-        <DataTemplate x:Key="musicListCellTemplate">
-            <Border>
-                <DockPanel Focusable="False" LastChildFill="False">
-                    <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"/>
-                    <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0">
-                        <TextBlock x:Name="titleTextBlock" Text="{Binding Title}" Margin="0,0,0,0" FontSize="16">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Style.Setters>
-                                        <Setter Property="Foreground" Value="#FF2B587A"/>
-                                    </Style.Setters>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ElementName=artistTextBlock, Path=Foreground}" Value="White">
-                                            <Setter Property="Foreground" Value="White"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                        <TextBlock x:Name="artistTextBlock" Text="{Binding Artist}" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
-        </DataTemplate>
     </Window.Resources>
 
     <DockPanel x:Name="mainDockPanel" LastChildFill="True">
@@ -624,7 +625,7 @@
                         <TextBox x:Name="addressTextBox" Height="30" VerticalContentAlignment="Bottom" Padding="0,0,0,0" BorderThickness="0" IsReadOnly="True" Margin="6,2,6,-1"
                             Foreground="#FF787878" CaretBrush="#FF787878" BorderBrush="#FF4D7FA4" AllowDrop="False" FontSize="13.333" Background="{x:Null}"/>
                     </DockPanel>
-                    <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="10,0,10,20" BorderThickness="1,0,1,1"
+                    <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="10,0,10,20" BorderThickness="1,1,1,1"
                         SelectionChanged="NavigTabControl_SelectionChanged" Focusable="False">
                         <TabItem Width="167" Height="26" FontSize="13.333" Margin="8,0,0,0">
                             <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="332" 
@@ -695,13 +696,13 @@
             <DataGrid x:Name="playlist1DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"
                 Visibility="Visible" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
+                    <DataGridTemplateColumn  Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
             <DataGrid x:Name="playlist2DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"
                 Visibility="Collapsed" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn CellTemplate="{StaticResource musicListCellTemplate}" Width="*"/>
+                    <DataGridTemplateColumn Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
         </DockPanel>
