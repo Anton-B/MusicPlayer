@@ -5,7 +5,6 @@ namespace MusicPlayerAPI
 {
     public class NavigationItem
     {
-        public object Parent { get; set; }
         public string Name { get; set; }
         public string Path { get; set; }
         public double Height { get; set; } = 24;

@@ -14,7 +14,6 @@ using System.Configuration;
 using MusicPlayerAPI;
 using System.Threading.Tasks;
 using System.Windows.Media.Animation;
-using FMUtils.KeyboardHook;
 
 namespace MusicPlayer
 {
@@ -84,14 +83,12 @@ namespace MusicPlayer
         }
         private bool songsListBlocked = false;
         private bool dragStarted = false;
-        Hook keyboardHook = new Hook("Media Keys Hook");
 
         #region WINDOW
         public MainWindow()
         {
             InitializeComponent();
             InitializeTimer();
-            keyboardHook.KeyDownEvent += MediaKeyDown;
             contentButtonImage = (Image)this.Resources["contentButtonImage"];
             playlist1DataGrid.Tag = playlist1Songs;
             playlist2DataGrid.Tag = playlist2Songs;
@@ -134,22 +131,6 @@ namespace MusicPlayer
                 musicTimelineSlider.Value = mediaElement.Position.TotalMilliseconds;
             currTimelinePosLabel.Content = TimeFormatter.Format((int)TimeSpan.FromMilliseconds(musicTimelineSlider.Value).TotalMinutes)
                 + ":" + TimeFormatter.Format(TimeSpan.FromMilliseconds(musicTimelineSlider.Value).Seconds);
-        }
-
-        private void MediaKeyDown(KeyboardHookEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case System.Windows.Forms.Keys.MediaPreviousTrack:
-                    prevButton_Click(null, new EventArgs());
-                    break;
-                case System.Windows.Forms.Keys.MediaPlayPause:
-                    playPauseButton_Click(null, new EventArgs());
-                    break;
-                case System.Windows.Forms.Keys.MediaNextTrack:
-                    nextButton_Click(null, new EventArgs());
-                    break;
-            }
         }
 
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
@@ -475,27 +456,29 @@ namespace MusicPlayer
         private void NavigListView_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left && pluginsManager.DoubleClickToOpenItem)
-                OpenItem(((ListView)sender).SelectedItem as NavigationItem);
+                OpenItem(((ListView)sender).SelectedItem as DockPanel);
         }
 
         private void NavigListView_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left && !pluginsManager.DoubleClickToOpenItem)
-                OpenItem((sender as Border)?.DataContext as NavigationItem);
+                OpenItem(sender is Border ? (sender as Border)?.DataContext as DockPanel : (sender as DockPanel)?.Parent as DockPanel);
         }
 
-        private async void OpenItem(NavigationItem item)
+        private async void OpenItem(DockPanel outerPanel)
         {
-            if (item == null)
+            DockPanel innerPanel = outerPanel?.Children[outerPanel.Children.Count - 1] as DockPanel;
+            if (innerPanel == null)
                 return;
+            NavigationItem item = innerPanel.Tag as NavigationItem;
             if (item.UseAreYouSureMessageBox)
             {
                 var answer = MessageBox.Show(this, item.AreYouSureMessageBoxMessage, item.Name, MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                 if (answer == MessageBoxResult.No)
                 {
-                    ((ListView)item.Parent).SelectedIndex = -1;
+                    ((ListView)outerPanel.Parent).SelectedIndex = -1;
                     return;
-                }
+                }                    
             }
             if (item != null && item.CanBeOpened)
                 await ShowItems(item.Path, true);
@@ -521,9 +504,7 @@ namespace MusicPlayer
         private async Task ShowNavigationItems(string path, bool isScrollToUp)
         {
             navigProgressBar.IsIndeterminate = true;
-            var count = navigListView.Items.Count;
-            for (int i = 0; i < count; i++)
-                navigListView.Items.RemoveAt(0);
+            navigListView.Items.Clear();
             List<NavigationItem> navItems = await pluginsManager.GetNavigationItems(path);
             if (navItems == null)
                 return;
@@ -541,9 +522,7 @@ namespace MusicPlayer
 
         private void ShowFavoriteItems()
         {
-            var count = favoritesListView.Items.Count;
-            for (int i = 0; i < count; i++)
-                favoritesListView.Items.RemoveAt(0);
+            favoritesListView.Items.Clear();
             List<NavigationItem> favItems = pluginsManager.GetFavoriteItems();
             if (navigTabControl.SelectedIndex == 1)
                 addressTextBox.Text = pluginsManager.GetHeader(1);
@@ -555,13 +534,59 @@ namespace MusicPlayer
 
         private void ShowNavigationItem(ListView listView, NavigationItem ni)
         {
-            ni.Parent = listView;
-            listView.Items.Add(ni);
+            DockPanel outerDP = new DockPanel();
+            outerDP.LastChildFill = true;
+            outerDP.Background = Brushes.Transparent;            
+            DockPanel innerDP = new DockPanel();
+            DockPanel.SetDock(innerDP, Dock.Left);
+            innerDP.LastChildFill = true;
+            innerDP.Background = Brushes.Transparent;
+            outerDP.Tag = innerDP.Tag = ni;
+            innerDP.Height = ni.Height;
+            innerDP.Width = listView.MinWidth;
+            innerDP.Cursor = ni.CursorType;
+            try
+            {
+                Image img = new Image();
+                img.Source = new BitmapImage(new Uri(ni.ImageSource, UriKind.RelativeOrAbsolute));
+                img.Height = ni.Height;           
+                DockPanel.SetDock(img, Dock.Left);
+                innerDP.Children.Add(img);
+            }
+            catch { }
+            Label label = new Label();
+            label.VerticalContentAlignment = VerticalAlignment.Center;
+            label.Content = ni.Name;
+            label.FontSize = ni.FontSize;
+            label.Foreground = ni.Foreground;
+            label.Height = ni.Height;
+            label.Padding = new Thickness(10, 0, 0, 0);
+            innerDP.Children.Add(label);
+            if (ni.CanBeFavorite)
+            {
+                Button addDelButton = new Button();
+                addDelButton.Style = (Style)this.Resources["buttonSlyle"];
+                var image = new Image();
+                image.Source = new BitmapImage(new Uri(ni.AddRemoveFavoriteImageSource, UriKind.RelativeOrAbsolute));
+                addDelButton.Content = image;
+                addDelButton.BorderBrush = Brushes.Transparent;
+                addDelButton.Visibility = Visibility.Hidden;
+                addDelButton.ToolTip = "Добавить в избранное / удалить из избранного";
+                addDelButton.Cursor = Cursors.Hand;
+                addDelButton.Width = image.Source.Width;
+                addDelButton.Height = image.Source.Height;
+                addDelButton.Click += ChangeFavorites;
+                DockPanel.SetDock(addDelButton, Dock.Right);
+                outerDP.Children.Add(addDelButton);
+            }
+            outerDP.Children.Add(innerDP);
+            outerDP.Cursor = ni.CursorType;
+            listView.Items.Add(outerDP);
         }
-
+        
         private void NavigationDockPanel_MouseEnterLeave(object sender, MouseEventArgs e)
         {
-            DockPanel outerDp = sender is Border ? (DockPanel)((Border)sender).Child : (DockPanel)sender;
+            DockPanel outerDp = sender is Border ? (DockPanel)((Border)sender).DataContext : (DockPanel)sender;
             if (outerDp == null)
                 return;
             if (outerDp.Children.Count == 1 && outerDp.Children[0] as Image == null)
@@ -575,19 +600,19 @@ namespace MusicPlayer
 
         private async void ChangeFavorites(object sender, RoutedEventArgs e)
         {
-            NavigationItem ni = ((Button)sender).DataContext as NavigationItem;
+            NavigationItem ni = (NavigationItem)((DockPanel)((Button)sender).Parent).Tag;
             if (pluginsManager.IsFavorite(ni))
             {
                 pluginsManager.DeleteFromFavorites(ni);
                 ((Image)((Button)sender).Content).Source = new BitmapImage(new Uri(string.Format(@"{0}\{1}", Environment.CurrentDirectory, pluginsManager.AddButtonImageSource), UriKind.RelativeOrAbsolute));
                 await ShowItems(addressTextBox.Tag?.ToString(), false);
-            }
+            } 
             else
             {
                 pluginsManager.AddToFavorites(ni);
                 ((Image)((Button)sender).Content).Source = new BitmapImage(new Uri(string.Format(@"{0}\{1}", Environment.CurrentDirectory, pluginsManager.DeleteButtonImageSource), UriKind.RelativeOrAbsolute));
-            }
-            var btnImage = ((Button)sender).Content as Image;
+            }                
+            var btnImage = ((Button)sender).Content as Image;            
             if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
             {
                 mainAreaDockPanel.IsEnabled = false;

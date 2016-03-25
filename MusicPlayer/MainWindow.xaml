@@ -32,7 +32,7 @@
                         <Condition Property="IsMouseOver" Value="True"/>
                         <Condition Property="IsChecked" Value="True"/>
                     </MultiTrigger.Conditions>
-                    <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>
+                    <Setter TargetName="Border" Property="Background" Value="#FF4D7FA4"/>                    
                 </MultiTrigger>
                 <MultiTrigger>
                     <MultiTrigger.Conditions>
@@ -108,7 +108,7 @@
                                     <Condition SourceName="ToggleButton" Property="IsMouseOver" Value="True"/>
                                     <Condition SourceName="ToggleButton" Property="IsChecked" Value="True"/>
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="ContentSite" Property="Foreground" Value="White"/>
+                                <Setter TargetName="ContentSite" Property="Foreground" Value="White"/>                                
                             </MultiTrigger>
                             <Trigger Property="HasItems" Value="False">
                                 <Setter TargetName="DropDownBorder" Property="MinHeight" Value="95"/>
@@ -119,7 +119,7 @@
                             <Trigger Property="IsGrouping" Value="True">
                                 <Setter Property="ScrollViewer.CanContentScroll" Value="False"/>
                             </Trigger>
-                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
+                            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">                                
                                 <Setter TargetName="DropDownBorder" Property="Margin" Value="0,-20,0,0"/>
                             </Trigger>
                             <Trigger Property="IsEditable" Value="True">
@@ -160,72 +160,25 @@
             </Setter>
         </Style>
 
-        <Style x:Key="buttonStyle" TargetType="Button">
-            <Setter Property="Width" Value="{Binding Width}"/>
-            <Setter Property="Height" Value="{Binding Height}"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Focusable" Value="False"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Grid x:Name="buttonGrid" Background="Transparent">
-                            <Border x:Name="buttonSurface" CornerRadius="4" BorderThickness="1" Background="White" BorderBrush="Transparent"/>
-                            <ContentPresenter x:Name="buttonCaption" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Content="{TemplateBinding Content}"/>
-                        </Grid>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="buttonSurface" Property="BorderBrush" Value="White"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="buttonCaption" Property="RenderTransformOrigin" Value="0.5,0.5"/>
-                                <Setter TargetName="buttonCaption" Property="RenderTransform">
-                                    <Setter.Value>
-                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
-                                    </Setter.Value>
-                                </Setter>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
         <Style TargetType="ListViewItem">
-            <Setter Property="OverridesDefaultStyle" Value="False"/>
-            <Setter Property="Cursor" Value="{Binding CursorType}"/>
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="Cursor" Value="{Binding Cursor}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ListViewItem">
-                        <Border x:Name="navigItemBorder" Background="Transparent" BorderBrush="#FF4D7FA4"
+                        <Border x:Name="navigItemBorder" Background="Transparent" BorderBrush="#664D7FA4"
                             BorderThickness="1" MouseDown="NavigListView_MouseDown" Margin="2,0,2,4" CornerRadius="4"
                             MouseEnter="NavigationDockPanel_MouseEnterLeave" MouseLeave="NavigationDockPanel_MouseEnterLeave">
-                            <DockPanel Margin="6" x:Name="outer" LastChildFill="True" Background="Transparent" Cursor="{Binding CursorType}">
-                                <Button x:Name="addDel" DockPanel.Dock="Right" Style="{DynamicResource buttonStyle}"
-                                    Height="{Binding ElementName=btnImg, Path=Source.Height}" Width="{Binding ElementName=btnImg, Path=Source.Width}"
-                                    BorderBrush="Transparent" Visibility="Hidden" ToolTip="Добавить в избранное / удалить из избранного" 
-                                    Cursor="Hand" Click="ChangeFavorites">
-                                    <Image x:Name="btnImg" Source="{Binding AddRemoveFavoriteImageSource}"/>
-                                </Button>
-                                <DockPanel x:Name="inner" DockPanel.Dock="Left" LastChildFill="True" Background="Transparent"
-                                    Width="300" Height="{Binding Height}" Cursor="{Binding CursosType}">
-                                    <Image DockPanel.Dock="Left" Source="{Binding ImageSource}" Height="{Binding Height}"/>
-                                    <Label x:Name="label" VerticalContentAlignment="Center" Content="{Binding Name}" FontSize="{Binding FontSize}"
-                                        Foreground="{Binding Foreground}" Height="{Binding Height}" Padding="10,0,0,0"/>
-                                </DockPanel>
-                            </DockPanel>
+                            <Label Content="{TemplateBinding Content}" Margin="0" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding CanBeFavorite}" Value="False">
-                                <Setter TargetName="addDel" Property="Width" Value="0"/>
-                                <Setter TargetName="addDel" Property="Height" Value="0"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding CanBeFavorite}" Value="True">
-                                <Setter TargetName="addDel" Property="Style" Value="{DynamicResource buttonStyle}"/>
-                            </DataTrigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="navigItemBorder" Property="Background" Value="#FF4D7FA4"/>
-                                <Setter TargetName="label" Property="Foreground" Value="White"/>
+                                <Setter TargetName="navigItemBorder" Property="BorderBrush" Value="#334D7FA4"/>
+                                <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="navigItemBorder" Property="Background" Value="#334D7FA4"/>
+                                <Setter TargetName="navigItemBorder" Property="BorderBrush" Value="#FF4D7FA4"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Foreground" Value="Gray"/>
@@ -287,7 +240,7 @@
             </Setter>
         </Style>
 
-        <Style x:Key="playerButtonStyle" TargetType="Button">
+        <Style x:Key="playerButtonSlyle" TargetType="Button">
             <Setter Property="Width" Value="60"/>
             <Setter Property="Height" Value="Auto"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -318,7 +271,38 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Image x:Key="contentButtonImage" Stretch="Uniform" StretchDirection="DownOnly"/>        
+        <Image x:Key="contentButtonImage" Stretch="Uniform" StretchDirection="DownOnly"/>
+
+        <Style x:Key="buttonSlyle" TargetType="Button">
+            <Setter Property="Width" Value="{Binding Width}"/>
+            <Setter Property="Height" Value="{Binding Height}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="buttonGrid" Background="Transparent">
+                            <Rectangle x:Name="buttonSurface" StrokeThickness="1" Stroke="Transparent"/>
+                            <ContentPresenter x:Name="buttonCaption" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Content="{TemplateBinding Content}"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="buttonSurface" Property="Stroke" Value="#FF4D7FA4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="buttonCaption" Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                <Setter TargetName="buttonCaption" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.9" ScaleY="0.9"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style x:Key="sliderButtonStyle" TargetType="RepeatButton">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -538,31 +522,31 @@
                 <StackPanel x:Name="controlButtonsStackPanel" DockPanel.Dock="Left" 
                     Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,0">
                     <Button x:Name="prevButton" DockPanel.Dock="Left"
-					    Click="prevButton_Click" Style="{StaticResource playerButtonStyle}">
+					    Click="prevButton_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\prev.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="playPauseButton" DockPanel.Dock="Left"
-                        Click="playPauseButton_Click" Style="{StaticResource playerButtonStyle}">
+                        Click="playPauseButton_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\play.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="nextButton" DockPanel.Dock="Left"
-					    Click="nextButton_Click" Style="{StaticResource playerButtonStyle}">
+					    Click="nextButton_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\next.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="randButton" DockPanel.Dock="Left"
-					    Click="Rand_Click" Style="{StaticResource playerButtonStyle}">
+					    Click="Rand_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\rand.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="repeatButton" DockPanel.Dock="Left"
-					    Click="Repeat_Click" Style="{StaticResource playerButtonStyle}">
+					    Click="Repeat_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\repeat.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="currentListButton" DockPanel.Dock="Left" ToolTip="К текущему списку воспроизведения"
-					    Click="currentListButton_Click" Style="{StaticResource playerButtonStyle}">
+					    Click="currentListButton_Click" Style="{StaticResource playerButtonSlyle}">
                         <Image Source="Images\current_songs.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                     <Button x:Name="songMenuButton" DockPanel.Dock="Left"
-					    Click="songMenuButton_Click" Style="{StaticResource playerButtonStyle}" ToolTip="Меню аудиозаписи">
+					    Click="songMenuButton_Click" Style="{StaticResource playerButtonSlyle}" ToolTip="Меню аудиозаписи">
                         <Image Source="Images\settings.png" Stretch="Uniform" StretchDirection="DownOnly"/>
                     </Button>
                 </StackPanel>
@@ -624,8 +608,8 @@
 			MediaEnded="MediaElement_MediaEnded" VerticalAlignment="Top" Width="38" UnloadedBehavior="Manual" Stretch="Fill"
 			Volume="1" MediaOpened="MediaElement_MediaOpened" LoadedBehavior="Manual"/>
         <DockPanel x:Name="mainAreaDockPanel" LastChildFill="False">
-            <Border x:Name="navigBorder" BorderThickness="0,0,0,0" BorderBrush="#FF699CBF">
-                <DockPanel x:Name="navigDockPanel" Margin="0" Width="360" LastChildFill="True"
+            <Border x:Name="navigBorder" BorderThickness="0" BorderBrush="#FF699CBF">
+                <DockPanel x:Name="navigDockPanel" Background="#074D7FA4" Margin="0" Width="360" LastChildFill="True"
                        Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
                     <ProgressBar x:Name="navigProgressBar" DockPanel.Dock="Top" Margin="0,0,0,0" Height="2" Foreground="#FF4D7FA4" BorderBrush="{x:Null}" Background="{x:Null}"/>
                     <StackPanel x:Name="modeStackPanel" DockPanel.Dock="Top" Margin="18,0,10,0" Orientation="Horizontal" Height="36" Visibility="Hidden">
@@ -634,7 +618,7 @@
                             Focusable="False" FontSize="13.333"/>
                     </StackPanel>
                     <DockPanel x:Name="navigControlsDockPanel" Margin="10,0,10,0" LastChildFill="True" DockPanel.Dock="Top">
-                        <Button x:Name="updateButton" DockPanel.Dock="Right" VerticalContentAlignment="Top" Style="{DynamicResource buttonStyle}" Height="30" Width="30" FontSize="16" BorderBrush="Transparent"
+                        <Button x:Name="updateButton" DockPanel.Dock="Right" VerticalContentAlignment="Top" Style="{DynamicResource buttonSlyle}" Height="30" Width="30" FontSize="16" BorderBrush="Transparent"
                             Background="White" Click="UpdateButton_Click" ToolTip="Обновить" Focusable="False" BorderThickness="1" Foreground="#FF2B587A" Margin="-1,2,0,-1" Visibility="Collapsed">
                             <Image Source="Images\update.png" Stretch="None"/>
                         </Button>
