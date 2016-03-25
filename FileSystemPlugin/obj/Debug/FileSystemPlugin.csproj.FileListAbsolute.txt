@@ -1,13 +1,7 @@
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\add.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\audio.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\delete.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\disk.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\favorite_folder.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\folder.png
-D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\Images\parent_folder.png
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\FileSystemPlugin.manifest
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\FileSystemPlugin.dll
 D:\C#\MusicPlayer\MusicPlayer\bin\Debug\Plugins\FileSystemPlugin\FileSystemPlugin.pdb
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Debug\FileSystemPlugin.csprojResolveAssemblyReference.cache
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Debug\FileSystemPlugin.dll
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Debug\FileSystemPlugin.pdb
+D:\C#\MusicPlayer\FileSystemPlugin\obj\Debug\FileSystemPlugin.g.resources

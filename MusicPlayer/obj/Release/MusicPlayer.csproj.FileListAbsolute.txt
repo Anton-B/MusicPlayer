@@ -14,3 +14,4 @@ D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.Properties.Resources.resou
 D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.csproj.GenerateResource.Cache
 D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.exe
 D:\C#\MusicPlayer\MusicPlayer\obj\Release\MusicPlayer.pdb
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\FMUtils.KeyboardHook.dll
