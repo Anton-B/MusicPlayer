@@ -18,7 +18,6 @@ namespace FileSystemPlugin
         public string AddButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\FileSystemPlugin\Images\delete.png";
         public int OpenedTabIndex { get; set; }
-        public bool UseDefaultNavigListStyle { get { return true; } }
         public bool SupportsSongMenuButton { get { return true; } }
         public bool UseDefaultHomeButton { get { return false; } }
         public bool UseDefaultSearch { get { return true; } }
@@ -72,7 +71,7 @@ namespace FileSystemPlugin
             }
             catch
             {
-                MessageBox.Show("Ошибка доступа к директории", "Ошибка доступа", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Ошибка доступа к директории", "", MessageBoxButton.OK, MessageBoxImage.Error);
                 var list = new List<NavigationItem>();
                 list.Add(new NavigationItem("[Назад]", Directory.GetParent(path)?.FullName, itemHeight,
                         true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
@@ -169,7 +168,7 @@ namespace FileSystemPlugin
             if (itemText == deleteSongMenuItem)
             {
                 var answer = MessageBox.Show(string.Format("Вы уверены, что хотите безвозвратно удалить аудиозапись \"{0}\" с вашего компьютера?",
-                    new FileInfo(song.Path).Name), "Удаление аудиозаписи", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+                    new FileInfo(song.Path).Name), "", MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
                 if (answer == MessageBoxResult.Yes)
                 {
                     try
@@ -185,7 +184,7 @@ namespace FileSystemPlugin
                     var songs = lastLoadedSongs.ToList();
                     songs.Remove(song);
                     lastLoadedSongs = songs.ToArray();
-                    MessageBox.Show("Аудиозапись успешно удалена с компьютера!", "Удаление аудиозаписи", 
+                    MessageBox.Show("Аудиозапись успешно удалена с компьютера!", "", 
                         MessageBoxButton.OK, MessageBoxImage.Information);
                     return UpdateBehavior.DeleteSongAndUpdateAll;
                 }

@@ -10,7 +10,6 @@ namespace MusicPlayerAPI
         string AddButtonImageSource { get; }
         string DeleteButtonImageSource { get; }
         int OpenedTabIndex { get; set; }
-        bool UseDefaultNavigListStyle { get; }
         bool SupportsSongMenuButton { get; }
         bool UseDefaultHomeButton { get; }
         bool UseDefaultSearch { get; }

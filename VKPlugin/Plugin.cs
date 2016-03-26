@@ -17,7 +17,6 @@ namespace VKPlugin
         public string AddButtonImageSource { get; } = @"Plugins\VKPlugin\Images\add.png";
         public string DeleteButtonImageSource { get; } = @"Plugins\VKPlugin\Images\delete.png";
         public int OpenedTabIndex { get; set; }
-        public bool UseDefaultNavigListStyle { get { return false; } }
         public bool SupportsSongMenuButton { get { return true; } }
         public bool UseDefaultHomeButton { get { return true; } }
         public bool UseDefaultSearch { get { return false; } }
@@ -192,7 +191,7 @@ namespace VKPlugin
                     break;
                 case deleteSongMenuItem:
                     var answer = MessageBox.Show(string.Format("Вы уверены, что хотите удалить аудиозапись \"{0}\"?",
-                    string.Format("{0} - {1}", song.Artist, song.Title)), "Удаление аудиозаписи", MessageBoxButton.YesNo,
+                    string.Format("{0} - {1}", song.Artist, song.Title)), "", MessageBoxButton.YesNo,
                     MessageBoxImage.Question, MessageBoxResult.No);
                     if (answer == MessageBoxResult.Yes)
                     {

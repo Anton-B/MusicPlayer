@@ -63,9 +63,6 @@
     <Content Include="Images\add.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Images\audio1.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Images\delete.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

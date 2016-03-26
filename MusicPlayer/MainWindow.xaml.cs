@@ -105,22 +105,6 @@ namespace MusicPlayer
                 modeStackPanel.Visibility = Visibility.Visible;
         }
 
-        private void mainWindow_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.MediaPreviousTrack:
-                    prevButton_Click(sender, e);
-                    break;
-                case Key.MediaPlayPause:
-                    playPauseButton_Click(sender, e);
-                    break;
-                case Key.MediaNextTrack:
-                    nextButton_Click(sender, e);
-                    break;
-            }
-        }
-
         private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             SaveSettings();
@@ -683,6 +667,8 @@ namespace MusicPlayer
             songsProgressBar.IsIndeterminate = true;
             SetSongsList(resultSongs.ToArray(), pluginsManager.SortSearchResults, false, (mediaElement.Source == null) ? true : false);
             songsProgressBar.IsIndeterminate = false;
+            if (visibDataGrid.Items.Count > 0)
+                visibDataGrid.ScrollIntoView(visibDataGrid.Items[0]);
         }
 
         private async void myMusicButton_Click(object sender, RoutedEventArgs e)

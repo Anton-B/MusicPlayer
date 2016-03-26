@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:MusicPlayer"
         xmlns:MusicPlayerAPI="clr-namespace:MusicPlayerAPI;assembly=MusicPlayerAPI" xmlns:System="clr-namespace:System;assembly=mscorlib"
         x:Name="mainWindow" x:Class="MusicPlayer.MainWindow" mc:Ignorable="d" Background="White" 
-        Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing" Icon="Images/icon.ico" KeyDown="mainWindow_KeyDown">
+        Width="1130" Height="700" MinHeight="460" MinWidth="860" Closing="mainWindow_Closing" Icon="Images/icon.ico">
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo>
             <TaskbarItemInfo.ThumbButtonInfos>
@@ -23,7 +23,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Border x:Name="Border" Grid.ColumnSpan="2"  Background="Transparent" BorderBrush="Transparent"
+                <Border x:Name="Border" Grid.ColumnSpan="2" Background="Transparent" BorderBrush="Transparent"
                     BorderThickness="0" />
             </Grid>
             <ControlTemplate.Triggers>
@@ -190,7 +190,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        
+
         <Style TargetType="ListViewItem">
             <Setter Property="OverridesDefaultStyle" Value="False"/>
             <Setter Property="Cursor" Value="{Binding CursorType}"/>
@@ -318,7 +318,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Image x:Key="contentButtonImage" Stretch="Uniform" StretchDirection="DownOnly"/>        
+        <Image x:Key="contentButtonImage" Stretch="Uniform" StretchDirection="DownOnly"/>
 
         <Style x:Key="sliderButtonStyle" TargetType="RepeatButton">
             <Setter Property="SnapsToDevicePixels" Value="True"/>
@@ -644,12 +644,12 @@
                     <TabControl x:Name="navigTabControl" TabStripPlacement="Bottom" Margin="10,0,10,20" BorderThickness="1,1,1,1"
                         SelectionChanged="NavigTabControl_SelectionChanged" Focusable="False">
                         <TabItem Width="167" Height="26" FontSize="13.333" Margin="8,0,0,0">
-                            <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="332" 
+                            <ListView x:Name="navigListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigListView_MouseDown" MinWidth="332" ScrollViewer.CanContentScroll="False"
                                 MouseDoubleClick="NavigListView_MouseDoubleClick" ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False" BorderBrush="{x:Null}" Background="{x:Null}"/>
                         </TabItem>
                         <TabItem Width="167" Height="26" FontSize="13.333">
                             <ListView x:Name="favoritesListView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" MouseDown="NavigFavListView_MouseDown" MinWidth="332"
-                                ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False" BorderBrush="{x:Null}" Background="{x:Null}"/>
+                                ScrollViewer.VerticalScrollBarVisibility="Auto" Focusable="False" BorderBrush="{x:Null}" Background="{x:Null}" ScrollViewer.CanContentScroll="False"/>
                         </TabItem>
                     </TabControl>
                 </DockPanel>
@@ -659,7 +659,7 @@
                     <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="10,0,10,0">
                         <TextBlock x:Name="sortTextBlock" DockPanel.Dock="Left" VerticalAlignment="Center" Text="Сортировка: " Margin="0,3,0,0" Foreground="#FF787878" FontSize="13.333"/>
                         <ComboBox x:Name="sortComboBox" DockPanel.Dock="Left" Height="36" Width="169" ToolTip="Сортировка песен" BorderThickness="0" FontSize="13.333" 
-                            SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF819FB4" Margin="0,1,0,2" Focusable="False">
+                            SelectionChanged="SortComboBox_SelectionChanged" BorderBrush="#FF819FB4" Margin="0,2,0,2" Focusable="False">
                             <TextBlock>По дате добавления</TextBlock>
                             <TextBlock>По названию</TextBlock>
                             <TextBlock>По исполнителю</TextBlock>
@@ -712,7 +712,7 @@
             <DataGrid x:Name="playlist1DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"
                 Visibility="Visible" SelectionChanged="playlistDataGrid_SelectionChanged" ScrollViewer.ScrollChanged ="playlistsScrollViewer_ScrollChanged">
                 <DataGrid.Columns>
-                    <DataGridTemplateColumn  Width="*"/>
+                    <DataGridTemplateColumn Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
             <DataGrid x:Name="playlist2DataGrid" Width="{Binding ActualWidth, ElementName=audioParamsStackPanel, Mode=OneWay}"

@@ -15,7 +15,6 @@ namespace MusicPlayerAPI
         public string AddButtonImageSource { get { return PluginInstasnces[Key].AddButtonImageSource; } }
         public string DeleteButtonImageSource { get { return PluginInstasnces[Key].DeleteButtonImageSource; } }
         public int OpenedTabIndex { get { return (Key == null) ? 0 : PluginInstasnces[Key].OpenedTabIndex; } set { PluginInstasnces[Key].OpenedTabIndex = value; } }
-        public bool UsUseDefaultNavigListStyle { get { return PluginInstasnces[Key].UseDefaultNavigListStyle; } }
         public bool SupportsSongMenuButton { get { return PluginInstasnces[Key].SupportsSongMenuButton; } }
         public bool UseDefaultHomeButton { get { return PluginInstasnces[Key].UseDefaultHomeButton; } }
         public bool UseDefaultSearch { get { return PluginInstasnces[Key].UseDefaultSearch; } }
