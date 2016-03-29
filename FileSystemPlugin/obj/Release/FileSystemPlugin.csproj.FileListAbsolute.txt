@@ -1,0 +1,14 @@
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\add.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\delete.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\favorite_folder.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\audio.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\disk.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\folder.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\Images\parent_folder.png
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\FileSystemPlugin.manifest
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\FileSystemPlugin.dll
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\FileSystemPlugin.pdb
+D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\TagLib.Portable.dll
+D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.csprojResolveAssemblyReference.cache
+D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.dll
+D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.pdb

@@ -32,16 +32,31 @@ namespace VKPlugin
         private const string downloadSongMenuItem = "Скачать аудиозапись";
         private const double itemHeight = 50;
         private const double fontHeight = 14;
-        private Brush foreground = new SolidColorBrush(Color.FromRgb(43, 88, 122));
         private BrowserWindow browserWin;
         private bool isCacheDownloaded;
         private string loginPath = "Вход";
-        private string logoutPath = "Выход";
-        private string friendsPath = "Друзья";
-        private string groupsPath = "Группы";
-        private string playlistsPath = "Плейлисты";
+        private string logoutPath = "Выполните вход";
+        private string friendsPath = "Мои друзья";
+        private string groupsPath = "Мои группы";
+        private string playlistsPath = "Мои плейлисты";
+        private Brush lyricsWindowBackground = (Brush)new BrushConverter().ConvertFromString("#FFFFFFFF");
+        private Brush lyricsWindowForeground = (Brush)new BrushConverter().ConvertFromString("#FF000000");
 
         public Plugin() { vkAudio = new VKAudio(AddButtonImageSource, DeleteButtonImageSource, FavoriteItems); }
+
+        public void SetThemeSettings(bool darkThemeIsUsing)
+        {
+            if (darkThemeIsUsing == true)
+            {
+                lyricsWindowBackground = (Brush)new BrushConverter().ConvertFromString("#FF1E1E1E");
+                lyricsWindowForeground = (Brush)new BrushConverter().ConvertFromString("#FFE6E6E6");
+            }
+            else
+            {
+                lyricsWindowBackground = (Brush)new BrushConverter().ConvertFromString("#FFFFFFFF");
+                lyricsWindowForeground = (Brush)new BrushConverter().ConvertFromString("#FF000000");
+            }                
+        }
 
         public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
@@ -57,7 +72,7 @@ namespace VKPlugin
             {
                 MessageBox.Show("Ошибка подключения. Пожалуйста, проверьте подключение к интернету.",
                 "Ошибка подключения", MessageBoxButton.OK, MessageBoxImage.Error);
-                navigItems.Add(new NavigationItem("Вход", null, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Вход", null, itemHeight, true, false, null, fontHeight, Cursors.Hand));
                 return navigItems;
             }
             if (path == null && !userLogged)
@@ -75,23 +90,23 @@ namespace VKPlugin
             }
             else if (path == loginPath)
             {
-                navigItems.Add(new NavigationItem("Вход", null, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Вход", null, itemHeight, true, false, null, fontHeight, Cursors.Hand));
             }
             else if (path == null && userLogged)
             {
                 if (!isCacheDownloaded)
                 {
                     if (FavoriteItems.Count > 0 && FavoriteItems[0].Name != "Мои аудиозаписи" || FavoriteItems.Count == 0)
-                        FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, null, fontHeight, foreground, Cursors.Hand));
+                        FavoriteItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, null, fontHeight, Cursors.Hand));
                     await vkAudio.GetFriendsList();
                     await vkAudio.GetGroupsList();
                     isCacheDownloaded = true;
                 }
-                navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, null, fontHeight, foreground, Cursors.Hand));
-                navigItems.Add(new NavigationItem("Друзья", friendsPath, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand));
-                navigItems.Add(new NavigationItem("Группы", groupsPath, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand));
-                navigItems.Add(new NavigationItem("Плейлисты", playlistsPath, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand));
-                navigItems.Add(new NavigationItem("Выход", logoutPath, itemHeight, true, false, null, fontHeight, foreground, Cursors.Hand, true, "Вы уверены что хотите выйти из своего аккаунта?"));
+                navigItems.Add(new NavigationItem("Мои аудиозаписи", vkAudio.UserID, itemHeight, false, false, null, fontHeight, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Мои друзья", friendsPath, itemHeight, true, false, null, fontHeight, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Мои группы", groupsPath, itemHeight, true, false, null, fontHeight, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Мои плейлисты", playlistsPath, itemHeight, true, false, null, fontHeight, Cursors.Hand));
+                navigItems.Add(new NavigationItem("Выход", logoutPath, itemHeight, true, false, null, fontHeight, Cursors.Hand, true, "Вы уверены что хотите выйти из своего аккаунта?"));
             }
             else if (path == logoutPath)
             {
@@ -104,7 +119,7 @@ namespace VKPlugin
             }
             else
             {
-                navigItems.Add(new NavigationItem("[Назад]", null, 50, true, false, null, 16, foreground, Cursors.Hand));
+                navigItems.Add(new NavigationItem("[Назад]", null, 50, true, false, null, 16, Cursors.Hand));
                 var resultList = new List<NavigationItem>();
                 if (path == friendsPath)
                     resultList = await vkAudio.GetFriendsList();
@@ -227,6 +242,7 @@ namespace VKPlugin
             lyricsWindow.ResizeMode = ResizeMode.NoResize;
             lyricsWindow.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             lyricsWindow.Title = title;
+            lyricsWindow.Background = lyricsWindowBackground;
             lyricsWindow.Icon = new System.Windows.Media.Imaging.BitmapImage(
                 new Uri(Environment.CurrentDirectory + @"\Plugins\VKPlugin\Images\faviconnew.ico"));
             var sw = new System.Windows.Controls.ScrollViewer();
@@ -236,6 +252,8 @@ namespace VKPlugin
             textBlock.TextWrapping = TextWrapping.Wrap;
             textBlock.TextAlignment = TextAlignment.Left;
             textBlock.Text = lyrics;
+            textBlock.Background = lyricsWindow.Background;
+            textBlock.Foreground = lyricsWindowForeground;
             sw.Content = textBlock;
             lyricsWindow.Content = sw;
             lyricsWindow.Show();

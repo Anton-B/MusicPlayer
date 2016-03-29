@@ -135,7 +135,7 @@ namespace VKPlugin
                 foreach (var res in responseItems)
                 {
                     var item = new NavigationItem(res.title, "album_id=" + res.id, 50, false, true, null,
-                        16, new SolidColorBrush(Color.FromRgb(43, 88, 122)), System.Windows.Input.Cursors.Hand);
+                        16, System.Windows.Input.Cursors.Hand);
                     item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (favorites.Contains(item) ? deleteButtonImageSource : addButtonImageSource);
                     list.Add(item);
                 }                    
@@ -185,7 +185,7 @@ namespace VKPlugin
                         await client.DownloadFileTaskAsync(res.photo_50, cacheFolderPath + res.id + ".jpg");
                     idsDict[res.id] = res.photo_50;
                     var item = new NavigationItem((listType == RequestedListType.Groups) ? res.name : (res.first_name + " " + res.last_name), "owner_id=" + res.id, 50, false,
-                        true, null, 16, new SolidColorBrush(Color.FromRgb(43, 88, 122)), System.Windows.Input.Cursors.Hand, Environment.CurrentDirectory + "\\" + cacheFolderPath + res.id + ".jpg");
+                        true, null, 16, System.Windows.Input.Cursors.Hand, Environment.CurrentDirectory + "\\" + cacheFolderPath + res.id + ".jpg");
                     item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (favorites.Contains(item) ? deleteButtonImageSource : addButtonImageSource);
                     list.Add(item);
                 }

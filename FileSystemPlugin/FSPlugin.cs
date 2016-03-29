@@ -35,6 +35,8 @@ namespace FileSystemPlugin
         private const string parentFolderImageSource = @"Plugins\FileSystemPlugin\Images\parent_folder.png";
         private Song[] lastLoadedSongs;
 
+        public void SetThemeSettings(bool darkThemeIsUsing) { }
+
         public async Task<List<NavigationItem>> GetNavigationItems(string path)
         {
             try
@@ -45,19 +47,19 @@ namespace FileSystemPlugin
                     var drives = DriveInfo.GetDrives();
                     foreach (var drive in drives)
                         navigItems.Add(new NavigationItem((drive.IsReady) ? drive.Name : (drive.Name + " [Отсутствует]"), drive.Name,
-                            itemHeight, true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + diskImageSource));
+                            itemHeight, true, false, null, fontHeight, Cursors.Arrow, Environment.CurrentDirectory + "\\" + diskImageSource));
                 }
                 else
                 {
                     var parent = Directory.GetParent(path);
                     navigItems.Add(new NavigationItem("[Назад]", parent?.FullName, itemHeight,
-                        true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
+                        true, false, null, fontHeight, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
                     DirectoryInfo di = new DirectoryInfo(path);
                     var dirs = di.GetDirectories();
                     foreach (var dir in dirs)
                     {
                         var item = new NavigationItem(dir.Name, dir.FullName, itemHeight,
-                            true, true, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + folderImageSource);
+                            true, true, null, fontHeight, Cursors.Arrow, Environment.CurrentDirectory + "\\" + folderImageSource);
                         item.AddRemoveFavoriteImageSource = Environment.CurrentDirectory + "\\" + (FavoriteItems.Contains(item) ? DeleteButtonImageSource : AddButtonImageSource);
                         navigItems.Add(item);
                     }
@@ -65,7 +67,7 @@ namespace FileSystemPlugin
                     var files = di.GetFiles("*.mp3", SearchOption.TopDirectoryOnly);
                     foreach (var file in files)
                         navigItems.Add(new NavigationItem(file.Name.Replace(".mp3", string.Empty), file.FullName, itemHeight,
-                            false, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + audioImageSource));
+                            false, false, null, fontHeight, Cursors.Arrow, Environment.CurrentDirectory + "\\" + audioImageSource));
                 }
                 return navigItems;
             }
@@ -74,7 +76,7 @@ namespace FileSystemPlugin
                 MessageBox.Show("Ошибка доступа к директории", "", MessageBoxButton.OK, MessageBoxImage.Error);
                 var list = new List<NavigationItem>();
                 list.Add(new NavigationItem("[Назад]", Directory.GetParent(path)?.FullName, itemHeight,
-                        true, false, null, fontHeight, Brushes.Black, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
+                        true, false, null, fontHeight, Cursors.Arrow, Environment.CurrentDirectory + "\\" + parentFolderImageSource));
                 return list;
             }
         }

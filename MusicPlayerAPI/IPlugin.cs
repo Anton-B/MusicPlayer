@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace MusicPlayerAPI
 {
@@ -16,8 +17,9 @@ namespace MusicPlayerAPI
         bool DoubleClickToOpenItem { get; }
         bool SortSearchResults { get; }
         bool UpdatePlaylistWhenFavoritesChanges { get; }
-        List<NavigationItem> FavoriteItems { get; }        
+        List<NavigationItem> FavoriteItems { get; }
 
+        void SetThemeSettings(bool darkThemeIsUsing);
         Task<List<NavigationItem>> GetNavigationItems(string path);
         void AddToFavorites(NavigationItem item);
         void DeleteFromFavorites(NavigationItem item);

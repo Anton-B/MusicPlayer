@@ -84,7 +84,8 @@ namespace MusicPlayer
         }
         private bool songsListBlocked = false;
         private bool dragStarted = false;
-        Hook keyboardHook = new Hook("Media Keys Hook");
+        private Hook keyboardHook = new Hook("Media Keys Hook");
+        private bool useDarkTheme;
 
         #region WINDOW
         public MainWindow()
@@ -103,6 +104,107 @@ namespace MusicPlayer
                 modeComboBox.SelectedIndex = 0;
             if (modeComboBox.Items.Count > 1)
                 modeStackPanel.Visibility = Visibility.Visible;
+        }
+
+        private void themeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (themeComboBox.SelectedIndex == -1)
+                return;
+            useDarkTheme = (themeComboBox.SelectedIndex == 0) ? false : true;
+            SetTheme();
+        }
+
+        private void SetTheme()
+        {
+            var bc = new BrushConverter();
+            if (useDarkTheme == true)
+            {
+                this.Background = GetBrush(bc, "#FF1E1E1E");
+                this.Resources["TextBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["ElementsBaseBrush"] = GetBrush(bc, "#FF68768A");
+                this.Resources["ActiveTextBrush"] = GetBrush(bc, "#FF9BA7B8");
+                this.Resources["ActiveTextMouseOverBrush"] = GetBrush(bc, "#FF68768A");
+                this.Resources["ActiveTextMousePressedBrush"] = GetBrush(bc, "#FF56657C");
+                this.Resources["SongCellBorderBrush"] = GetBrush(bc, "#334D7FA4");
+                this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
+                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "DarkGray");
+                this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF9BA7B8");
+                this.Resources["MenuBackgroundBrush"] = GetBrush(bc, "#FF1E1E1E");
+                this.Resources["MenuForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["MenuForegroundMouseOverBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["FavoritesButtonBackgroundBrush"] = GetBrush(bc, "#FF1E1E1E");
+                this.Resources["FavoritesButtonBorderBrush"] = GetBrush(bc, "#FF1E1E1E");
+                this.Resources["NavigItemForegroundBrush"] = GetBrush(bc, "#FF97A0AC");
+                this.Resources["NavigItemForegroundMouseOverBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["TabItemForegroundSelectedBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["ScrollBarBackgroundBrush"] = GetBrush(bc, "#FF3E3E42");
+                this.Resources["ScrollBarRepeatMouseOverBrush"] = GetBrush(bc, "#FFA6A6A6");
+                this.Resources["ScrollBarRepeatMousePressedBrush"] = GetBrush(bc, "#FFEFEBEF");
+                this.Resources["ScrollBarRepeatPathBrush"] = GetBrush(bc, "#FFA6A6A6");
+                this.Resources["ScrollBarRepeatPathMouseOverBrush"] = GetBrush(bc, "Black");
+                this.Resources["ScrollBarThumbBrush"] = GetBrush(bc, "#FF686868");
+                this.Resources["ScrollBarThumbMouseOverBrush"] = GetBrush(bc, "#FF9E9E9E");
+
+                this.Resources["PlayerButtonMouseOverBrush"] = GetBrush(bc, "#FF52729C");
+                this.Resources["PlayerButtonMouseDownBrush"] = GetBrush(bc, "#FF425C81");
+                this.Resources["PlayerBackgroundBrush"] = GetBrush(bc, "#FF50687A");
+                this.Resources["PlayerSliderBackgroundBrush"] = GetBrush(bc, "LightGray");
+                this.Resources["PlayerSliderBackgroundFilledBrush"] = GetBrush(bc, "White");
+                this.Resources["PlayerSliderThumbStrokeBrush"] = GetBrush(bc, "White");
+                this.Resources["PlayerSongInfoForegroundBrush"] = GetBrush(bc, "White");
+            }
+            else
+            {
+                this.Background = GetBrush(bc, "White");
+                this.Resources["TextBrush"] = GetBrush(bc, "#FF787878");
+                this.Resources["ElementsBaseBrush"] = GetBrush(bc, "#FF4D7FA4");
+                this.Resources["ActiveTextBrush"] = GetBrush(bc, "#FF2B587A");
+                this.Resources["ActiveTextMouseOverBrush"] = GetBrush(bc, "#FF5585A8");
+                this.Resources["ActiveTextMousePressedBrush"] = GetBrush(bc, "#FF76A2C1");
+                this.Resources["SongCellBorderBrush"] = GetBrush(bc, "#334D7FA4");
+                this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
+                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FF2B587A");
+                this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "White");
+                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "LightGray");
+                this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF819FB4");
+                this.Resources["MenuBackgroundBrush"] = GetBrush(bc, "White");
+                this.Resources["MenuForegroundBrush"] = GetBrush(bc, "#FF2B587A");
+                this.Resources["MenuForegroundMouseOverBrush"] = GetBrush(bc, "White");
+                this.Resources["FavoritesButtonBackgroundBrush"] = GetBrush(bc, "White");
+                this.Resources["FavoritesButtonBorderBrush"] = GetBrush(bc, "White");
+                this.Resources["NavigItemForegroundBrush"] = GetBrush(bc, "#FF2B587A");
+                this.Resources["NavigItemForegroundMouseOverBrush"] = GetBrush(bc, "White");
+                this.Resources["TabItemForegroundSelectedBrush"] = GetBrush(bc, "White");
+                this.Resources["ScrollBarBackgroundBrush"] = GetBrush(bc, "#FFF0F0F0");
+                this.Resources["ScrollBarRepeatMouseOverBrush"] = GetBrush(bc, "#FFA6A6A6");
+                this.Resources["ScrollBarRepeatMousePressedBrush"] = GetBrush(bc, "#FF606060");
+                this.Resources["ScrollBarRepeatPathBrush"] = GetBrush(bc, "#FFA6A6A6");
+                this.Resources["ScrollBarRepeatPathMouseOverBrush"] = GetBrush(bc, "Black");
+                this.Resources["ScrollBarThumbBrush"] = GetBrush(bc, "#FFCDCDCD");
+                this.Resources["ScrollBarThumbMouseOverBrush"] = GetBrush(bc, "#FF919191");
+
+                this.Resources["PlayerButtonMouseOverBrush"] = GetBrush(bc, "#FF52729C");
+                this.Resources["PlayerButtonMouseDownBrush"] = GetBrush(bc, "#FF425C81");
+                this.Resources["PlayerBackgroundBrush"] = GetBrush(bc, "#FF50687A");
+                this.Resources["PlayerSliderBackgroundBrush"] = GetBrush(bc, "LightGray");
+                this.Resources["PlayerSliderBackgroundFilledBrush"] = GetBrush(bc, "White");
+                this.Resources["PlayerSliderThumbStrokeBrush"] = GetBrush(bc, "White");
+                this.Resources["PlayerSongInfoForegroundBrush"] = GetBrush(bc, "White");
+            }
+            pluginsManager.SetThemeSettings(useDarkTheme);
+        }
+
+        private void SetDarkTheme()
+        {
+            var bc = new BrushConverter();
+
+        }
+
+        private Brush GetBrush(BrushConverter converter, string brushStr)
+        {
+            return (Brush)converter.ConvertFromString(brushStr);
         }
 
         private void mainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -436,6 +538,7 @@ namespace MusicPlayer
             songsProgressBar.IsIndeterminate = true;
             SetSongsList(await pluginsManager.GetDefaultSongsList(), true, true, true);
             songsProgressBar.IsIndeterminate = false;
+            pluginsManager.SetThemeSettings(useDarkTheme);
         }
 
         private async void NavigTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -489,11 +592,6 @@ namespace MusicPlayer
                 SetSongsList(await pluginsManager.GetSongsList(item), true, false, (mediaElement.Source == null) ? true : false);
                 songsProgressBar.IsIndeterminate = false;
             }
-        }
-
-        private async void UpdateButton_Click(object sender, RoutedEventArgs e)
-        {
-            await ShowItems(addressTextBox.Tag?.ToString(), false);
         }
 
         private async Task ShowItems(string path, bool isScrollToUp)
@@ -595,16 +693,15 @@ namespace MusicPlayer
 
         private void searchTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
-            searchTextBox.Text = searchTextBox.Text == "Поиск..." && searchTextBox.Foreground == Brushes.LightGray ? string.Empty : searchTextBox.Text;
-            searchTextBox.Foreground = (Brush)new BrushConverter().ConvertFromString("#FF2B587A");
-            searchButton.BorderBrush = (Brush)new BrushConverter().ConvertFromString("#FF3399FF");
+            searchTextBox.Text = searchTextBox.Text == "Поиск..." && searchTextBox.Foreground.ToString()
+                == this.Resources["SearchInactiveForegroundBrush"].ToString() ? string.Empty : searchTextBox.Text;
+            searchTextBox.Foreground = (Brush)this.Resources["ActiveTextBrush"];
         }
 
         private void searchTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
-            searchTextBox.Foreground = searchTextBox.Text == string.Empty ? Brushes.LightGray : (Brush)new BrushConverter().ConvertFromString("#FF2B587A");
+            searchTextBox.Foreground = searchTextBox.Text == string.Empty ? (Brush)this.Resources["SearchInactiveForegroundBrush"] : (Brush)this.Resources["ActiveTextBrush"];
             searchTextBox.Text = searchTextBox.Text == string.Empty ? "Поиск..." : searchTextBox.Text;
-            searchButton.BorderBrush = (Brush)new BrushConverter().ConvertFromString("#FF819FB4");
         }
 
         private void SortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -830,12 +927,14 @@ namespace MusicPlayer
                                                     "Window.Width",
                                                     "Window.Height",
                                                     "Window.WindowState",
+                                                    "Player.UseDarkTheme",
                                                     "Plugins.Key" };
             List<string> values = new List<string> {this.Left.ToString(),
                                                     this.Top.ToString(),
                                                     this.Width.ToString(),
                                                     this.Height.ToString(),
                                                     this.WindowState.ToString(),
+                                                    useDarkTheme.ToString(),
                                                     pluginsManager.Key };
             string pattern = "{0}.FavoriteItems.{1}.{2}";
             foreach (var pluginInstance in pluginsManager.PluginInstasnces)
@@ -851,7 +950,6 @@ namespace MusicPlayer
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "AddRemoveFavoriteImageSource"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "FontSize"));
-                    keys.Add(string.Format(pattern, pluginInstance.Key, i, "Foreground"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "CursorType"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "ImageSource"));
                     keys.Add(string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox"));
@@ -863,7 +961,6 @@ namespace MusicPlayer
                     values.Add(pluginInstance.Value.FavoriteItems[i].CanBeFavorite.ToString());
                     values.Add(pluginInstance.Value.FavoriteItems[i].AddRemoveFavoriteImageSource);
                     values.Add(pluginInstance.Value.FavoriteItems[i].FontSize.ToString());
-                    values.Add(new BrushConverter().ConvertToString(pluginInstance.Value.FavoriteItems[i].Foreground));
                     values.Add(new CursorConverter().ConvertToString(pluginInstance.Value.FavoriteItems[i].CursorType));
                     values.Add(pluginInstance.Value.FavoriteItems[i].ImageSource);
                     values.Add(pluginInstance.Value.FavoriteItems[i].UseAreYouSureMessageBox.ToString());
@@ -890,7 +987,12 @@ namespace MusicPlayer
         {
             var allAppSettings = ConfigurationManager.AppSettings;
             if (allAppSettings.Count < 1)
+            {
+                useDarkTheme = false;
+                themeComboBox.SelectedIndex = 0;
                 return;
+            }
+                
             foreach (var pluginInstance in pluginsManager.PluginInstasnces)
             {
                 if (allAppSettings[string.Format("{0}.{1}", pluginInstance.Key, "OpenedTabIndex")] == null)
@@ -910,7 +1012,6 @@ namespace MusicPlayer
                                                                          Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CanBeFavorite")]),
                                                                          allAppSettings[string.Format(pattern, pluginInstance.Key, i, "AddRemoveFavoriteImageSource")],
                                                                          Convert.ToDouble(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "FontSize")]),
-                                                                         new BrushConverter().ConvertFromString(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "Foreground")]) as Brush,
                                                                          new CursorConverter().ConvertFromString(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "CursorType")]) as Cursor,
                                                                          allAppSettings[string.Format(pattern, pluginInstance.Key, i, "ImageSource")],
                                                                          Convert.ToBoolean(allAppSettings[string.Format(pattern, pluginInstance.Key, i, "UseAreYouSureMessageBox")]),
@@ -927,6 +1028,8 @@ namespace MusicPlayer
             this.Width = Convert.ToDouble(allAppSettings["Window.Width"]);
             this.Height = Convert.ToDouble(allAppSettings["Window.Height"]);
             this.WindowState = (WindowState)WindowState.Parse(WindowState.GetType(), allAppSettings["Window.WindowState"]);
+            useDarkTheme = Convert.ToBoolean(allAppSettings["Player.UseDarkTheme"]);
+            themeComboBox.SelectedIndex = (useDarkTheme == true) ? 1 : 0;
 
             if (allAppSettings["Plugins.Key"] == string.Empty && modeComboBox.Items.Count > 0)
                 allAppSettings["Plugins.Key"] = (modeComboBox.Items[0] as TextBlock).Tag.ToString();
@@ -952,6 +1055,6 @@ namespace MusicPlayer
                 throw new Exception("Конфигурационный файл не найден.", ex);
             }
         }
-        #endregion                
+        #endregion
     }
 }

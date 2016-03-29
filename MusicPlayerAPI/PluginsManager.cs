@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows.Media;
 
 namespace MusicPlayerAPI
 {
@@ -114,6 +115,12 @@ namespace MusicPlayerAPI
         public async Task<UpdateBehavior> HandleMenuItemClick(string itemText, Song song)
         {
             return await PluginInstasnces[Key].HandleMenuItemClick(itemText, song);
+        }
+
+        public void SetThemeSettings(bool darkThemeIsUsing)
+        {
+            if (Key != null)
+                PluginInstasnces[Key].SetThemeSettings(darkThemeIsUsing);
         }
     }
 }
