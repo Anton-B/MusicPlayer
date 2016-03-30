@@ -127,7 +127,8 @@ namespace MusicPlayer
                 this.Resources["ActiveTextMousePressedBrush"] = GetBrush(bc, "#FF56657C");
                 this.Resources["SongCellBorderBrush"] = GetBrush(bc, "#334D7FA4");
                 this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
-                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
+                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "DarkGray");
+                this.Resources["SongCellTitleForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
                 this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "#FFE6E6E6");
                 this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "Gray");
                 this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF9BA7B8");
@@ -165,7 +166,8 @@ namespace MusicPlayer
                 this.Resources["ActiveTextMousePressedBrush"] = GetBrush(bc, "#FF76A2C1");
                 this.Resources["SongCellBorderBrush"] = GetBrush(bc, "#334D7FA4");
                 this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
-                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FF2B587A");
+                this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FF787878");
+                this.Resources["SongCellTitleForegroundBrush"] = GetBrush(bc, "#FF2B587A");
                 this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "White");
                 this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "Gray");
                 this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF819FB4");
@@ -331,7 +333,7 @@ namespace MusicPlayer
             ((Image)randButton.Content).Source = visibSongsMixed ? new BitmapImage(new Uri(@"pack://application:,,,/Images/rand_active.png"))
                 : new BitmapImage(new Uri(@"pack://application:,,,/Images/rand.png"));
             SetSongsList(visibleSongs, true, true, false);
-            if (visibDataGrid == busyDataGrid)
+            if (visibDataGrid == busyDataGrid && visibDataGrid.Items.Count != 0)
                 visibDataGrid.ScrollIntoView(visibDataGrid.SelectedItem);
         }
 

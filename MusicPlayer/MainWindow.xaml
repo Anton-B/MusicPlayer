@@ -26,6 +26,7 @@
         <SolidColorBrush x:Key="SongCellBorderBrush"/>
         <SolidColorBrush x:Key="SongCellBackgroundMouseOverBrush"/>
         <SolidColorBrush x:Key="SongCellForegroundBrush"/>
+        <SolidColorBrush x:Key="SongCellTitleForegroundBrush"/>
         <SolidColorBrush x:Key="SongCellForegroundSelectedBrush"/>
         <SolidColorBrush x:Key="SearchInactiveForegroundBrush"/>
         <SolidColorBrush x:Key="SearchBorderBrush"/>
@@ -644,7 +645,7 @@
                             <Setter Property="Margin" Value="10,0,10,0"/>
                             <Setter Property="BorderThickness" Value="0"/>
                             <Setter Property="BorderBrush" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SongCellForegroundBrush}"/>
                             <Setter Property="Cursor" Value="Hand"/>
                             <Setter Property="Template">
                                 <Setter.Value>
@@ -653,7 +654,7 @@
                                             <DockPanel Focusable="False" LastChildFill="False">
                                                 <TextBlock x:Name="durTextBlock" DockPanel.Dock="Right" VerticalAlignment="Center" Text="{Binding Duration}" Width="40"/>
                                                 <StackPanel DockPanel.Dock="Left" Orientation="Vertical" VerticalAlignment="Center" Margin="10,0,0,0">
-                                                    <TextBlock x:Name="titleTextBlock" Text="{Binding Title}" Margin="0,0,0,0" FontSize="16" Foreground="{DynamicResource SongCellForegroundBrush}"/>
+                                                    <TextBlock x:Name="titleTextBlock" Text="{Binding Title}" Margin="0,0,0,0" FontSize="16" Foreground="{DynamicResource SongCellTitleForegroundBrush}"/>
                                                     <TextBlock x:Name="artistTextBlock" Text="{Binding Artist}" Margin="0,4,0,0"/>
                                                 </StackPanel>
                                             </DockPanel>
