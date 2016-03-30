@@ -781,7 +781,7 @@
                     Height="{Binding ActualHeight, ElementName=mainAreaDockPanel, Mode=OneWay}">
                     <ProgressBar x:Name="navigProgressBar" DockPanel.Dock="Top" Margin="0" Height="2" 
                         Foreground="{DynamicResource ElementsBaseBrush}" BorderBrush="{x:Null}" Background="{x:Null}"/>
-                    <StackPanel x:Name="modeStackPanel" DockPanel.Dock="Top" Margin="18,0,10,0" Orientation="Horizontal" Height="36" Visibility="Visible">
+                    <StackPanel x:Name="modeStackPanel" DockPanel.Dock="Top" Margin="18,0,10,0" Orientation="Horizontal" Height="36" Visibility="Hidden">
                         <TextBlock x:Name="modeTextBlock" Foreground="{DynamicResource TextBrush}" Text="Режим: " Margin="0,2,0,0" VerticalAlignment="Center" FontSize="13.333"/>
                         <ComboBox x:Name="modeComboBox" BorderBrush="Transparent" SelectionChanged="ModeComboBox_SelectionChanged"
                             Focusable="False" FontSize="13.333"/>
