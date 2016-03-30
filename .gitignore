@@ -5,9 +5,6 @@ ehthumbs.db
 # Folder config file
 Desktop.ini
 
-#Folders
-/MusicPlayer/obj/**
-
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 

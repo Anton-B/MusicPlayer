@@ -12,3 +12,13 @@ D:\C#\MusicPlayer\FileSystemPlugin\bin\Release\TagLib.Portable.dll
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.csprojResolveAssemblyReference.cache
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.dll
 D:\C#\MusicPlayer\FileSystemPlugin\obj\Release\FileSystemPlugin.pdb
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\add.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\delete.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\favorite_folder.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\audio.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\disk.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\folder.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\Images\parent_folder.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\FileSystemPlugin.manifest
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\FileSystemPlugin.dll
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\FileSystemPlugin\FileSystemPlugin.pdb

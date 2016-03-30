@@ -235,7 +235,7 @@ namespace VKPlugin
                     var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
                     if (resp == null || resp.response == null || resp.response.count == 0)
                         return songs;
-                    var index = resp.response.count - 1;
+                    var index = resp.response.items.Count - 1;
                     foreach (var res in resp.response.items)
                     {
                         songs.Add(new Song(res.owner_id + "_" + res.id, res.title, res.artist, TimeFormatter.Format(res.duration / 60)
@@ -265,7 +265,7 @@ namespace VKPlugin
                         lyrics, performerOnly, sort, searchOwn, count, lang, APIVersion, accessToken));
                     var vkResponse = new { response = new { count = 0, items = new List<ResponseAudio>() } };
                     var resp = JsonConvert.DeserializeAnonymousType(jsonResponseStr, vkResponse);
-                    if (resp == null || resp.response == null || resp.response.count == 0)
+                    if (resp == null || resp.response == null || resp.response.items.Count == 0)
                         return songs;
                     foreach (var res in resp.response.items)
                         songs.Add(new Song(res.owner_id + "_" + res.id, res.title, res.artist, TimeFormatter.Format(res.duration / 60)

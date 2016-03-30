@@ -110,7 +110,7 @@ namespace FileSystemPlugin
                             using (FileStream fs = new FileStream(mp3FilePaths[i], FileMode.Open))
                             {
                                 var tagFile = TagLib.File.Create(new StreamFileAbstraction(mp3FilePaths[i], fs, fs));
-                                Song song = new Song(i.ToString(), (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title,
+                                Song song = new Song(mp3FilePaths[i], (tagFile.Tag.Title == null) ? "[Без имени]" : tagFile.Tag.Title,
                                                      (tagFile.Tag.FirstPerformer == null) ? "[Без имени]" : tagFile.Tag.FirstPerformer,
                                                      TimeFormatter.Format((int)tagFile.Properties.Duration.Minutes)
                                                      + ":" + TimeFormatter.Format((int)tagFile.Properties.Duration.Seconds),

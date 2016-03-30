@@ -27,7 +27,7 @@ namespace MusicPlayerAPI
 
         public bool Equals(Song x, Song y)
         {
-            return x.Path == y.Path;
+            return x.ID == y.ID;
         }
 
         public int GetHashCode(Song obj)

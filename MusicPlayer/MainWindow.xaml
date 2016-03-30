@@ -823,7 +823,7 @@
                                     Height="{Binding ActualHeight, ElementName=searchTextBox, Mode=OneWay}" FontSize="13.333" Style="{DynamicResource textButtonStyle}"
                                     ToolTip="Поиск" Focusable="False" BorderThickness="0,1,1,1"/>
                                 <TextBox x:Name="searchTextBox" FontSize="16" VerticalContentAlignment="Center" BorderThickness="0" Width="300"
-                                    KeyDown="SearchButton_Click" BorderBrush="Transparent" ToolTip="Введите поисковой запрос" Text="Поиск..." Loaded="searchTextBox_Loaded" 
+                                    KeyDown="SearchButton_Click" BorderBrush="Transparent" ToolTip="Введите поисковой запрос" Text="Поиск..."
                                     GotFocus="searchTextBox_GotFocus" LostFocus="searchTextBox_LostFocus" Background="Transparent" HorizontalContentAlignment="Left"
                                     Foreground="{DynamicResource SearchInactiveForegroundBrush}" CaretBrush="{DynamicResource ActiveTextBrush}"/>
                             </DockPanel>

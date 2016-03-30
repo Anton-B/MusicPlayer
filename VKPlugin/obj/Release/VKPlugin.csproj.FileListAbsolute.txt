@@ -9,3 +9,9 @@ D:\C#\MusicPlayer\VKPlugin\bin\Release\Newtonsoft.Json.xml
 D:\C#\MusicPlayer\VKPlugin\obj\Release\VKPlugin.csprojResolveAssemblyReference.cache
 D:\C#\MusicPlayer\VKPlugin\obj\Release\VKPlugin.dll
 D:\C#\MusicPlayer\VKPlugin\obj\Release\VKPlugin.pdb
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\Images\add.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\Images\delete.png
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\Images\faviconnew.ico
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\VKPlugin.manifest
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\VKPlugin.dll
+D:\C#\MusicPlayer\MusicPlayer\bin\Release\Plugins\VKPlugin\VKPlugin.pdb

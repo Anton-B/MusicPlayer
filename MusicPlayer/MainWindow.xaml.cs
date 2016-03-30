@@ -129,7 +129,7 @@ namespace MusicPlayer
                 this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
                 this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
                 this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "#FFE6E6E6");
-                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "DarkGray");
+                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "Gray");
                 this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF9BA7B8");
                 this.Resources["MenuBackgroundBrush"] = GetBrush(bc, "#FF1E1E1E");
                 this.Resources["MenuForegroundBrush"] = GetBrush(bc, "#FFE6E6E6");
@@ -167,7 +167,7 @@ namespace MusicPlayer
                 this.Resources["SongCellBackgroundMouseOverBrush"] = GetBrush(bc, "#334D7FA4");
                 this.Resources["SongCellForegroundBrush"] = GetBrush(bc, "#FF2B587A");
                 this.Resources["SongCellForegroundSelectedBrush"] = GetBrush(bc, "White");
-                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "LightGray");
+                this.Resources["SearchInactiveForegroundBrush"] = GetBrush(bc, "Gray");
                 this.Resources["SearchBorderBrush"] = GetBrush(bc, "#FF819FB4");
                 this.Resources["MenuBackgroundBrush"] = GetBrush(bc, "White");
                 this.Resources["MenuForegroundBrush"] = GetBrush(bc, "#FF2B587A");
@@ -672,7 +672,6 @@ namespace MusicPlayer
             var btnImage = ((Button)sender).Content as Image;
             if (pluginsManager.UpdatePlaylistWhenFavoritesChanges)
             {
-                mainAreaDockPanel.IsEnabled = false;
                 mediaElement.Close();
                 mediaElement.Source = null;
                 songsProgressBar.IsIndeterminate = true;
@@ -680,17 +679,11 @@ namespace MusicPlayer
                 songsProgressBar.IsIndeterminate = false;
                 if (visibDataGrid.Items.Count == 0)
                     ClearControls();
-                mainAreaDockPanel.IsEnabled = true;
             }
         }
         #endregion
 
         #region WORKING WITH SONGS
-        private void searchTextBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            searchTextBox.Text = "Поиск...";
-        }
-
         private void searchTextBox_GotFocus(object sender, RoutedEventArgs e)
         {
             searchTextBox.Text = searchTextBox.Text == "Поиск..." && searchTextBox.Foreground.ToString()
@@ -869,7 +862,8 @@ namespace MusicPlayer
             playlist1DataGrid.SelectedIndex = playlist2DataGrid.SelectedIndex = -1;
             numOfAudioTextBlock.Content = "Количество песен в списке: 0";
             sortComboBox.SelectedIndex = 0;
-            searchTextBox.Clear();
+            searchTextBox.Text = "Поиск...";
+            searchTextBox.Foreground = (Brush)this.Resources["SearchInactiveForegroundBrush"];
             musicTimelineSlider.Value = 0;
             currTimelinePosLabel.Content = maxTimelinePosLabel.Content = "00:00";
             artistLabel.Content = "";
